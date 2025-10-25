@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "target": "esnext",  // 转译目标 JS 版本（如 ES5、ES6）
+    "module": "esnext",  // 模块系统（与 Webpack 配合推荐 ESNext）
+    "outDir": "./dist",  // 编译输出目录（可与 Webpack 输出目录一致）
+    "rootDir": "./",  // 源码根目录
+    "jsx": "preserve",
+    "moduleResolution": "node",
+    "declaration": true,
+    "declarationMap": true,
+    "strict": true,  // 开启严格模式（强类型检查）
+    "esModuleInterop": true,  // 允许 CommonJS 和 ES 模块互操作
+    "skipLibCheck": true,  // 跳过库文件类型检查（加速编译）
+    "forceConsistentCasingInFileNames": true  // 强制文件名大小写一致
+  },
+  "paths": {
+    "@/*": [
+      "./src/*"
+    ],
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable",
+      "scripthost"
+    ]
+  },
+
+  "include": ["src/**/*"],  // 需要编译的文件（src 目录下所有文件）
+  "exclude": ["node_modules"]  // 排除 node_modules
+}
