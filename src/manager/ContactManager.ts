@@ -40,12 +40,14 @@ export class IMIOContactManager extends IMIOBaseManager {
     /**
      * 获取联系人
      */
-    public getContactList(): Promise<Array<IMIOContact>> {
+    public getContactList(page:number  = 1,pageSize: number = 50): Promise<Array<IMIOContact>> {
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
                 return;
             }
+            this.imioClient!!.meta.page = page;
+            this.imioClient!!.meta.pageSize = pageSize;
             const param = new Contacts({
                 meta: this.imioClient!!.meta,
                 joinRoomId: this.imioClient!!.meta.roomId,
@@ -63,6 +65,155 @@ export class IMIOContactManager extends IMIOBaseManager {
                             let proto = Contacts.deserialize(payload.data);
                             let data = this.buildContact(proto);
                             res.push(data);
+                            if (this.imioClient) {
+                                let index = this.imioClient.contactList.findIndex(it => it.contactId == data.contactId);
+                                if (index == -1) {
+                                    this.imioClient.contactList.push(data);
+                                } else {
+                                    this.imioClient.contactList.splice(index,1,data);
+                                }
+                            }
+                        }
+                    }catch (e) {
+                        reject(new Error("IMIO Client Error"))
+                    }
+                },
+                onError: (error: Error) => {
+                    let message = error?.message + "";
+                    let errorMsg = this.onError(message);
+                    if (errorMsg.length > 0) {
+                        reject(new Error(errorMsg))
+                    }else {
+                        reject(new Error(message))
+                    }
+                }, onExtension(extendedType: number, content: Buffer | null | undefined, canBeIgnored: boolean): void {
+                }
+            })
+        });
+    }
+
+    /**
+     * 获取联系人的黑名单
+     */
+    public getContactBlackList(page: number = 1): Promise<Array<IMIOContact>> {
+        return new Promise<any>((resolve, reject) => {
+            if (this.checkSocket().length) {
+                reject(new Error(this.checkSocket()))
+                return;
+            }
+            this.imioClient!!.meta.page = page;
+            const param = new Contacts({
+                meta: this.imioClient!!.meta,
+                joinRoomId: this.imioClient!!.meta.roomId,
+            });
+            let res : Array<IMIOContact>  = [];
+            this.imioClient!!.socket?.requestStream({
+                data: Buffer.from(param.serializeBinary().buffer),
+                metadata: this.buildRoute('contact.black.list'),
+            }, 3000,{
+                onComplete: () => {
+                    resolve(res)
+                }, onNext: (payload: Payload, isComplete: boolean) => {
+                    try {
+                        if (payload.data) {
+                            let proto = Contacts.deserialize(payload.data);
+                            let data = this.buildContact(proto);
+                            res.push(data);
+                        }
+                    }catch (e) {
+                        reject(new Error("IMIO Client Error"))
+                    }
+                },
+                onError: (error: Error) => {
+                    let message = error?.message + "";
+                    let errorMsg = this.onError(message);
+                    if (errorMsg.length > 0) {
+                        reject(new Error(errorMsg))
+                    }else {
+                        reject(new Error(message))
+                    }
+                }, onExtension(extendedType: number, content: Buffer | null | undefined, canBeIgnored: boolean): void {
+                }
+            })
+        });
+    }
+
+
+    /**
+     * 获取联系人根据用户ID
+     */
+    public getContactByUserId(userId: string): Promise<IMIOContact> {
+        return new Promise<any>((resolve, reject) => {
+            if (this.checkSocket().length) {
+                reject(new Error(this.checkSocket()))
+                return;
+            }
+            const param = new Contacts({
+                meta: this.imioClient!!.meta,
+                userId: userId,
+            });
+            let res : Array<IMIOContact>  = [];
+            this.imioClient!!.socket?.requestStream({
+                data: Buffer.from(param.serializeBinary().buffer),
+                metadata: this.buildRoute('contact.byUserId'),
+            }, 3000,{
+                onComplete: () => {
+                    resolve(res)
+                }, onNext: (payload: Payload, isComplete: boolean) => {
+                    try {
+                        if (payload.data) {
+                            let proto = Contacts.deserialize(payload.data);
+                            let data = this.buildContact(proto);
+                            res.push(data);
+                        }
+                    }catch (e) {
+                        reject(new Error("IMIO Client Error"))
+                    }
+                },
+                onError: (error: Error) => {
+                    let message = error?.message + "";
+                    let errorMsg = this.onError(message);
+                    if (errorMsg.length > 0) {
+                        reject(new Error(errorMsg))
+                    }else {
+                        reject(new Error(message))
+                    }
+                }, onExtension(extendedType: number, content: Buffer | null | undefined, canBeIgnored: boolean): void {
+                }
+            })
+        });
+    }
+
+
+    /**
+     * 获取联系人根据joinID
+     */
+    public getContactByJoinId(joinId: number): Promise<IMIOContact | null> {
+        return new Promise<any>((resolve, reject) => {
+            if (this.checkSocket().length) {
+                reject(new Error(this.checkSocket()))
+                return;
+            }
+            const param = new Contacts({
+                meta: this.imioClient!!.meta,
+                joinRoomId: joinId,
+            });
+            let res : IMIOContact | null = null;
+            this.imioClient!!.socket?.requestResponse({
+                data: Buffer.from(param.serializeBinary().buffer),
+                metadata: this.buildRoute('contact.byJoinId'),
+            },{
+                onComplete: () => {
+                    resolve(res)
+                }, onNext: (payload: Payload, isComplete: boolean) => {
+                    try {
+                        if (payload.data) {
+                            let proto = Contacts.deserialize(payload.data);
+                            let data = this.buildContact(proto);
+                            res = data;
+                            if (isComplete) {
+                                resolve(res)
+                            }
                         }
                     }catch (e) {
                         reject(new Error("IMIO Client Error"))
@@ -113,6 +264,9 @@ export class IMIOContactManager extends IMIOBaseManager {
                            let proto = Rooms.deserialize(payload.data);
                            let data = this.buildGroup(proto);
                            res = data;
+                           if (isComplete) {
+                               resolve(res)
+                           }
                        }
                     }catch (e) {
 
@@ -165,6 +319,9 @@ export class IMIOContactManager extends IMIOBaseManager {
                            let proto = Rooms.deserialize(payload.data);
                            let data = this.buildGroup(proto);
                            res = data;
+                           if (isComplete) {
+                               resolve(res)
+                           }
                        }
                     }catch (e) {
                         reject(new Error("IMIO Client Error"))
@@ -183,6 +340,261 @@ export class IMIOContactManager extends IMIOBaseManager {
             })
         });
     }
+
+
+    /**
+     * 设置备注名称
+     * @param contactId
+     * @param remark
+     */
+    public setRemarkName(contactId: number, remark: string): Promise<any> {
+        return new Promise<any>((resolve, reject) => {
+            if (this.checkSocket().length) {
+                reject(new Error(this.checkSocket()))
+                return;
+            }
+            const param = new Contacts({
+                meta: this.imioClient!!.meta,
+                id: contactId,
+                username: remark
+            });
+            let res : Object | null = null;
+            this.imioClient!!.socket?.requestResponse({
+                data: Buffer.from(param.serializeBinary().buffer),
+                metadata: this.buildRoute('contact.username')
+            }, {
+                onComplete: () => {
+                    resolve(res)
+                }, onNext: (payload: Payload, isComplete: boolean) => {
+                    try {
+                       if (payload.data) {
+                           let proto = Contacts.deserialize(payload.data);
+                           let data = this.buildContact(proto);
+                           res = data;
+                           if (isComplete) {
+                               resolve(res)
+                           }
+                       }
+                    }catch (e) {
+                        reject(new Error("IMIO Client Error"))
+                    }
+                }, onError: (error: Error) => {
+                    let message = error?.message + "";
+                    let errorMsg = this.onError(message);
+                    if (errorMsg.length > 0) {
+                        reject(new Error(errorMsg))
+                    }else {
+                        reject(new Error(message))
+                    }
+                }, onExtension(extendedType: number, content: Buffer | null | undefined, canBeIgnored: boolean): void {
+                }
+            })
+        });
+    }
+
+
+    /**
+     * 设置 通知范围
+     * @param contactId
+     * @param rule
+     */
+    public setNoticeRule(contactId: number, rule: number): Promise<any> {
+        return new Promise<any>((resolve, reject) => {
+            if (this.checkSocket().length) {
+                reject(new Error(this.checkSocket()))
+                return;
+            }
+            const param = new Contacts({
+                meta: this.imioClient!!.meta,
+                id: contactId,
+                noise: rule
+            });
+            let res : Object | null = null;
+            this.imioClient!!.socket?.requestResponse({
+                data: Buffer.from(param.serializeBinary().buffer),
+                metadata: this.buildRoute('contact.noise')
+            }, {
+                onComplete: () => {
+                    resolve(res)
+                }, onNext: (payload: Payload, isComplete: boolean) => {
+                    try {
+                       if (payload.data) {
+                           let proto = Contacts.deserialize(payload.data);
+                           let data = this.buildContact(proto);
+                           res = data;
+                           if (isComplete) {
+                               resolve(res)
+                           }
+                       }
+                    }catch (e) {
+                        reject(new Error("IMIO Client Error"))
+                    }
+                }, onError: (error: Error) => {
+                    let message = error?.message + "";
+                    let errorMsg = this.onError(message);
+                    if (errorMsg.length > 0) {
+                        reject(new Error(errorMsg))
+                    }else {
+                        reject(new Error(message))
+                    }
+                }, onExtension(extendedType: number, content: Buffer | null | undefined, canBeIgnored: boolean): void {
+                }
+            })
+        });
+    }
+
+
+    /**
+     * 设置 或移除 黑名单
+     * @param userId
+     * @param black
+     */
+    public setBlack(userId: string, black: number): Promise<any> {
+        return new Promise<any>((resolve, reject) => {
+            if (this.checkSocket().length) {
+                reject(new Error(this.checkSocket()))
+                return;
+            }
+            const param = new Contacts({
+                meta: this.imioClient!!.meta,
+                userId: userId,
+                black: black
+            });
+            let res : Object | null = null;
+            this.imioClient!!.socket?.requestResponse({
+                data: Buffer.from(param.serializeBinary().buffer),
+                metadata: this.buildRoute('contact.black')
+            }, {
+                onComplete: () => {
+                    resolve(res)
+                }, onNext: (payload: Payload, isComplete: boolean) => {
+                    try {
+                       if (payload.data) {
+                           let proto = Contacts.deserialize(payload.data);
+                           let data = this.buildContact(proto);
+                           res = data;
+                           if (isComplete) {
+                               resolve(res)
+                           }
+                       }
+                    }catch (e) {
+                        reject(new Error("IMIO Client Error"))
+                    }
+                }, onError: (error: Error) => {
+                    let message = error?.message + "";
+                    let errorMsg = this.onError(message);
+                    if (errorMsg.length > 0) {
+                        reject(new Error(errorMsg))
+                    }else {
+                        reject(new Error(message))
+                    }
+                }, onExtension(extendedType: number, content: Buffer | null | undefined, canBeIgnored: boolean): void {
+                }
+            })
+        });
+    }
+
+
+    /**
+     * 设置 联系人分组
+     * @param userId
+     * @param black
+     */
+    public setSubgroup(userId: string, name: string): Promise<any> {
+        return new Promise<any>((resolve, reject) => {
+            if (this.checkSocket().length) {
+                reject(new Error(this.checkSocket()))
+                return;
+            }
+            const param = new Contacts({
+                meta: this.imioClient!!.meta,
+                userId: userId,
+                subgroup: name
+            });
+            let res : Object | null = null;
+            this.imioClient!!.socket?.requestResponse({
+                data: Buffer.from(param.serializeBinary().buffer),
+                metadata: this.buildRoute('contact.subgroup')
+            }, {
+                onComplete: () => {
+                    resolve(res)
+                }, onNext: (payload: Payload, isComplete: boolean) => {
+                    try {
+                       if (payload.data) {
+                           let proto = Contacts.deserialize(payload.data);
+                           let data = this.buildContact(proto);
+                           res = data;
+                           if (isComplete) {
+                               resolve(res)
+                           }
+                       }
+                    }catch (e) {
+                        reject(new Error("IMIO Client Error"))
+                    }
+                }, onError: (error: Error) => {
+                    let message = error?.message + "";
+                    let errorMsg = this.onError(message);
+                    if (errorMsg.length > 0) {
+                        reject(new Error(errorMsg))
+                    }else {
+                        reject(new Error(message))
+                    }
+                }, onExtension(extendedType: number, content: Buffer | null | undefined, canBeIgnored: boolean): void {
+                }
+            })
+        });
+    }
+
+    /**
+     * 设置 联系人排序
+     * @param userId
+     * @param black
+     */
+    public setSort(userId: string, sort: number): Promise<any> {
+        return new Promise<any>((resolve, reject) => {
+            if (this.checkSocket().length) {
+                reject(new Error(this.checkSocket()))
+                return;
+            }
+            const param = new Contacts({
+                meta: this.imioClient!!.meta,
+                userId: userId,
+                sort: sort
+            });
+            let res : Object | null = null;
+            this.imioClient!!.socket?.requestResponse({
+                data: Buffer.from(param.serializeBinary().buffer),
+                metadata: this.buildRoute('contact.sort')
+            }, {
+                onComplete: () => {
+                    resolve(res)
+                }, onNext: (payload: Payload, isComplete: boolean) => {
+                    try {
+                       if (payload.data) {
+                           let proto = Contacts.deserialize(payload.data);
+                           let data = this.buildContact(proto);
+                           res = data;
+                           if (isComplete) {
+                               resolve(res)
+                           }
+                       }
+                    }catch (e) {
+                        reject(new Error("IMIO Client Error"))
+                    }
+                }, onError: (error: Error) => {
+                    let message = error?.message + "";
+                    let errorMsg = this.onError(message);
+                    if (errorMsg.length > 0) {
+                        reject(new Error(errorMsg))
+                    }else {
+                        reject(new Error(message))
+                    }
+                }, onExtension(extendedType: number, content: Buffer | null | undefined, canBeIgnored: boolean): void {
+                }
+            })
+        });
+    }
+
 
 
 
@@ -211,6 +623,9 @@ export class IMIOContactManager extends IMIOBaseManager {
                            let proto = Contacts.deserialize(payload.data);
                            let data = this.buildContact(proto);
                            res = data;
+                           if (isComplete) {
+                                resolve(res)
+                            }
                        }
                     }catch (e) {
                         reject(new Error("IMIO Client Error"))

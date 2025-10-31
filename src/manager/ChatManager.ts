@@ -1,13 +1,32 @@
 import {IMIOClient} from "../Client";
+import {IMIOBaseManager} from "./BaseManager";
+import {IMIOContactManager} from "./ContactManager";
+import {Payload} from "rsocket-core";
+import {IMIOMember} from "../entity/Member";
+import {IMIOContact} from "../entity/Contact";
+import {IMIOMessageSender} from "../entity/MessageSender";
+import {IMIOMessage} from "../entity/Message";
 
+//  ======
+import {onlyour as ContactPB} from "../protocol/Contacts";
+import {onlyour as RoomPB} from "../protocol/Rooms";
+import {onlyour as MessagePB} from "../protocol/Message";
+import {onlyour as MessageSignPB} from "../protocol/MessageSign";
+import {onlyour as MessageRemindPB} from "../protocol/MessageRemind";
+import Contacts = ContactPB.imio.Contacts;
+import Rooms = RoomPB.imio.Rooms;
+import Message = MessagePB.imio.Message;
+import MessageSign = MessageSignPB.imio.MessageSign;
+import MessageRemind = MessageRemindPB.imio.MessageRemind;
 
-export class IMIOChatManager {
+export class IMIOChatManager extends IMIOBaseManager {
     // ========= 单例模式 =========
     private static instance: IMIOChatManager;
 
     public imioClient: IMIOClient | null = null;
 
     private constructor() {
+        super();
     }
 
     public static getInstance(): IMIOChatManager {
@@ -17,9 +36,406 @@ export class IMIOChatManager {
         return IMIOChatManager.instance;
     }
 
-    public setIMIOClient(client : IMIOClient) : IMIOChatManager{
+    public setIMIOClient(client: IMIOClient): IMIOChatManager {
         this.imioClient = client
         return this
     }
+
     // ========= 单例模式 END =========
+
+    public oneToOne(sender: IMIOMessageSender): Promise<any> {
+        return new Promise<any>(async (resolve, reject) => {
+            if (this.checkSocket().length) {
+                reject(new Error(this.checkSocket()))
+                return;
+            }
+
+            let contactManager = IMIOContactManager.getInstance();
+            let imioContact = await contactManager.getContactByJoinId(sender.joinId);
+            if (!imioContact) {
+                reject(new Error("联系人不存在"))
+                return
+            }
+            if (imioContact.isGroup) {
+                reject(new Error("联系人是群组"))
+                return;
+            }
+            let message1 = this.buildMessageProto(imioContact.userId,sender);
+            let res: Object | null = null;
+            this.imioClient!!.socket?.requestResponse({
+                data: Buffer.from(message1.serializeBinary().buffer),
+                metadata: this.buildRoute('oneToOne')
+            }, {
+                onComplete: () => {
+                    resolve(res)
+                }, onNext: (payload: Payload, isComplete: boolean) => {
+                    try {
+                        if (payload.data) {
+                            let proto = Message.deserialize(payload.data);
+                            let data = this.buildMessage(proto);
+                            res = data;
+                            if (isComplete) {
+                                resolve(res)
+                            }
+                        }
+                    } catch (e) {
+                        reject(new Error("IMIO Client Error"))
+                    }
+                }, onError: (error: Error) => {
+                    let message = error?.message + "";
+                    let errorMsg = this.onError(message);
+                    if (errorMsg.length > 0) {
+                        reject(new Error(errorMsg))
+                    } else {
+                        reject(new Error(message))
+                    }
+                }, onExtension(extendedType: number, content: Buffer | null | undefined, canBeIgnored: boolean): void {
+                }
+            })
+        });
+    }
+
+
+    public oneToMany(sender: IMIOMessageSender): Promise<any> {
+        return new Promise<any>(async (resolve, reject) => {
+            if (this.checkSocket().length) {
+                reject(new Error(this.checkSocket()))
+                return;
+            }
+            let contactManager = IMIOContactManager.getInstance();
+            let imioContact = await contactManager.getContactByJoinId(sender.joinId);
+            if (!imioContact) {
+                reject(new Error("联系人不存在"))
+                return
+            }
+            if (!imioContact.isGroup) {
+                reject(new Error("联系人不是群组"))
+                return;
+            }
+            let message1 = this.buildMessageProto("",sender);
+            let res: Object | null = null;
+            this.imioClient!!.socket?.requestResponse({
+                data: Buffer.from(message1.serializeBinary().buffer),
+                metadata: this.buildRoute('oneToMany')
+            }, {
+                onComplete: () => {
+                    resolve(res)
+                }, onNext: (payload: Payload, isComplete: boolean) => {
+                    try {
+                        if (payload.data) {
+                            let proto = Message.deserialize(payload.data);
+                            let data = this.buildMessage(proto);
+                            res = data;
+                            if (isComplete) {
+                                resolve(res)
+                            }
+                        }
+                    } catch (e) {
+                        reject(new Error("IMIO Client Error"))
+                    }
+                }, onError: (error: Error) => {
+                    let message = error?.message + "";
+                    let errorMsg = this.onError(message);
+                    if (errorMsg.length > 0) {
+                        reject(new Error(errorMsg))
+                    } else {
+                        reject(new Error(message))
+                    }
+                }, onExtension(extendedType: number, content: Buffer | null | undefined, canBeIgnored: boolean): void {
+                }
+            })
+        });
+    }
+
+    /**
+     * 签收消息
+     * @param messageId
+     * @param joinId
+     */
+    public signMessage(messageId:string,joinId: number): Promise<any> {
+        return new Promise<any>(async (resolve, reject) => {
+            if (this.checkSocket().length) {
+                reject(new Error(this.checkSocket()))
+                return;
+            }
+            let message = new MessageSign({
+                meta:this.imioClient!!.meta,
+                messageId: messageId,
+                roomId: joinId,
+                destId:this.imioClient!!.meta.userId,
+                deviceTag:'h5',
+                deviceKey:this.imioClient?.getDeviceKey()
+            });
+            this.imioClient!!.socket?.requestResponse({
+                data: Buffer.from(message.serializeBinary().buffer),
+                metadata: this.buildRoute('message.sign')
+            }, {
+                onComplete: () => {
+                    resolve('')
+                }, onNext: (payload: Payload, isComplete: boolean) => {
+                    try {
+                        if (isComplete) {
+                            resolve("")
+                        }
+                    } catch (e) {
+                        reject(new Error("IMIO Client Error"))
+                    }
+                }, onError: (error: Error) => {
+                    let message = error?.message + "";
+                    let errorMsg = this.onError(message);
+                    if (errorMsg.length > 0) {
+                        reject(new Error(errorMsg))
+                    } else {
+                        reject(new Error(message))
+                    }
+                }, onExtension(extendedType: number, content: Buffer | null | undefined, canBeIgnored: boolean): void {
+                }
+            })
+        });
+    }
+    /**
+     * 已读消息
+     * @param messageId
+     * @param joinId
+     */
+    public readMessage(messageId:string,joinId: number): Promise<any> {
+        return new Promise<any>(async (resolve, reject) => {
+            if (this.checkSocket().length) {
+                reject(new Error(this.checkSocket()))
+                return;
+            }
+            let message = new MessageSign({
+                meta:this.imioClient!!.meta,
+                messageId: messageId,
+                roomId: joinId,
+                destId:this.imioClient!!.meta.userId
+            });
+            this.imioClient!!.socket?.requestResponse({
+                data: Buffer.from(message.serializeBinary().buffer),
+                metadata: this.buildRoute('message.read')
+            }, {
+                onComplete: () => {
+                    resolve('')
+                }, onNext: (payload: Payload, isComplete: boolean) => {
+                    try {
+                        if (isComplete) {
+                            resolve('')
+                        }
+                    } catch (e) {
+                        reject(new Error("IMIO Client Error"))
+                    }
+                }, onError: (error: Error) => {
+                    let message = error?.message + "";
+                    let errorMsg = this.onError(message);
+                    if (errorMsg.length > 0) {
+                        reject(new Error(errorMsg))
+                    } else {
+                        reject(new Error(message))
+                    }
+                }, onExtension(extendedType: number, content: Buffer | null | undefined, canBeIgnored: boolean): void {
+                }
+            })
+        });
+    }
+
+
+    public getMessageList(joinId: number,page: number = 1,pageSize: number = 40): Promise<Array<IMIOMessage>> {
+        return new Promise<any>(async (resolve, reject) => {
+            if (this.checkSocket().length) {
+                reject(new Error(this.checkSocket()))
+                return;
+            }
+            let contactManager = IMIOContactManager.getInstance();
+            let imioContact = await contactManager.getContactByJoinId(joinId);
+            if (!imioContact) {
+                reject(new Error("联系人不存在"))
+                return
+            }
+            console.warn(imioContact);
+            this.imioClient!!.meta.page = page;
+            this.imioClient!!.meta.pageSize = pageSize;
+            const param = new Message({
+                meta: this.imioClient!!.meta,
+                roomId: imioContact.joinId
+            });
+            let res : Array<IMIOMessage>  = [];
+            this.imioClient!!.socket?.requestStream({
+                data: Buffer.from(param.serializeBinary().buffer),
+                metadata: this.buildRoute('message.page')
+            }, 500,{
+                onComplete: () => {
+                    resolve(res)
+                }, onNext: (payload: Payload, isComplete: boolean) => {
+                    try {
+                        if (payload.data) {
+                            let proto = Message.deserialize(payload.data);
+                            let data = this.buildMessage(proto);
+                            res.push(data);
+                        }
+                    }catch (e) {
+                        reject(new Error("IMIO Client Error"))
+                    }
+                }, onError: (error: Error) => {
+                    let message = error?.message + "";
+                    let errorMsg = this.onError(message);
+                    if (errorMsg.length > 0) {
+                        reject(new Error(errorMsg))
+                    }else {
+                        reject(new Error(message))
+                    }
+                }, onExtension(extendedType: number, content: Buffer | null | undefined, canBeIgnored: boolean): void {
+                }
+            })
+        });
+    }
+
+    private senderBuildMessage(sender: IMIOMessageSender): IMIOMessage {
+        let imioMessage = new IMIOMessage();
+        imioMessage.messageId = sender.messageId;
+        imioMessage.joinId = sender.joinId;
+        imioMessage.cite = sender.cite;
+        imioMessage.type = sender.type;
+        imioMessage.title = sender.title;
+        imioMessage.subtitle = sender.subtitle;
+        imioMessage.text = sender.text;
+        imioMessage.secret = sender.secret;
+        imioMessage.thumb = sender.thumb;
+        imioMessage.host = sender.host;
+        imioMessage.url = sender.url;
+        imioMessage.lng = sender.lng;
+        imioMessage.lat = sender.lat;
+        imioMessage.size = sender.size;
+        imioMessage.length = sender.length;
+        if (sender.hintList && sender.hintList.length) {
+            imioMessage.hintList = [];
+            for (let item of sender.hintList) {
+                let imioMessage1 = new IMIOMessage();
+                imioMessage1.destId = item.targetId
+                imioMessage1.destName = item.targetName
+                imioMessage.hintList.push(imioMessage1)
+            }
+        }
+        if (sender.notifyList && sender.notifyList.length) {
+            imioMessage.notifyList = [];
+            for (let item of sender.notifyList) {
+                let imioMessage1 = new IMIOMessage();
+                imioMessage1.destId = item.targetId
+                imioMessage1.destName = item.targetName
+                imioMessage.notifyList.push(imioMessage1)
+            }
+        }
+        if (sender.quietlyList && sender.quietlyList.length) {
+            imioMessage.quietlyList = [];
+            for (let item of sender.quietlyList) {
+                let imioMessage1 = new IMIOMessage();
+                imioMessage1.destId = item.targetId
+                imioMessage1.destName = item.targetName
+                imioMessage.quietlyList.push(imioMessage1)
+            }
+        }
+        return imioMessage;
+    }
+
+    private buildMessageProto(destId:string,sender: IMIOMessageSender): Message {
+        let cc:Array<MessageRemind> = [];
+        let remind:Array<MessageRemind> = [];
+        if (sender.notifyList && sender.notifyList.length) {
+            for (let item of sender.notifyList) {
+                let remind = new MessageRemind({
+                    sort : 0,
+                    destId: item.targetId
+                });
+                cc.push(remind);
+            }
+        }
+        if (sender.quietlyList && sender.quietlyList.length) {
+            for (let item of sender.quietlyList) {
+                let remind = new MessageRemind({
+                    sort : 1,
+                    destId: item.targetId
+                });
+                cc.push(remind);
+            }
+        }
+        if (sender.hintList && sender.hintList.length) {
+            for (let item of sender.hintList) {
+                let remind1 = new MessageRemind({
+                    destId: item.targetId
+                });
+                remind.push(remind1);
+            }
+        }
+
+        let message = new Message({
+            meta:this.imioClient?.meta,
+            messageId: sender.messageId,
+            roomId: sender.joinId,
+            fromId: this.imioClient?.meta?.userId,
+            fromName: this.imioClient?.meta?.nickname,
+            destId: destId,
+            subtype: this.messageType(sender.type),
+            title: sender.title,
+            subtitle: sender.subtitle,
+            text: sender.text,
+            secret: sender.secret,
+            thumb: sender.thumb,
+            host: sender.host,
+            url: sender.url,
+            lng: sender.lng,
+            lat: sender.lat,
+            size: sender.size,
+            length: sender.length,
+            cc: cc,
+            remind:remind
+        });
+
+        return message
+    }
+
+    private messageType(t: String): number {
+        switch (t) {
+            case 'txt':
+                return 1;
+            case 'img':
+                return 2;
+            case 'audio':
+                return 3;
+            case 'video':
+                return 4;
+            case 'file':
+                return 5;
+            case 'loc':
+                return 6;
+            case 'wallet':
+                return 9;
+            case 'custom':
+                return 7;
+        }
+        return 1;
+    }
+
+    private onError(message: string): string {
+        if (message.indexOf("Jwt") > -1) {
+            try {
+                this.imioClient!!.clientListener?.onTokenExpired();
+            } catch (e) {
+            }
+            return 'IMIO Token 已过期';
+        }
+        if (message.indexOf("SQL") > -1 || message.indexOf('connect') > -1) {
+            return ("IMIO System Error");
+        }
+        return "";
+    }
+
+    private checkSocket(): string {
+        if (!this.imioClient) {
+            return ("IMIO Client 不存在")
+        }
+        if (!this.imioClient.socket) {
+            return ("IMIO Client 尚未建立连接")
+        }
+        return ''
+    }
+
 }

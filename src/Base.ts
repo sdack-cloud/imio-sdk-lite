@@ -1,22 +1,23 @@
-import {RSocket, RSocketConnector} from "rsocket-core";
-import {WebsocketClientTransport} from "rsocket-websocket-client";
+import {RSocket} from "rsocket-core";
 
 import {
     decodeCompositeMetadata,
-    encodeBearerAuthMetadata,
     encodeCompositeMetadata,
-    encodeRoute, ExplicitMimeTimeEntry,
+    encodeRoute,
+    ExplicitMimeTimeEntry,
     WellKnownMimeType
 } from "rsocket-composite-metadata";
 
 import {IMIOAccountUser} from "./entity/AccountUser";
 import {IMIOContact} from "./entity/Contact";
 import {IMIOMember} from "./entity/Member";
-import {IMIOGroup,IMIOGroupType} from "./entity/Group";
+import {IMIOGroup, IMIOGroupType} from "./entity/Group";
 // =======
 import {onlyour as MetaPB} from "./protocol/Meta";
 import {onlyour as ContactPB} from "./protocol/Contacts";
 import {onlyour as RoomPB} from "./protocol/Rooms";
+import {onlyour as MessagePB} from "./protocol/Message";
+import {IMIOMessage, IMIOMessageLabel, IMIOMessageTalk} from "./entity/Message";
 
 
 export class IMIOBase {
@@ -144,5 +145,116 @@ export class IMIOBase {
         }
 
         return data;
+    }
+
+    protected buildMessage(proto: MessagePB.imio.Message) : IMIOMessage {
+        let imioMessage = new IMIOMessage();
+        imioMessage.messageId = proto.messageId;
+        imioMessage.joinId = proto.roomId;
+        imioMessage.tag = proto.tag;
+        imioMessage.fromId = proto.fromId;
+        imioMessage.fromName = proto.fromName;
+        imioMessage.destId = proto.destId;
+        imioMessage.destName = proto.destName;
+        imioMessage.cite = proto.cite;
+        imioMessage.type = this.subtype(proto.subtype);
+        imioMessage.title = proto.title;
+        imioMessage.subtitle = proto.subtitle;
+        imioMessage.text = proto.text;
+        imioMessage.secret = proto.secret;
+        imioMessage.thumb = proto.thumb;
+        imioMessage.host = proto.host;
+        imioMessage.url = proto.url;
+        imioMessage.lng = proto.lng;
+        imioMessage.lat = proto.lat;
+        imioMessage.size = proto.size;
+        imioMessage.length = proto.length;
+        imioMessage.sent = proto.sent;
+        imioMessage.sentDate = new Date(proto.sent);
+        imioMessage.revoke = proto.revoke.length != 0;
+
+        switch (proto.talkMode) {
+            case 1:
+                imioMessage.talk = IMIOMessageTalk.default;
+                break;
+            case 2:
+                imioMessage.talk = IMIOMessageTalk.group;
+                break;
+            case 3:
+                imioMessage.talk = IMIOMessageTalk.team;
+                break;
+        }
+
+        switch (proto.label) {
+            case 'tip':
+                imioMessage.label = IMIOMessageLabel.tip;
+                break;
+            case 'notice':
+                imioMessage.label = IMIOMessageLabel.notice;
+                break;
+            case 'action':
+                imioMessage.label = IMIOMessageLabel.action;
+                break;
+            case 'cc':
+                imioMessage.label = IMIOMessageLabel.notify;
+                break;
+            case 'bcc':
+                imioMessage.label = IMIOMessageLabel.quietly;
+                break;
+        }
+
+        if (proto.citeData) {
+            imioMessage.citeData = this.buildMessage(proto.citeData)
+        }
+        if (proto.remind && proto.remind.length) {
+            imioMessage.hintList = [];
+            for (let item of proto.remind) {
+                let imioMessage1 = new IMIOMessage();
+                imioMessage1.fromId = item.fromId;
+                imioMessage1.destId = item.destId;
+                imioMessage1.destName = item.nickname
+                imioMessage1.joinId = item.roomId
+                imioMessage.hintList.push(imioMessage1);
+            }
+        }
+        if (proto.cc && proto.cc.length) {
+            imioMessage.notifyList = [];
+            imioMessage.quietlyList = [];
+            for (let item of proto.cc) {
+                let imioMessage1 = new IMIOMessage();
+                imioMessage1.fromId = item.fromId;
+                imioMessage1.destId = item.destId;
+                imioMessage1.destName = item.nickname
+                imioMessage1.joinId = item.roomId
+                if (item.sort == 0) {
+                    imioMessage.notifyList.push(imioMessage1);
+                } else {
+                    imioMessage.quietlyList.push(imioMessage1);
+                }
+            }
+        }
+        return imioMessage;
+    }
+
+    private subtype(d: number):string {
+        switch (d) {
+            case 1:
+                return 'txt';
+                case 2:
+                return 'img';
+                case 3:
+                return 'audio';
+                case 4:
+                return 'video';
+                case 5:
+                return 'file';
+                case 6:
+                return 'loc';
+                case 7:
+                return 'custom';
+                case 9:
+                return 'wallet';
+        }
+        return ''
     }
 }

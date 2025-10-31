@@ -12,7 +12,11 @@ import {WebsocketClientTransport} from "rsocket-websocket-client";
 import {encodeBearerAuthMetadata, encodeCompositeMetadata, WellKnownMimeType} from "rsocket-composite-metadata";
 import {IMIOBase} from "./Base";
 import {IMIOClientConnectStatus, IMIOClientListener} from "./listener/ClientListener";
+import {IMIOMessageListener} from "./listener/MessageListener";
+import {IMIOContactListener} from "./listener/ContactListener";
 import {IMIOAccountUser} from "./entity/AccountUser";
+import {IMIOChatManager} from "./manager/ChatManager";
+import {IMIOContactManager} from "./manager/ContactManager";
 import fp from '@fingerprintjs/fingerprintjs';
 
 // =======
@@ -39,6 +43,11 @@ export class IMIOClient extends IMIOBase {
     public static getInstance(): IMIOClient {
         if (!IMIOClient.instance) {
             IMIOClient.instance = new IMIOClient();
+            fp.load().then(it => it.get())
+                .then(res => {
+                    IMIOClient.instance.deviceId = res.visitorId;
+                    // this._instance.meta?.appId = Number(option.appId);
+                });
             try {
                 const buffer: Buffer = Buffer.from("Buffer 支持度测试文本");
                 const str: string = buffer.toString();
@@ -119,6 +128,10 @@ export class IMIOClient extends IMIOBase {
 
     private unexpectedly: number = 0;// 意外关闭次数
 
+    readonly messageListener: Array<IMIOMessageListener> = []
+
+    readonly contactListener: Array<IMIOContactListener> = []
+
     public setToken(token: string): IMIOClient {
         this.token = token;
         return this;
@@ -181,15 +194,26 @@ export class IMIOClient extends IMIOBase {
             this.clientListener = clientListener;
         }
         this.token = token;
-
+        if (this.option?.debug) {
+            console.warn('connect deviceId', this.deviceId);
+            if (!this.meta.deviceKey.length) {
+                this.meta.deviceKey = this.deviceId;
+            }
+        }
         if (this.isClose()) { // 关闭的连接才能再次连接
             this.disconnect();
-            this.account = new IMIOAccountUser();
-            this.account.nickname = nickname;
-            if (accountId) {
-                this.account.accountId = accountId.toString();
-                this.meta.userId = this.account.accountId;
-            }
+        }
+        this.account = new IMIOAccountUser();
+        this.account.nickname = nickname;
+        if (accountId) {
+            this.account.accountId = accountId.toString();
+            this.meta.userId = this.account.accountId;
+        }
+        if (!this.deviceId.length) {
+            setTimeout(() => {
+                this.callSocket(accountId);
+            }, 2000);
+        } else {
             this.callSocket(accountId);
         }
         return this;
@@ -326,6 +350,13 @@ export class IMIOClient extends IMIOBase {
                 }
             } catch (e) {
             }
+            try{
+                if (this.connectStatus == IMIOClientConnectStatus.SUCCESS
+                    || this.connectStatus == IMIOClientConnectStatus.SUCCESS_PULL) {
+                    this.ping()
+                }
+            }catch (e) {
+            }
         }, 2 * 1000);
         connector.connect()
             .then((res) => {
@@ -385,6 +416,36 @@ export class IMIOClient extends IMIOBase {
         ;
     }
 
+    public ping() {
+        if (!this.option) {
+            return;
+        }
+        if (!this.option!!.appId.length) {
+            return;
+        }
+        if (!this.socket){
+            return;
+        }
+        const connect = new Connect({
+            appId: parseInt(this.option.appId),
+            deviceKey: this.deviceId,
+            prefix: 'h5',
+            userId: this.account ? this.account!!.accountId.toString() : "",
+            deviceModel: this.deviceModel,
+            deviceName: this.deviceName,
+        });
+        this.socket?.requestResponse({
+            data: Buffer.from(connect.serializeBinary().buffer),
+            metadata: this.buildRoute('ping')
+        }, {
+            onComplete: () => {
+            }, onNext: (payload: Payload, isComplete: boolean) => {
+            }, onError: (error: Error) => {
+            }, onExtension(extendedType: number, content: Buffer | null | undefined, canBeIgnored: boolean): void {
+            }
+        })
+    }
+
     /**
      * 连接建立失败事件
      * @param eventMessage
@@ -406,6 +467,24 @@ export class IMIOClient extends IMIOBase {
                 this.clientListener?.onDisconnected();
             } catch (e) {
             }
+            return;
+        }
+        if (eventMessage.indexOf("keep-alive") > -1) { // 重连
+            this.unexpectedly = 0;
+            if (this.unexpectedly > 6) { // 大于重试次数，停止连接
+                clearInterval(this.retryTimer);
+                clearInterval(this.connectStatusTimer);
+                this.connectStatus = IMIOClientConnectStatus.ERROR;
+                this.connectStatusTimer = -2;
+                this.retryTimer = -2;
+                try {
+                    this.clientListener?.onDisconnected();
+                } catch (e) {
+                }
+                return;
+            }
+            this.unexpectedly++;
+            this.retryConnTimer()
             return;
         }
         if (eventMessage.indexOf("unexpectedly") > -1) {
@@ -530,6 +609,15 @@ export class IMIOClient extends IMIOBase {
             case 'contact-status':
                 this.handleContactStatus(payloadData);
                 break;
+            case 'contact-change':
+                this.handleContactChange(payloadData);
+                break;
+            case 'notice':
+                this.handleNotice(payloadData);
+                break;
+            case 'message':
+                this.handleMessage(payloadData);
+                break;
         }
     }
 
@@ -554,7 +642,6 @@ export class IMIOClient extends IMIOBase {
             }
         }
     }
-
 
     private handelPong(payloadData: Buffer | null | undefined) {
         if (!payloadData) {
@@ -612,7 +699,74 @@ export class IMIOClient extends IMIOBase {
             if (findIndex > -1) {
                 this.contactList[findIndex].status = deserialize.command;
                 if (this.account && this.account!!.accountId.length > 0 && deserialize.destId == this.account!!.accountId) {
-                    this.account!!.status = deserialize.command
+                    this.account!!.status = deserialize.command;
+                }
+                for (const listener of this.contactListener) {
+                    try {
+                        listener.onContactChange(false, this.contactList[findIndex]);
+                    } catch (e) {}
+                }
+            }
+        }catch (e) {
+        }
+    }
+
+    private handleContactChange(payloadData: Buffer | null | undefined) {
+        if (!payloadData) {
+            return;
+        }
+        try {
+            let deserialize = Message.deserialize(payloadData);
+            if (deserialize.text.length) {
+                IMIOContactManager.getInstance().getContactByUserId(deserialize.text).then(res => {
+                    let findIndex = this.contactList.findIndex(it => !it.isGroup && it.userId == res.userId);
+                    if (findIndex > -1) {
+                        this.contactList.splice(findIndex,1, res)
+                        for (const listener of this.contactListener) {
+                            try {
+                                listener.onContactChange(false, res);
+                            } catch (e) {}
+                        }
+                    }
+                })
+            }
+        }catch (e) {
+        }
+    }
+
+    private handleNotice(payloadData: Buffer | null | undefined) {
+        if (!payloadData) {
+            return;
+        }
+        try {
+            let deserialize = Message.deserialize(payloadData);
+            let imioMessage = this.buildMessage(deserialize);
+            for (const listener of this.messageListener) {
+                try {
+                    listener.onNotice(imioMessage);
+                }catch (_) {
+                }
+            }
+        }catch (e) {
+        }
+    }
+
+    private handleMessage(payloadData: Buffer | null | undefined) {
+        if (!payloadData) {
+            return;
+        }
+        try {
+            let deserialize = Message.deserialize(payloadData);
+            let imioMessage = this.buildMessage(deserialize);
+            try {
+                let chatManager = IMIOChatManager.getInstance().setIMIOClient(this);
+                chatManager.signMessage(imioMessage.messageId,imioMessage.joinId).then()
+            }catch (_) {
+            }
+            for (const listener of this.messageListener) {
+                try {
+                    listener.onMessage(imioMessage);
+                }catch (_) {
                 }
             }
         }catch (e) {
