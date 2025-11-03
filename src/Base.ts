@@ -121,16 +121,20 @@ export class IMIOBase {
     protected buildGroup(proto: RoomPB.imio.Rooms): IMIOGroup {
         let data = new IMIOGroup();
         data.groupId = proto.id;
+        data.joinId = proto.id;
         data.groupName = proto.roomname
         data.groupNumber = proto.account;
         data.userId = proto.userId;
         data.avatar = proto.avatar;
         data.depict = proto.depict;
-        data.isTalk = proto.talkMode == 1;
+        data.isTalk = proto.groupToOne == 1;
         data.isApproval = proto.applyJoin == 1;
-        data.isInvite = proto.applyNeed == 1;
+        data.isInviteApply = proto.applyNeed == 1;
+        data.isInvite = proto.invite == 1;
         data.maxMember = proto.roomMax;
         data.isGroup = proto.talkMode == 2;
+        data.isMute = proto.muted == 1;
+        data.isRevoke = proto.revoke == 1;
         data.ask = proto.ask;
         switch (proto.type) {
             case 'protected':

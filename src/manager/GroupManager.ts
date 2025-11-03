@@ -137,6 +137,109 @@ export class IMIOGroupManager extends IMIOBaseManager{
         });
     }
 
+    /**
+     * 获取一个群组
+     * @param groupId
+     */
+    public getGroupById(groupId: number): Promise<IMIOGroup> {
+        return new Promise<any>(async (resolve, reject) => {
+            if (this.checkSocket().length) {
+                reject(new Error(this.checkSocket()))
+                return;
+            }
+
+            const param = new Contacts({
+                meta: this.imioClient!!.meta,
+                joinRoomId: groupId,
+            });
+            let res : IMIOGroup | null = null;
+            this.imioClient!!.socket?.requestResponse({
+                data: Buffer.from(param.serializeBinary().buffer),
+                metadata: this.buildRoute('group.byId')
+            }, {
+                onComplete: () => {
+                    resolve(res)
+                }, onNext: (payload: Payload, isComplete: boolean) => {
+                    try {
+                        if (payload.data) {
+                            let proto = Rooms.deserialize(payload.data);
+                            let data = this.buildGroup(proto);
+                            res = data;
+                            if (isComplete) {
+                                resolve(res)
+                            }
+                        }
+                    }catch (e) {
+
+                        reject(new Error("IMIO Client Error"))
+                    }
+                },
+                onError: (error: Error) => {
+                    let message = error?.message + "";
+                    let errorMsg = this.onError(message);
+                    if (errorMsg.length > 0) {
+                        reject(new Error(errorMsg))
+                    }else {
+                        reject(new Error(message))
+                    }
+                }, onExtension(extendedType: number, content: Buffer | null | undefined, canBeIgnored: boolean): void {
+                }
+            })
+        });
+    }
+
+    /**
+     * 创建一对一的临时性对话
+     * @param userId 用户
+     * @param joinId 加入的群组
+     */
+    public createDialogue(userId: string,joinId: number): Promise<IMIOGroup> {
+        return new Promise<any>(async (resolve, reject) => {
+            if (this.checkSocket().length) {
+                reject(new Error(this.checkSocket()))
+                return;
+            }
+
+            const param = new Contacts({
+                meta: this.imioClient!!.meta,
+                userId: userId,
+                joinRoomId:joinId
+            });
+            let res : IMIOGroup | null = null;
+            this.imioClient!!.socket?.requestResponse({
+                data: Buffer.from(param.serializeBinary().buffer),
+                metadata: this.buildRoute('dialogue.create')
+            }, {
+                onComplete: () => {
+                    resolve(res)
+                }, onNext: (payload: Payload, isComplete: boolean) => {
+                    try {
+                        if (payload.data) {
+                            let proto = Rooms.deserialize(payload.data);
+                            let data = this.buildGroup(proto);
+                            res = data;
+                            if (isComplete) {
+                                resolve(res)
+                            }
+                        }
+                    }catch (e) {
+
+                        reject(new Error("IMIO Client Error"))
+                    }
+                },
+                onError: (error: Error) => {
+                    let message = error?.message + "";
+                    let errorMsg = this.onError(message);
+                    if (errorMsg.length > 0) {
+                        reject(new Error(errorMsg))
+                    }else {
+                        reject(new Error(message))
+                    }
+                }, onExtension(extendedType: number, content: Buffer | null | undefined, canBeIgnored: boolean): void {
+                }
+            })
+        });
+    }
 
     /**
      * 创建群
@@ -439,6 +542,57 @@ export class IMIOGroupManager extends IMIOBaseManager{
                                 resolve(res)
                             }
                         }
+                    }catch (e) {
+                        reject(new Error("IMIO Client Error"))
+                    }
+                }, onError: (error: Error) => {
+                    let message = error?.message + "";
+                    let errorMsg = this.onError(message);
+                    if (errorMsg.length > 0) {
+                        reject(new Error(errorMsg))
+                    }else {
+                        reject(new Error(message))
+                    }
+                }, onExtension(extendedType: number, content: Buffer | null | undefined, canBeIgnored: boolean): void {
+                }
+            })
+        });
+    }
+
+
+    /**
+     * 设置或取消 管理员
+     * @param joinId
+     * @param userId 管理员
+     */
+    public setManager(joinId : number,userId: string): Promise<IMIOContact> {
+        return new Promise<any>((resolve, reject) => {
+            if (this.checkSocket().length) {
+                reject(new Error(this.checkSocket()))
+                return;
+            }
+            const param = new Contacts({
+                meta: this.imioClient!!.meta,
+                joinRoomId: joinId,
+                userId: userId
+            });
+            let res : Object | null = null;
+            this.imioClient!!.socket?.requestResponse({
+                data: Buffer.from(param.serializeBinary().buffer),
+                metadata: this.buildRoute('group.set.manager')
+            }, {
+                onComplete: () => {
+                    resolve('')
+                }, onNext: (payload: Payload, isComplete: boolean) => {
+                    try {
+                        // if (payload.data) {
+                        //     let proto = Contacts.deserialize(payload.data);
+                        //     let data = this.buildContact(proto);
+                        //     res = data;
+                            if (isComplete) {
+                                resolve('')
+                            }
+                        // }
                     }catch (e) {
                         reject(new Error("IMIO Client Error"))
                     }
@@ -826,6 +980,59 @@ export class IMIOGroupManager extends IMIOBaseManager{
 
 
     /**
+     * 设置群成员备注名称
+     * @param joinId
+     * @param userId
+     * @param name
+     */
+    public setGroupMemberName(joinId : number,userId: string,name: string): Promise<IMIOGroup> {
+        return new Promise<any>((resolve, reject) => {
+            if (this.checkSocket().length) {
+                reject(new Error(this.checkSocket()))
+                return;
+            }
+            const param = new Contacts({
+                meta: this.imioClient!!.meta,
+                joinRoomId: joinId,
+                userId: userId,
+                username: name,
+            });
+            let res : Object | null = null;
+            this.imioClient!!.socket?.requestResponse({
+                data: Buffer.from(param.serializeBinary().buffer),
+                metadata: this.buildRoute('group.set.username')
+            }, {
+                onComplete: () => {
+                    resolve('')
+                }, onNext: (payload: Payload, isComplete: boolean) => {
+                    try {
+                        // if (payload.data) {
+                        //     let proto = Rooms.deserialize(payload.data);
+                        //     let data = this.buildGroup(proto);
+                        //     res = data;
+                            if (isComplete) {
+                                resolve('')
+                            }
+                        // }
+                    }catch (e) {
+                        reject(new Error("IMIO Client Error"))
+                    }
+                }, onError: (error: Error) => {
+                    let message = error?.message + "";
+                    let errorMsg = this.onError(message);
+                    if (errorMsg.length > 0) {
+                        reject(new Error(errorMsg))
+                    }else {
+                        reject(new Error(message))
+                    }
+                }, onExtension(extendedType: number, content: Buffer | null | undefined, canBeIgnored: boolean): void {
+                }
+            })
+        });
+    }
+
+
+    /**
      * 设置群类型
      * @param joinId
      * @param type
@@ -1146,6 +1353,9 @@ export class IMIOGroupManager extends IMIOBaseManager{
         }
         if (message.indexOf("SQL") > -1 || message.indexOf('connect') > -1) {
             return ("IMIO System Error");
+        }
+        if (message.indexOf("terminal") > -1 || message.indexOf('signal') > -1) {
+            return ("请求超时");
         }
         return "";
     }

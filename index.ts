@@ -5,7 +5,7 @@ import {IMIORoomManager} from "./src/manager/RoomManager";
 import {IMIOClientConnectStatus, IMIOClientListener} from "./src/listener/ClientListener";
 import {IMIOContactManager} from "./src/manager/ContactManager";
 import {IMIOGroupManager} from "./src/manager/GroupManager";
-
+import {onlyour as RoomPB} from "./src/protocol/Rooms";
 // export {IMIOClientOption,IMIOClient}
 
 let clientOption = IMIOClientOption.newBuilder()
@@ -57,6 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btnClose.addEventListener('click', () => {
         console.log(`Close ==`);
         imioClient.disconnect()
+
     })
     apply.addEventListener('click', () => {
         console.log(`apply ==`);

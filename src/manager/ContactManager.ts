@@ -2,7 +2,7 @@ import {IMIOClient} from "../Client";
 import {IMIOBaseManager} from "./BaseManager";
 import {Payload} from "rsocket-core";
 import {IMIOMember} from "../entity/Member";
-import {IMIOContact} from "../entity/Contact";
+import {IMIOContact, IMIOContactNotice} from "../entity/Contact";
 
 //  ======
 import {onlyour as ContactPB} from "../protocol/Contacts";
@@ -344,18 +344,24 @@ export class IMIOContactManager extends IMIOBaseManager {
 
     /**
      * 设置备注名称
-     * @param contactId
+     * @param joinId
      * @param remark
      */
-    public setRemarkName(contactId: number, remark: string): Promise<any> {
-        return new Promise<any>((resolve, reject) => {
+    public setRemarkName(joinId: number, remark: string): Promise<any> {
+        return new Promise<any>(async (resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
                 return;
             }
+
+            let contact = await this.getContactByJoinId(joinId);
+            if (!contact) {
+                reject(new Error('联系人获取失败'))
+                return;
+            }
             const param = new Contacts({
                 meta: this.imioClient!!.meta,
-                id: contactId,
+                id: contact.contactId,
                 username: remark
             });
             let res : Object | null = null;
@@ -395,18 +401,24 @@ export class IMIOContactManager extends IMIOBaseManager {
 
     /**
      * 设置 通知范围
-     * @param contactId
+     * @param joinId
      * @param rule
      */
-    public setNoticeRule(contactId: number, rule: number): Promise<any> {
-        return new Promise<any>((resolve, reject) => {
+    public setNoticeRule(joinId: number, rule: IMIOContactNotice): Promise<any> {
+        return new Promise<any>(async (resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
                 return;
             }
+
+            let contact = await this.getContactByJoinId(joinId);
+            if (!contact) {
+                reject(new Error('联系人获取失败'))
+                return;
+            }
             const param = new Contacts({
                 meta: this.imioClient!!.meta,
-                id: contactId,
+                id: contact.contactId,
                 noise: rule
             });
             let res : Object | null = null;
@@ -446,18 +458,28 @@ export class IMIOContactManager extends IMIOBaseManager {
 
     /**
      * 设置 或移除 黑名单
-     * @param userId
+     * @param joinId
      * @param black
      */
-    public setBlack(userId: string, black: number): Promise<any> {
-        return new Promise<any>((resolve, reject) => {
+    public setBlack(joinId: number, black: number): Promise<any> {
+        return new Promise<any>(async (resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
                 return;
             }
+
+            let contact = await this.getContactByJoinId(joinId);
+            if (!contact) {
+                reject(new Error('联系人获取失败'))
+                return;
+            }
+            if (contact.isGroup) {
+                reject(new Error('群禁止设置'))
+                return;
+            }
             const param = new Contacts({
                 meta: this.imioClient!!.meta,
-                userId: userId,
+                userId: contact.userId,
                 black: black
             });
             let res : Object | null = null;
@@ -497,18 +519,23 @@ export class IMIOContactManager extends IMIOBaseManager {
 
     /**
      * 设置 联系人分组
-     * @param userId
-     * @param black
+     * @param joinId
+     * @param name
      */
-    public setSubgroup(userId: string, name: string): Promise<any> {
-        return new Promise<any>((resolve, reject) => {
+    public setSubgroup(joinId: number, name: string): Promise<any> {
+        return new Promise<any>(async (resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
                 return;
             }
+            let contact = await this.getContactByJoinId(joinId);
+            if (!contact) {
+                reject(new Error('联系人获取失败'))
+                return;
+            }
             const param = new Contacts({
                 meta: this.imioClient!!.meta,
-                userId: userId,
+                userId: contact.userId,
                 subgroup: name
             });
             let res : Object | null = null;
@@ -547,18 +574,23 @@ export class IMIOContactManager extends IMIOBaseManager {
 
     /**
      * 设置 联系人排序
-     * @param userId
-     * @param black
+     * @param joinId
+     * @param sort
      */
-    public setSort(userId: string, sort: number): Promise<any> {
-        return new Promise<any>((resolve, reject) => {
+    public setSort(joinId: number, sort: number): Promise<any> {
+        return new Promise<any>(async (resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
                 return;
             }
+            let contact = await this.getContactByJoinId(joinId);
+            if (!contact) {
+                reject(new Error('联系人获取失败'))
+                return;
+            }
             const param = new Contacts({
                 meta: this.imioClient!!.meta,
-                userId: userId,
+                userId: contact.userId,
                 sort: sort
             });
             let res : Object | null = null;
@@ -658,6 +690,9 @@ export class IMIOContactManager extends IMIOBaseManager {
         }
         if (message.indexOf("SQL") > -1 || message.indexOf('connect') > -1) {
             return ("IMIO System Error");
+        }
+        if (message.indexOf("terminal") > -1 || message.indexOf('signal') > -1) {
+            return ("请求超时");
         }
         return "";
     }

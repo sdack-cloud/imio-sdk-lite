@@ -11,3 +11,9 @@ export class IMIOContact {
     isMuted: boolean = false;
     noise: number = 1;
 }
+
+export enum IMIOContactNotice {
+    normal = 1, // 正常提醒
+    not_notify = 2, // 不通知
+    reject = 0 // 拒收信息
+}

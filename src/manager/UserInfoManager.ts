@@ -161,6 +161,9 @@ export class IMIOUserInfoManager extends IMIOBaseManager{
         if (message.indexOf("SQL") > -1 || message.indexOf('connect') > -1) {
             return ("IMIO System Error");
         }
+        if (message.indexOf("terminal") > -1 || message.indexOf('signal') > -1) {
+            return ("请求超时");
+        }
         return "";
     }
     private checkSocket(): string {

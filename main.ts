@@ -9,7 +9,7 @@ import {IMIOUserInfoManager} from "./src/manager/UserInfoManager";
 import {IMIOChatManager} from "./src/manager/ChatManager";
 import {IMIOMessageSender,IMIOMessageType,IMIOMessageSenderHint} from './src/entity/MessageSender'
 import {IMIOMessageLabel,IMIOMessage,IMIOMessageTalk,IMIOMessageRemind} from "./src/entity/Message";
-import {IMIOContact} from "./src/entity/Contact";
+import {IMIOContact,IMIOContactNotice} from "./src/entity/Contact";
 import {IMIOGroup, IMIOGroupType} from "./src/entity/Group";
 import {IMIOMember} from "./src/entity/Member";
 
@@ -35,5 +35,6 @@ export default {
     IMIOGroup,
     IMIOGroupType,
     IMIOChatManager,
-    IMIOMember
+    IMIOMember,
+    IMIOContactNotice
 }

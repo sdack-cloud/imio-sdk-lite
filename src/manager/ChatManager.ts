@@ -43,6 +43,56 @@ export class IMIOChatManager extends IMIOBaseManager {
 
     // ========= 单例模式 END =========
 
+    /**
+     * 非好友关系，私聊
+     * @param joinId 来源群聊的ID
+     * @param userId 聊天的对象
+     * @param sender
+     * @param sender.joinId 新创建joinId。 IMIOGroupManager.createDialogue 返回值
+     */
+    public dialogue(joinId: number,userId:string, sender: IMIOMessageSender): Promise<any> {
+        return new Promise<any>(async (resolve, reject) => {
+            if (this.checkSocket().length) {
+                reject(new Error(this.checkSocket()))
+                return;
+            }
+
+            let message1 = this.buildMessageProto( userId,sender);
+            message1.appId = joinId;
+            let res: Object | null = null;
+            this.imioClient!!.socket?.requestResponse({
+                data: Buffer.from(message1.serializeBinary().buffer),
+                metadata: this.buildRoute('dialogue')
+            }, {
+                onComplete: () => {
+                    resolve(res)
+                }, onNext: (payload: Payload, isComplete: boolean) => {
+                    try {
+                        if (payload.data) {
+                            let proto = Message.deserialize(payload.data);
+                            let data = this.buildMessage(proto);
+                            res = data;
+                            if (isComplete) {
+                                resolve(res)
+                            }
+                        }
+                    } catch (e) {
+                        reject(new Error("IMIO Client Error"))
+                    }
+                }, onError: (error: Error) => {
+                    let message = error?.message + "";
+                    let errorMsg = this.onError(message);
+                    if (errorMsg.length > 0) {
+                        reject(new Error(errorMsg))
+                    } else {
+                        reject(new Error(message))
+                    }
+                }, onExtension(extendedType: number, content: Buffer | null | undefined, canBeIgnored: boolean): void {
+                }
+            })
+        });
+    }
+
     public oneToOne(sender: IMIOMessageSender): Promise<any> {
         return new Promise<any>(async (resolve, reject) => {
             if (this.checkSocket().length) {
@@ -424,6 +474,9 @@ export class IMIOChatManager extends IMIOBaseManager {
         }
         if (message.indexOf("SQL") > -1 || message.indexOf('connect') > -1) {
             return ("IMIO System Error");
+        }
+        if (message.indexOf("terminal") > -1 || message.indexOf('signal') > -1) {
+            return ("请求超时");
         }
         return "";
     }
