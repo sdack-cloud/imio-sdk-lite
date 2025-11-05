@@ -46,6 +46,3 @@ export enum IMIOMessageTalk {
     team = 3 // 小队
 }
 
-export class IMIOMessageRemind {
-
-}

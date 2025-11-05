@@ -176,6 +176,7 @@ export class IMIOMessageSender {
 export class IMIOMessageSenderHint {
     targetId: string = '';
     targetName: string = '';
+    avatar: string = '';
 }
 
 export enum IMIOMessageType {

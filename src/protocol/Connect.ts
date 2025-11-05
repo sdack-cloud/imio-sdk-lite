@@ -25,6 +25,9 @@ export namespace onlyour.imio {
             avatar?: string;
             getaway?: string;
             deviceName?: string;
+            ip?: string;
+            country?: string;
+            city?: string;
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [11], this.#one_of_decls);
@@ -79,6 +82,15 @@ export namespace onlyour.imio {
                 }
                 if ("deviceName" in data && data.deviceName != undefined) {
                     this.deviceName = data.deviceName;
+                }
+                if ("ip" in data && data.ip != undefined) {
+                    this.ip = data.ip;
+                }
+                if ("country" in data && data.country != undefined) {
+                    this.country = data.country;
+                }
+                if ("city" in data && data.city != undefined) {
+                    this.city = data.city;
                 }
             }
         }
@@ -184,6 +196,24 @@ export namespace onlyour.imio {
         set deviceName(value: string) {
             pb_1.Message.setField(this, 17, value);
         }
+        get ip() {
+            return pb_1.Message.getFieldWithDefault(this, 18, "") as string;
+        }
+        set ip(value: string) {
+            pb_1.Message.setField(this, 18, value);
+        }
+        get country() {
+            return pb_1.Message.getFieldWithDefault(this, 19, "") as string;
+        }
+        set country(value: string) {
+            pb_1.Message.setField(this, 19, value);
+        }
+        get city() {
+            return pb_1.Message.getFieldWithDefault(this, 20, "") as string;
+        }
+        set city(value: string) {
+            pb_1.Message.setField(this, 20, value);
+        }
         static fromObject(data: {
             userId?: string;
             appId?: number;
@@ -202,6 +232,9 @@ export namespace onlyour.imio {
             avatar?: string;
             getaway?: string;
             deviceName?: string;
+            ip?: string;
+            country?: string;
+            city?: string;
         }): Connect {
             const message = new Connect({});
             if (data.userId != null) {
@@ -255,6 +288,15 @@ export namespace onlyour.imio {
             if (data.deviceName != null) {
                 message.deviceName = data.deviceName;
             }
+            if (data.ip != null) {
+                message.ip = data.ip;
+            }
+            if (data.country != null) {
+                message.country = data.country;
+            }
+            if (data.city != null) {
+                message.city = data.city;
+            }
             return message;
         }
         toObject() {
@@ -276,6 +318,9 @@ export namespace onlyour.imio {
                 avatar?: string;
                 getaway?: string;
                 deviceName?: string;
+                ip?: string;
+                country?: string;
+                city?: string;
             } = {};
             if (this.userId != null) {
                 data.userId = this.userId;
@@ -328,6 +373,15 @@ export namespace onlyour.imio {
             if (this.deviceName != null) {
                 data.deviceName = this.deviceName;
             }
+            if (this.ip != null) {
+                data.ip = this.ip;
+            }
+            if (this.country != null) {
+                data.country = this.country;
+            }
+            if (this.city != null) {
+                data.city = this.city;
+            }
             return data;
         }
         serialize(): Uint8Array;
@@ -368,6 +422,12 @@ export namespace onlyour.imio {
                 writer.writeString(16, this.getaway);
             if (this.deviceName.length)
                 writer.writeString(17, this.deviceName);
+            if (this.ip.length)
+                writer.writeString(18, this.ip);
+            if (this.country.length)
+                writer.writeString(19, this.country);
+            if (this.city.length)
+                writer.writeString(20, this.city);
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -427,6 +487,15 @@ export namespace onlyour.imio {
                         break;
                     case 17:
                         message.deviceName = reader.readString();
+                        break;
+                    case 18:
+                        message.ip = reader.readString();
+                        break;
+                    case 19:
+                        message.country = reader.readString();
+                        break;
+                    case 20:
+                        message.city = reader.readString();
                         break;
                     default: reader.skipField();
                 }

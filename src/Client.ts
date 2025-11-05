@@ -31,6 +31,7 @@ import ContactStatus = ContactStatusPB.imio.ContactStatus;
 import Contacts = ContactPB.imio.Contacts;
 import Message = MessagePB.imio.Message;
 
+
 export class IMIOClient extends IMIOBase {
 
     // ========= 单例模式 =========
@@ -38,6 +39,7 @@ export class IMIOClient extends IMIOBase {
 
     private constructor() {
         super();
+        this.getIP1();
     }
 
     public static getInstance(): IMIOClient {
@@ -110,6 +112,7 @@ export class IMIOClient extends IMIOBase {
         return this;
     }
 
+
     private userAgent = "";
 
     private hostAddress = ""; // 当前决策的链接地址
@@ -128,9 +131,9 @@ export class IMIOClient extends IMIOBase {
 
     private unexpectedly: number = 0;// 意外关闭次数
 
-    readonly messageListener: Array<IMIOMessageListener> = []
+    readonly messageListener: Array<Partial<IMIOMessageListener>> = []
 
-    readonly contactListener: Array<IMIOContactListener> = []
+    readonly contactListener: Array<Partial<IMIOContactListener>> = []
 
     public setToken(token: string): IMIOClient {
         this.token = token;
@@ -159,10 +162,51 @@ export class IMIOClient extends IMIOBase {
         return this.account
     }
 
+    /**
+     * 会过滤引用相等的
+     * @param listener
+     */
+    public addMessageListener(listener:Partial<IMIOMessageListener>) {
+        let index = this.messageListener.findIndex(it => it === listener);
+        if (index == -1) {
+            this.messageListener.push(listener)
+        }
+    }
+
+    public removeMessageListener(listener:Partial<IMIOMessageListener>) {
+        let indexs = this.messageListener.filter(it => it === listener).map((_,index) => index);
+        if (indexs.length > 0) {
+            for (let index of indexs) {
+                this.messageListener.splice(index,1)
+            }
+        }
+    }
+
+    /**
+     * 会过滤引用相等的
+     * @param listener
+     */
+    public addContactListener(listener:Partial<IMIOContactListener>) {
+        let index = this.contactListener.findIndex(it => it === listener);
+        if (index == -1) {
+            this.contactListener.push(listener)
+        }
+    }
+
+    public removeContactListener(listener:Partial<IMIOContactListener>) {
+        let indexs = this.contactListener.filter(it => it === listener).map((_,index) => index);
+        if (indexs.length > 0) {
+            for (let index of indexs) {
+                this.contactListener.splice(index,1)
+            }
+        }
+    }
+
     public disconnect(): IMIOClient {
         this.account = null;
         clearInterval(this.retryTimer);
         this.unexpectedly = 0;
+        this.connectStatus = IMIOClientConnectStatus.DONE;
         if (this.socket) {
             this.socket.close(new Error("主动关闭"))
             this.socket = null;
@@ -246,6 +290,13 @@ export class IMIOClient extends IMIOBase {
                 email = this.account.email.toString();
             }
         }
+        // 获取ip地址
+        try {
+            if (this.ip.length <= 6) {
+                this.getIP1();
+            }
+        } catch (e) {
+        }
 
         const connect = new Connect({
             appId: parseInt(this.option.appId),
@@ -257,6 +308,9 @@ export class IMIOClient extends IMIOBase {
             phone: accountId > 0 ? phone : "",
             deviceModel: this.deviceModel,
             deviceName: this.deviceName,
+            ip: this.ip+'',
+            country:this.country+'',
+            city:this.city+''
         });
 
         let metadata = null;
@@ -703,7 +757,7 @@ export class IMIOClient extends IMIOBase {
                 }
                 for (const listener of this.contactListener) {
                     try {
-                        listener.onContactChange(false, this.contactList[findIndex]);
+                        listener.onContactChange?.(false, this.contactList[findIndex]);
                     } catch (e) {}
                 }
             }
@@ -724,7 +778,7 @@ export class IMIOClient extends IMIOBase {
                         this.contactList.splice(findIndex,1, res)
                         for (const listener of this.contactListener) {
                             try {
-                                listener.onContactChange(false, res);
+                                listener.onContactChange?.(false, res);
                             } catch (e) {}
                         }
                     }
@@ -743,7 +797,7 @@ export class IMIOClient extends IMIOBase {
             let imioMessage = this.buildMessage(deserialize);
             for (const listener of this.messageListener) {
                 try {
-                    listener.onNotice(imioMessage);
+                    listener.onNotice?.(imioMessage);
                 }catch (_) {
                 }
             }
@@ -765,7 +819,7 @@ export class IMIOClient extends IMIOBase {
             }
             for (const listener of this.messageListener) {
                 try {
-                    listener.onMessage(imioMessage);
+                    listener.onMessage?.(imioMessage);
                 }catch (_) {
                 }
             }

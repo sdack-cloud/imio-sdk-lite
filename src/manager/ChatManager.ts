@@ -243,6 +243,8 @@ export class IMIOChatManager extends IMIOBaseManager {
             })
         });
     }
+
+
     /**
      * 已读消息
      * @param messageId
@@ -263,6 +265,52 @@ export class IMIOChatManager extends IMIOBaseManager {
             this.imioClient!!.socket?.requestResponse({
                 data: Buffer.from(message.serializeBinary().buffer),
                 metadata: this.buildRoute('message.read')
+            }, {
+                onComplete: () => {
+                    resolve('')
+                }, onNext: (payload: Payload, isComplete: boolean) => {
+                    try {
+                        if (isComplete) {
+                            resolve('')
+                        }
+                    } catch (e) {
+                        reject(new Error("IMIO Client Error"))
+                    }
+                }, onError: (error: Error) => {
+                    let message = error?.message + "";
+                    let errorMsg = this.onError(message);
+                    if (errorMsg.length > 0) {
+                        reject(new Error(errorMsg))
+                    } else {
+                        reject(new Error(message))
+                    }
+                }, onExtension(extendedType: number, content: Buffer | null | undefined, canBeIgnored: boolean): void {
+                }
+            })
+        });
+    }
+
+
+
+    /**
+     * 删除消息
+     * @param messageId
+     * @param joinId
+     */
+    public deleteMessage(messageId:string,joinId: number): Promise<any> {
+        return new Promise<any>(async (resolve, reject) => {
+            if (this.checkSocket().length) {
+                reject(new Error(this.checkSocket()))
+                return;
+            }
+            let message = new MessageSign({
+                meta:this.imioClient!!.meta,
+                messageId: messageId,
+                roomId: joinId,
+            });
+            this.imioClient!!.socket?.requestResponse({
+                data: Buffer.from(message.serializeBinary().buffer),
+                metadata: this.buildRoute('message.revoke')
             }, {
                 onComplete: () => {
                     resolve('')
@@ -392,8 +440,9 @@ export class IMIOChatManager extends IMIOBaseManager {
         if (sender.notifyList && sender.notifyList.length) {
             for (let item of sender.notifyList) {
                 let remind = new MessageRemind({
-                    sort : 0,
-                    destId: item.targetId
+                    sort : 1,
+                    destId: item.targetId,
+                    nickname: item.targetName
                 });
                 cc.push(remind);
             }
@@ -401,8 +450,9 @@ export class IMIOChatManager extends IMIOBaseManager {
         if (sender.quietlyList && sender.quietlyList.length) {
             for (let item of sender.quietlyList) {
                 let remind = new MessageRemind({
-                    sort : 1,
-                    destId: item.targetId
+                    sort : 2,
+                    destId: item.targetId,
+                    nickname: item.targetName
                 });
                 cc.push(remind);
             }
@@ -410,7 +460,9 @@ export class IMIOChatManager extends IMIOBaseManager {
         if (sender.hintList && sender.hintList.length) {
             for (let item of sender.hintList) {
                 let remind1 = new MessageRemind({
-                    destId: item.targetId
+                    sort : 0,
+                    destId: item.targetId,
+                    nickname: item.targetName
                 });
                 remind.push(remind1);
             }

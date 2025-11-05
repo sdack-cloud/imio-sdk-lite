@@ -12,6 +12,7 @@ import {IMIOAccountUser} from "./entity/AccountUser";
 import {IMIOContact} from "./entity/Contact";
 import {IMIOMember} from "./entity/Member";
 import {IMIOGroup, IMIOGroupType} from "./entity/Group";
+import axios, {Axios, AxiosInstance} from "axios";
 // =======
 import {onlyour as MetaPB} from "./protocol/Meta";
 import {onlyour as ContactPB} from "./protocol/Contacts";
@@ -27,10 +28,12 @@ export class IMIOBase {
     public token = ""; // token
     public pageSize = 300;
     protected account : IMIOAccountUser | null = null; // 这里为 null 是为了，切换用户后重新赋值
-
     protected deviceId = ""; // 浏览器指纹码
     protected deviceName = ""; //浏览器设备
     protected deviceModel = ""; //浏览器设备
+    protected ip: string = "";
+    protected country: string = "";
+    protected city: string = "";
 
     public readonly meta: MetaPB.imio.Meta =  new MetaPB.imio.Meta({
         v: IMIOBase._version,
@@ -38,11 +41,60 @@ export class IMIOBase {
         page: 0, pageSize: 30
     });
 
-    // private axios ?: AxiosInstance
+    protected axios ?: AxiosInstance = axios.create({
+        timeout: 5 * 1000
+    })
 
     public socket?: RSocket | null;
 
     public readonly contactList:Array<IMIOContact> = [];
+
+    protected getIP1() {
+        axios.get("https://api.ipbase.com/v1/json/").then(res => {
+
+            let data = res.data;
+            if (res.status == 200 && data.ip) {
+                    this.ip = data?.ip;
+                    this.country = data?.country_name;
+                    this.city = (data?.region_name)+'-'+data?.city;
+            } else {
+                this.getIP2()
+            }
+        }).catch(err => {
+            this.getIP2()
+        })
+    }
+    protected getIP3() {
+        axios.get("https://ipinfo.io/json").then(res => {
+
+            let data = res.data;
+            if (res.status == 200 && data.ip) {
+                    this.ip = data?.ip;
+                    this.country = data?.country;
+                    this.city = (data?.region) +'-'+ (data?.city);
+            } else {
+
+            }
+        }).catch(err => {
+
+        })
+    }
+
+    protected getIP2() {
+        axios.get("http://ip-api.com/json/").then(res => {
+
+            let data = res.data;
+            if (res.status == 200 && data.status && data.status == 'success') {
+                    this.ip = data?.query;
+                    this.country = data?.country;
+                    this.city = (data?.regionName) +'-'+(data?.city);
+            } else {
+                this.getIP3()
+            }
+        }).catch(err => {
+            this.getIP3()
+        })
+    }
 
     private getJwtPayload(token: string): Object {
         // 分割JWT的三个部分

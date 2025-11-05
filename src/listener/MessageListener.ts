@@ -3,7 +3,11 @@ import {IMIOMessage} from "../entity/Message";
 
 export interface IMIOMessageListener {
 
-    // 系统通知
+    /**
+     * 系统通知
+     * message.label 有2种类型
+     * IMIOMessageLabel.notice 和 IMIOMessageLabel.action
+     */
     onNotice(message: IMIOMessage): void
 
     // 正常消息
