@@ -25,11 +25,16 @@ import {onlyour as ConnectPB} from "./protocol/Connect";
 import {onlyour as ContactPB} from "./protocol/Contacts";
 import {onlyour as ContactStatusPB} from "./protocol/ContactStatus";
 import {onlyour as MessagePB} from "./protocol/Message";
+import {onlyour as GatewayPB} from "./protocol/Gateway";
 import Meta = MetaPB.imio.Meta;
 import Connect = ConnectPB.imio.Connect;
 import ContactStatus = ContactStatusPB.imio.ContactStatus;
 import Contacts = ContactPB.imio.Contacts;
 import Message = MessagePB.imio.Message;
+import Gateway = GatewayPB.imio.Gateway;
+import {IMIOHostNode} from "./entity/HostNode";
+import {IMIOContactStatus} from "./entity/Contact";
+import {IMIODeviceStatus} from "./entity/Status";
 
 
 export class IMIOClient extends IMIOBase {
@@ -117,6 +122,8 @@ export class IMIOClient extends IMIOBase {
 
     private hostAddress = ""; // 当前决策的链接地址
 
+    private readonly hostNodeList: Array<IMIOHostNode> = [];
+
     protected option ?: IMIOClientOption;
 
     public clientListener ?: IMIOClientListener
@@ -137,6 +144,16 @@ export class IMIOClient extends IMIOBase {
 
     public setToken(token: string): IMIOClient {
         this.token = token;
+        try {
+            let payload = this.getJwtPayload(token);
+            this.tokenAppId = Number(payload.aud)
+            if ((this.tokenAppId+"" != this.option?.appId)) {
+                console.warn("IMIO：token中的AppId 与 IMIOClientOption不一致")
+            }
+        }catch (e) {
+            this.tokenAppId = 0;
+            console.warn("IMIO: token中的AppId 解析错误")
+        }
         return this;
     }
 
@@ -238,6 +255,18 @@ export class IMIOClient extends IMIOBase {
             this.clientListener = clientListener;
         }
         this.token = token;
+        if (!this.option){
+            throw new Error("IMIOClientOption 缺失")
+        }
+        try {
+            let payload = this.getJwtPayload(token);
+            this.tokenAppId = Number(payload.aud)
+        } catch (e) {
+            this.tokenAppId = 0;
+        }
+        if (this.tokenAppId == 0 || (this.tokenAppId+'' != this.option?.appId)) {
+            throw new Error("token中的AppId 与 IMIOClientOption不一致")
+        }
         if (this.option?.debug) {
             console.warn('connect deviceId', this.deviceId);
             if (!this.meta.deviceKey.length) {
@@ -264,15 +293,15 @@ export class IMIOClient extends IMIOBase {
     }
 
 
-    private callSocket(accountId: number = 0, address: string = ""): void {
+    private callSocket(accountId: number = 0): void {
         if (!this.option) {
             throw new Error("客户端配置项不存在")
         }
-        if (address.length > 0)  {
-            this.hostAddress = address;
-        } else {
-            this.hostAddress = this.hostProvider();
-        }
+        // if (address.length > 0)  {
+        //     this.hostAddress = address;
+        // } else {
+        // }
+        this.hostAddress = this.hostAddressProvider();
         if (!this.hostAddress.length) {
             throw new Error("主机地址不存在")
         }
@@ -414,9 +443,12 @@ export class IMIOClient extends IMIOBase {
         }, 2 * 1000);
         connector.connect()
             .then((res) => {
-                // if (this.option?.debug) {
+                if (this.option?.debug) {
                 console.warn("IMIO connect success...")
-                // }
+                }
+                if (this.account) {
+                    this.account.status = IMIOContactStatus.online
+                }
                 try {
                     // clearInterval(intervalConnectStatus); //  收到 Pong 响应才 停止
                     this.connectStatus = IMIOClientConnectStatus.SUCCESS_PULL
@@ -431,20 +463,26 @@ export class IMIOClient extends IMIOBase {
                 // 监听服务器的关闭事件
                 res.onClose(err => {
                     let message = err?.message + "";
-                    // if (this.option?.debug) {
+                    if (this.option?.debug) {
                     console.error("IMIOServer connect onClose", message)
-                    // }
+                    }
+                    if (this.account) {
+                        this.account.status = IMIOContactStatus.done
+                    }
                     this.connectErrorEvent(message)
                 });
             })
             .catch(err => {
-                // if (this.option?.debug) {
+                if (this.option?.debug) {
                 console.error("IMIOServer Connect Error", err);
-                // }
+                }
                 if (err) {
                     let message = err?.message + "";
                     this.connectErrorEvent(message);
                 } else { //undefined
+                    if (this.account) {
+                        this.account.status = IMIOContactStatus.done
+                    }
                     // 未知错误原因，尝试几次
                     if (this.unexpectedly > 6) { // 大于重试次数，停止连接
                         clearInterval(this.retryTimer);
@@ -465,7 +503,9 @@ export class IMIOClient extends IMIOBase {
                 }
             })
             .finally(() => {
-                console.warn("IMIO connect finally");
+                if (this.option?.debug) {
+                    console.warn("IMIO connect finally");
+                }
             })
         ;
     }
@@ -507,6 +547,9 @@ export class IMIOClient extends IMIOBase {
      */
     private connectErrorEvent(eventMessage: String) {
         this.socket = null;
+        if (this.account) {
+            this.account.status = IMIOContactStatus.done
+        }
         clearInterval(this.connectStatusTimer);
         this.connectStatusTimer = -2;
         // 是服务器错误引起的关闭，发起重试连接，定时器
@@ -586,16 +629,11 @@ export class IMIOClient extends IMIOBase {
             this.retryConnTimer()
             return;
         }
-        if (eventMessage.indexOf("token cannot") > -1) {
-            try {
-                // this.clientListener?.onDisconnected(IMIOClientError.TOKEN_EMPTY.valueOf())
-            } catch (e) {
-            }
-            return;
-        }
         if (eventMessage.indexOf("token") > -1) {
             try {
-                // this.clientListener?.onDisconnected(IMIOClientError.TOKEN_EXPIRE.valueOf())
+                this.connectStatus = IMIOClientConnectStatus.TOKEN_EXPIRED;
+                this.clientListener?.onTokenExpired();
+                this.clientListener?.onConnectStatus(this.connectStatus,this.retryConnectNum);
             } catch (e) {
             }
             return;
@@ -610,6 +648,17 @@ export class IMIOClient extends IMIOBase {
     private retryConnTimer() {
         clearInterval(this.retryTimer);
         this.retryTimer = setInterval(() => {
+            if (this.retryConnectNum > 8) {
+                clearInterval(this.retryTimer);
+                this.retryConnectNum = 0;
+                try {
+                    this.connectStatus = IMIOClientConnectStatus.ERROR;
+                    this.clientListener?.onConnectStatus(this.connectStatus, this.retryConnectNum);
+                    this.clientListener?.onDisconnected()
+                } catch (e) {
+                }
+                return
+            }
             if (!this.socket) {
                 this.retryConnectNum++;
                 this.connectStatus = IMIOClientConnectStatus.RETRY_CONNECTING;
@@ -631,10 +680,10 @@ export class IMIOClient extends IMIOBase {
     }
 
     /**
-     *
+     * 地址决策
      * @private
      */
-    private hostProvider(): string {
+    private hostAddressProvider(): string {
         if (this.option && this.option?.host) {
             return this.option.host.toString()
         }
@@ -645,6 +694,9 @@ export class IMIOClient extends IMIOBase {
         switch (route) {
             case 'link-to-many': // 切换接入点
                 this.handleToMany(payloadData)
+                break;
+            case 'gateway': // 切换接入点
+                this.handleGateway(payloadData)
                 break;
             case 'pong':
                 clearInterval(this.connectStatusTimer)
@@ -675,6 +727,24 @@ export class IMIOClient extends IMIOBase {
         }
     }
 
+    private handleGateway(payloadData: Buffer | null | undefined) {
+        if (!payloadData) {
+            return;
+        }
+        try{
+            let data = Gateway.deserialize(payloadData);
+            let hostNode = this.buildGateway(data);
+            let find = this.hostNodeList.find(it => it.host == it.host);
+            if (!find) {
+                this.hostNodeList.push(hostNode);
+            } else {
+                find.current = hostNode.current;
+            }
+        }catch (e) {
+
+        }
+    }
+
     private handleToMany(payloadData: Buffer | null | undefined) {
         if (!payloadData) {
             return;
@@ -687,8 +757,27 @@ export class IMIOClient extends IMIOBase {
         } catch (e) {
         }
         const pongData = Connect.deserialize(payloadData);
-        this.hostAddress = pongData.email;
-        this.option?.whitHost(pongData.email);
+        this.hostAddress = pongData.ip;
+        try {
+            let ips = pongData.ip.split(':');
+            let hostNode = new IMIOHostNode();
+            hostNode.max = pongData.appId;
+            hostNode.current = pongData.roomId;
+            hostNode.name = pongData.nickname;
+            hostNode.host = ips[0];
+            hostNode.port = ips[1];
+            let find = this.hostNodeList.find(it => it.name == hostNode.name);
+            if (find) {
+                find.max = hostNode.max;
+                find.current = hostNode.current;
+                find.host = hostNode.host;
+                find.port = hostNode.port;
+            } else {
+                this.hostNodeList.push(hostNode)
+            }
+        } catch (e) {
+        }
+        this.option?.whitHost(pongData.ip);
         if (this.socket) {
             this.socket?.close(new Error("主动关闭"))
             if (this.account) {
@@ -749,10 +838,23 @@ export class IMIOClient extends IMIOBase {
         }
         try {
             let deserialize = Message.deserialize(payloadData);
-            let findIndex = this.contactList.findIndex(it => !it.isGroup && it.userId == deserialize.destId);
+            let findIndex = this.contactList.findIndex(it => !it.isGroup && it.userId == deserialize.fromId);
             if (findIndex > -1) {
-                this.contactList[findIndex].status = deserialize.command;
-                if (this.account && this.account!!.accountId.length > 0 && deserialize.destId == this.account!!.accountId) {
+                let status = IMIOContactStatus.done
+                if (deserialize.command == IMIOContactStatus.offline) {
+                    status = IMIOContactStatus.offline
+                }
+                if (deserialize.command == IMIOContactStatus.online) {
+                    status = IMIOContactStatus.online
+                }
+                if (deserialize.command == IMIOContactStatus.online_busy) {
+                    status = IMIOContactStatus.online_busy
+                }
+                if (deserialize.command == IMIOContactStatus.online_leave) {
+                    status = IMIOContactStatus.online_leave
+                }
+                this.contactList[findIndex].status = status;
+                if (this.account && this.account!!.accountId.length > 0 && deserialize.fromId == this.account!!.accountId) {
                     this.account!!.status = deserialize.command;
                 }
                 for (const listener of this.contactListener) {
@@ -813,7 +915,7 @@ export class IMIOClient extends IMIOBase {
             let deserialize = Message.deserialize(payloadData);
             let imioMessage = this.buildMessage(deserialize);
             try {
-                let chatManager = IMIOChatManager.getInstance().setIMIOClient(this);
+                let chatManager = IMIOChatManager.getInstance().setClient(this);
                 chatManager.signMessage(imioMessage.messageId,imioMessage.joinId).then()
             }catch (_) {
             }

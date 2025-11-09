@@ -24,7 +24,7 @@ export class IMIOAccountUser {
 
     lurk: number = 0;
 
-    status: string = "";
+    status: string = ""; // 用户状态
 
 
 }

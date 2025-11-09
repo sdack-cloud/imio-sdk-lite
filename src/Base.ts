@@ -7,10 +7,12 @@ import {
     ExplicitMimeTimeEntry,
     WellKnownMimeType
 } from "rsocket-composite-metadata";
-
+import {IMIOMessage, IMIOMessageLabel, IMIOMessageTalk} from "./entity/Message";
 import {IMIOAccountUser} from "./entity/AccountUser";
-import {IMIOContact} from "./entity/Contact";
+import {IMIOContact, IMIOContactStatus} from "./entity/Contact";
 import {IMIOMember} from "./entity/Member";
+import {IMIOHostNode} from "./entity/HostNode";
+import {IMIODeviceStatus} from "./entity/Status";
 import {IMIOGroup, IMIOGroupType} from "./entity/Group";
 import axios, {Axios, AxiosInstance} from "axios";
 // =======
@@ -18,7 +20,8 @@ import {onlyour as MetaPB} from "./protocol/Meta";
 import {onlyour as ContactPB} from "./protocol/Contacts";
 import {onlyour as RoomPB} from "./protocol/Rooms";
 import {onlyour as MessagePB} from "./protocol/Message";
-import {IMIOMessage, IMIOMessageLabel, IMIOMessageTalk} from "./entity/Message";
+import {onlyour as GatewayPB} from "./protocol/Gateway";
+import {onlyour as UserStatusPB} from "./protocol/UserStatus";
 
 
 export class IMIOBase {
@@ -26,6 +29,7 @@ export class IMIOBase {
     protected static _version = 1.0
 
     public token = ""; // token
+    protected tokenAppId = 0;
     public pageSize = 300;
     protected account : IMIOAccountUser | null = null; // 这里为 null 是为了，切换用户后重新赋值
     protected deviceId = ""; // 浏览器指纹码
@@ -35,6 +39,9 @@ export class IMIOBase {
     protected country: string = "";
     protected city: string = "";
 
+    public getTokenAppId(): number {
+        return this.tokenAppId;
+    }
     public readonly meta: MetaPB.imio.Meta =  new MetaPB.imio.Meta({
         v: IMIOBase._version,
         deviceTag: 'h5',
@@ -96,7 +103,7 @@ export class IMIOBase {
         })
     }
 
-    private getJwtPayload(token: string): Object {
+    protected getJwtPayload(token: string): any {
         // 分割JWT的三个部分
         const parts = token.split('.');
         // 解码JWT的第二部分（负载部分）
@@ -138,6 +145,35 @@ export class IMIOBase {
         return compositeMetaData;
     }
 
+    protected buildDeviceStatus(proto: UserStatusPB.imio.UserStatus) : IMIODeviceStatus {
+        let data = new IMIODeviceStatus();
+        data.deviceTag = proto.deviceTag;
+        data.deviceId = proto.device;
+        data.deviceKey = proto.deviceKey;
+        data.status = proto.status;
+        data.region = proto.region;
+        data.gateway = proto.gateway;
+        data.joinId = proto.roomId;
+        data.userId = proto.userId;
+        return data;
+    }
+
+
+    protected buildGateway(proto: GatewayPB.imio.Gateway) : IMIOHostNode {
+        let data = new IMIOHostNode();
+        if (proto.ip == 4) {
+            data.type = true;
+            data.host = `${proto.one}.${proto.two}.${proto.three}.${proto.four}`
+        } else {
+            data.type = false;
+            data.host = proto.host
+        }
+        data.max = proto.max
+        data.port = proto.port
+        data.region = proto.remark
+        data.current = proto.sort
+        return data;
+    }
     protected buildContact(proto: ContactPB.imio.Contacts): IMIOContact {
         let data = new IMIOContact();
         data.contactId = proto.id
@@ -146,11 +182,22 @@ export class IMIOBase {
         data.nickname = proto.nickname;
         data.username = proto.username;
         data.avatar = proto.avatar;
-        data.status = proto.status;
         data.isGroup = proto.talkMode == 2;
         data.joinTime = proto.joinTime;
         data.isMuted = proto.muted == 1;
         data.noise = proto.noise;
+        if (proto.status == IMIOContactStatus.offline) {
+            data.status = IMIOContactStatus.offline;
+        }
+        if (proto.status == IMIOContactStatus.online) {
+            data.status = IMIOContactStatus.online;
+        }
+        if (proto.status == IMIOContactStatus.online_busy) {
+            data.status = IMIOContactStatus.online_busy;
+        }
+        if (proto.status == IMIOContactStatus.online_leave) {
+            data.status = IMIOContactStatus.online_leave;
+        }
         return data;
     }
 

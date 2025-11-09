@@ -36,7 +36,7 @@ export class IMIOChatManager extends IMIOBaseManager {
         return IMIOChatManager.instance;
     }
 
-    public setIMIOClient(client: IMIOClient): IMIOChatManager {
+    public setClient(client: IMIOClient): IMIOChatManager {
         this.imioClient = client
         return this
     }
@@ -539,6 +539,9 @@ export class IMIOChatManager extends IMIOBaseManager {
         }
         if (!this.imioClient.socket) {
             return ("IMIO Client 尚未建立连接")
+        }
+        if (this.imioClient!!.getTokenAppId() == 0 || (this.imioClient!!.getTokenAppId() != this.imioClient!!.meta.appId)) {
+            return ("token中的AppId 与 IMIOClientOption不一致")
         }
         return ''
     }

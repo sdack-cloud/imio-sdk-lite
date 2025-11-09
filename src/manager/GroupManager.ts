@@ -31,7 +31,7 @@ export class IMIOGroupManager extends IMIOBaseManager{
         return IMIOGroupManager.instance;
     }
 
-    public setIMIOClient(client : IMIOClient) : IMIOGroupManager{
+    public setClient(client : IMIOClient) : IMIOGroupManager{
         this.imioClient = client
         return this
     }
@@ -254,7 +254,7 @@ export class IMIOGroupManager extends IMIOBaseManager{
             }
 
             let contacts = await IMIOContactManager.getInstance()
-                .setIMIOClient(this.imioClient!!).getContactList();
+                .setClient(this.imioClient!!).getContactList();
             if (contacts.length <= 0) {
                 reject(new Error("联系人获取失败"))
                 return
@@ -1366,6 +1366,9 @@ export class IMIOGroupManager extends IMIOBaseManager{
         }
         if (!this.imioClient.socket) {
             return ("IMIO Client 尚未建立连接")
+        }
+        if (this.imioClient!!.getTokenAppId() == 0 || (this.imioClient!!.getTokenAppId() != this.imioClient!!.meta.appId)) {
+            return ("token中的AppId 与 IMIOClientOption不一致")
         }
         return ''
     }

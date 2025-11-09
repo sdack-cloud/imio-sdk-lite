@@ -5,7 +5,7 @@ export class IMIOContact {
     nickname : string = '';
     username : string = '';
     avatar : string = '';
-    status : string = '';
+    status : IMIOContactStatus = IMIOContactStatus.done;
     isGroup: boolean = false;
     joinTime: string = '';
     isMuted: boolean = false;
@@ -16,4 +16,11 @@ export enum IMIOContactNotice {
     normal = 1, // 正常提醒
     not_notify = 2, // 不通知
     reject = 0 // 拒收信息
+}
+export enum IMIOContactStatus {
+    done = '',
+    offline = 'offline',
+    online = 'online',
+    online_busy = 'online-busy',
+    online_leave = 'online-leave',
 }

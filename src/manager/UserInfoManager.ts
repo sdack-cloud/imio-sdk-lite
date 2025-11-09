@@ -6,6 +6,7 @@ import {IMIOGroup, IMIOGroupType} from "../entity/Group";
 import {IMIOContactManager} from "./ContactManager";
 import {IMIOContact} from "../entity/Contact";
 import {IMIOMessage, IMIOMessageLabel} from "../entity/Message";
+import {IMIODeviceStatus} from "../entity/Status";
 
 //  ======
 import {onlyour as ContactPB} from "../protocol/Contacts";
@@ -14,7 +15,9 @@ import {onlyour as UserPB} from "../protocol/Users";
 import Users = UserPB.imio.Users;
 import {onlyour as MessagePB} from "../protocol/Message";
 import Message = MessagePB.imio.Message;
-
+import Contacts = ContactPB.imio.Contacts;
+import {onlyour as UserStatusPB} from "../protocol/UserStatus";
+import UserStatus = UserStatusPB.imio.UserStatus;
 
 export class IMIOUserInfoManager extends IMIOBaseManager{
 // ========= 单例模式 =========
@@ -33,11 +36,102 @@ export class IMIOUserInfoManager extends IMIOBaseManager{
         return IMIOUserInfoManager.instance;
     }
 
-    public setIMIOClient(client : IMIOClient) : IMIOUserInfoManager{
+    public setClient(client : IMIOClient) : IMIOUserInfoManager{
         this.imioClient = client
         return this
     }
     // ========= 单例模式 END =========
+
+    /**
+     * 获取用户设备状态
+     * @param userId
+     */
+    public getUserDeviceStatus(userId: string): Promise<Array<IMIODeviceStatus>> {
+        return new Promise<any>((resolve, reject) => {
+            if (this.checkSocket().length) {
+                reject(new Error(this.checkSocket()))
+                return;
+            }
+            const param = new UserStatus({
+                meta: this.imioClient!!.meta,
+                userId,
+            });
+            let res : Array<IMIODeviceStatus> = [];
+            this.imioClient!!.socket?.requestStream({
+                data: Buffer.from(param.serializeBinary().buffer),
+                metadata: this.buildRoute('device.status.byUserid')
+            }, 100,{
+                onComplete: () => {
+                    resolve(res)
+                }, onNext: (payload: Payload, isComplete: boolean) => {
+                    try {
+                        if (payload.data) {
+                            let proto = UserStatus.deserialize(payload.data);
+                            let data = this.buildDeviceStatus(proto);
+                            res.push(data)
+                        }
+                    }catch (e) {
+                        reject(new Error("IMIO Client Error"))
+                    }
+                }, onError: (error: Error) => {
+                    let message = error?.message + "";
+                    let errorMsg = this.onError(message);
+                    if (errorMsg.length > 0) {
+                        reject(new Error(errorMsg))
+                    }else {
+                        reject(new Error(message))
+                    }
+                }, onExtension(extendedType: number, content: Buffer | null | undefined, canBeIgnored: boolean): void {
+                }
+            })
+        });
+    }
+
+    /**
+     * 更新我的设备状态
+     * @param status
+     */
+    public updateDeviceStatus(status: IMIODeviceStatus): Promise<Array<IMIODeviceStatus>> {
+        return new Promise<any>((resolve, reject) => {
+            if (this.checkSocket().length) {
+                reject(new Error(this.checkSocket()))
+                return;
+            }
+            const param = new UserStatus({
+                meta: this.imioClient!!.meta,
+                status: status.toString()
+            });
+            let res : Array<IMIODeviceStatus> = [];
+            this.imioClient!!.socket?.requestStream({
+                data: Buffer.from(param.serializeBinary().buffer),
+                metadata: this.buildRoute('device.status.update')
+            }, 100,{
+                onComplete: () => {
+                    resolve(res)
+                }, onNext: (payload: Payload, isComplete: boolean) => {
+                    try {
+                        if (payload.data) {
+                            let proto = UserStatus.deserialize(payload.data);
+                            let data = this.buildDeviceStatus(proto);
+                            res.push(data)
+                        }
+                    }catch (e) {
+                        reject(new Error("IMIO Client Error"))
+                    }
+                }, onError: (error: Error) => {
+                    let message = error?.message + "";
+                    let errorMsg = this.onError(message);
+                    if (errorMsg.length > 0) {
+                        reject(new Error(errorMsg))
+                    }else {
+                        reject(new Error(message))
+                    }
+                }, onExtension(extendedType: number, content: Buffer | null | undefined, canBeIgnored: boolean): void {
+                }
+            })
+        });
+    }
+
 
     /**
      * 获取我的通知信息
@@ -172,6 +266,9 @@ export class IMIOUserInfoManager extends IMIOBaseManager{
         }
         if (!this.imioClient.socket) {
             return ("IMIO Client 尚未建立连接")
+        }
+        if (this.imioClient!!.getTokenAppId() == 0 || (this.imioClient!!.getTokenAppId() != this.imioClient!!.meta.appId)) {
+            return ("token中的AppId 与 IMIOClientOption不一致")
         }
         return ''
     }
