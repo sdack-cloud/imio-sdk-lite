@@ -5,11 +5,13 @@ export class IMIOContact {
     nickname : string = '';
     username : string = '';
     avatar : string = '';
+    subgroup : string = '';
     status : IMIOContactStatus = IMIOContactStatus.done;
     isGroup: boolean = false;
     joinTime: string = '';
     isMuted: boolean = false;
     noise: number = 1;
+    sort: number = 0;
 }
 
 export enum IMIOContactNotice {

@@ -397,7 +397,6 @@ export class IMIOClient extends IMIOBase {
                     }
                 },
                 requestResponse: (payload: Payload, responderStream: OnTerminalSubscriber & OnNextSubscriber & OnExtensionSubscriber): Cancellable & OnExtensionSubscriber => {
-                    console.warn("IMIO requestResponse...");
 
                     const meta = payload.metadata;
                     const payloadData = payload.data;

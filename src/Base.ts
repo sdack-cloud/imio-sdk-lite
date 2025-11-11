@@ -181,11 +181,13 @@ export class IMIOBase {
         data.userId = proto.userId;
         data.nickname = proto.nickname;
         data.username = proto.username;
+        data.subgroup = proto.subgroup;
         data.avatar = proto.avatar;
         data.isGroup = proto.talkMode == 2;
         data.joinTime = proto.joinTime;
         data.isMuted = proto.muted == 1;
         data.noise = proto.noise;
+        data.sort = proto.sort;
         if (proto.status == IMIOContactStatus.offline) {
             data.status = IMIOContactStatus.offline;
         }

@@ -404,7 +404,7 @@ export class IMIOContactManager extends IMIOBaseManager {
      * @param joinId
      * @param rule
      */
-    public setNoticeRule(joinId: number, rule: IMIOContactNotice): Promise<any> {
+    public setNoticeLevel(joinId: number, rule: IMIOContactNotice): Promise<any> {
         return new Promise<any>(async (resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))

@@ -61,6 +61,7 @@ export class IMIOMessageSender {
         sender.size = size;
         return sender;
     }
+
     public static buildAudio(joinId: number,host: string,url: string,length:number,secret: string = ''): IMIOMessageSender {
         let sender = new IMIOMessageSender(IMIOMessageType.AUDIO);
         sender.joinId = joinId;

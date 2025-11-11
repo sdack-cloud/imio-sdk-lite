@@ -18,6 +18,7 @@ import Rooms = RoomPB.imio.Rooms;
 import Message = MessagePB.imio.Message;
 import MessageSign = MessageSignPB.imio.MessageSign;
 import MessageRemind = MessageRemindPB.imio.MessageRemind;
+import {IMIOGroup} from "../entity/Group";
 
 export class IMIOChatManager extends IMIOBaseManager {
     // ========= 单例模式 =========
@@ -386,6 +387,61 @@ export class IMIOChatManager extends IMIOBaseManager {
             })
         });
     }
+
+
+    /**
+     * 创建一对一的临时性对话
+     * @param userId 用户
+     * @param joinId 加入的群组
+     */
+    public createDialogue(userId: string,joinId: number): Promise<IMIOGroup> {
+        return new Promise<any>(async (resolve, reject) => {
+            if (this.checkSocket().length) {
+                reject(new Error(this.checkSocket()))
+                return;
+            }
+
+            const param = new Contacts({
+                meta: this.imioClient!!.meta,
+                userId: userId,
+                joinRoomId:joinId
+            });
+            let res : IMIOGroup | null = null;
+            this.imioClient!!.socket?.requestResponse({
+                data: Buffer.from(param.serializeBinary().buffer),
+                metadata: this.buildRoute('dialogue.create')
+            }, {
+                onComplete: () => {
+                    resolve(res)
+                }, onNext: (payload: Payload, isComplete: boolean) => {
+                    try {
+                        if (payload.data) {
+                            let proto = Rooms.deserialize(payload.data);
+                            let data = this.buildGroup(proto);
+                            res = data;
+                            if (isComplete) {
+                                resolve(res)
+                            }
+                        }
+                    }catch (e) {
+
+                        reject(new Error("IMIO Client Error"))
+                    }
+                },
+                onError: (error: Error) => {
+                    let message = error?.message + "";
+                    let errorMsg = this.onError(message);
+                    if (errorMsg.length > 0) {
+                        reject(new Error(errorMsg))
+                    }else {
+                        reject(new Error(message))
+                    }
+                }, onExtension(extendedType: number, content: Buffer | null | undefined, canBeIgnored: boolean): void {
+                }
+            })
+        });
+    }
+
 
     private senderBuildMessage(sender: IMIOMessageSender): IMIOMessage {
         let imioMessage = new IMIOMessage();
