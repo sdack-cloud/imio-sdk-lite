@@ -16,12 +16,12 @@ import {IMIODeviceStatus} from "./entity/Status";
 import {IMIOGroup, IMIOGroupType} from "./entity/Group";
 import axios, {Axios, AxiosInstance} from "axios";
 // =======
-import {onlyour as MetaPB} from "./protocol/Meta";
-import {onlyour as ContactPB} from "./protocol/Contacts";
-import {onlyour as RoomPB} from "./protocol/Rooms";
-import {onlyour as MessagePB} from "./protocol/Message";
-import {onlyour as GatewayPB} from "./protocol/Gateway";
-import {onlyour as UserStatusPB} from "./protocol/UserStatus";
+import {only as MetaPB} from "./protocol/Meta";
+import {only as ContactPB} from "./protocol/Contacts";
+import {only as RoomPB} from "./protocol/Rooms";
+import {only as MessagePB} from "./protocol/Message";
+import {only as GatewayPB} from "./protocol/Gateway";
+import {only as UserStatusPB} from "./protocol/UserStatus";
 
 
 export class IMIOBase {
@@ -42,7 +42,7 @@ export class IMIOBase {
     public getTokenAppId(): number {
         return this.tokenAppId;
     }
-    public readonly meta: MetaPB.imio.Meta =  new MetaPB.imio.Meta({
+    public readonly meta: MetaPB.Meta =  new MetaPB.Meta({
         v: IMIOBase._version,
         deviceTag: 'h5',
         page: 0, pageSize: 30
@@ -145,7 +145,7 @@ export class IMIOBase {
         return compositeMetaData;
     }
 
-    protected buildDeviceStatus(proto: UserStatusPB.imio.UserStatus) : IMIODeviceStatus {
+    protected buildDeviceStatus(proto: UserStatusPB.UserStatus) : IMIODeviceStatus {
         let data = new IMIODeviceStatus();
         data.deviceTag = proto.deviceTag;
         data.deviceId = proto.device;
@@ -159,7 +159,7 @@ export class IMIOBase {
     }
 
 
-    protected buildGateway(proto: GatewayPB.imio.Gateway) : IMIOHostNode {
+    protected buildGateway(proto: GatewayPB.Gateway) : IMIOHostNode {
         let data = new IMIOHostNode();
         if (proto.ip == 4) {
             data.type = true;
@@ -174,7 +174,7 @@ export class IMIOBase {
         data.current = proto.sort
         return data;
     }
-    protected buildContact(proto: ContactPB.imio.Contacts): IMIOContact {
+    protected buildContact(proto: ContactPB.Contacts): IMIOContact {
         let data = new IMIOContact();
         data.contactId = proto.id
         data.joinId = proto.joinRoomId;
@@ -203,7 +203,7 @@ export class IMIOBase {
         return data;
     }
 
-    protected buildMember(proto: ContactPB.imio.Contacts): IMIOMember {
+    protected buildMember(proto: ContactPB.Contacts): IMIOMember {
         let data = new IMIOMember();
         data.memberId = proto.id
         data.joinId = proto.joinRoomId;
@@ -219,7 +219,7 @@ export class IMIOBase {
         return data;
     }
 
-    protected buildGroup(proto: RoomPB.imio.Rooms): IMIOGroup {
+    protected buildGroup(proto: RoomPB.Rooms): IMIOGroup {
         let data = new IMIOGroup();
         data.groupId = proto.id;
         data.joinId = proto.id;
@@ -252,7 +252,7 @@ export class IMIOBase {
         return data;
     }
 
-    protected buildMessage(proto: MessagePB.imio.Message) : IMIOMessage {
+    protected buildMessage(proto: MessagePB.Message) : IMIOMessage {
         let imioMessage = new IMIOMessage();
         imioMessage.messageId = proto.messageId;
         imioMessage.joinId = proto.roomId;

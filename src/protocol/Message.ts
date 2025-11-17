@@ -6,7 +6,7 @@
 import * as dependency_1 from "./Meta";
 import * as dependency_2 from "./MessageRemind";
 import * as pb_1 from "google-protobuf";
-export namespace onlyour.imio {
+export namespace only {
     export class Message extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
@@ -19,7 +19,7 @@ export namespace onlyour.imio {
             ids?: string[];
             appIds?: string[];
             fromName?: string;
-            meta?: dependency_1.onlyour.imio.Meta;
+            meta?: dependency_1.only.Meta;
             roomId?: number;
             fromId?: string;
             destId?: string;
@@ -42,13 +42,13 @@ export namespace onlyour.imio {
             host?: string;
             params?: string;
             citeData?: Message;
-            cc?: dependency_2.onlyour.imio.MessageRemind[];
+            cc?: dependency_2.only.MessageRemind[];
             destName?: string;
             talkMode?: number;
             tag?: string;
             deviceKey?: string;
             label?: string;
-            remind?: dependency_2.onlyour.imio.MessageRemind[];
+            remind?: dependency_2.only.MessageRemind[];
             fromAccount?: string;
             destAccount?: string;
             revoke?: string;
@@ -239,9 +239,9 @@ export namespace onlyour.imio {
             pb_1.Message.setField(this, 9, value);
         }
         get meta() {
-            return pb_1.Message.getWrapperField(this, dependency_1.onlyour.imio.Meta, 10) as dependency_1.onlyour.imio.Meta;
+            return pb_1.Message.getWrapperField(this, dependency_1.only.Meta, 10) as dependency_1.only.Meta;
         }
-        set meta(value: dependency_1.onlyour.imio.Meta) {
+        set meta(value: dependency_1.only.Meta) {
             pb_1.Message.setWrapperField(this, 10, value);
         }
         get has_meta() {
@@ -383,9 +383,9 @@ export namespace onlyour.imio {
             return pb_1.Message.getField(this, 32) != null;
         }
         get cc() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.onlyour.imio.MessageRemind, 33) as dependency_2.onlyour.imio.MessageRemind[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.only.MessageRemind, 33) as dependency_2.only.MessageRemind[];
         }
-        set cc(value: dependency_2.onlyour.imio.MessageRemind[]) {
+        set cc(value: dependency_2.only.MessageRemind[]) {
             pb_1.Message.setRepeatedWrapperField(this, 33, value);
         }
         get destName() {
@@ -419,9 +419,9 @@ export namespace onlyour.imio {
             pb_1.Message.setField(this, 38, value);
         }
         get remind() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.onlyour.imio.MessageRemind, 39) as dependency_2.onlyour.imio.MessageRemind[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.only.MessageRemind, 39) as dependency_2.only.MessageRemind[];
         }
-        set remind(value: dependency_2.onlyour.imio.MessageRemind[]) {
+        set remind(value: dependency_2.only.MessageRemind[]) {
             pb_1.Message.setRepeatedWrapperField(this, 39, value);
         }
         get fromAccount() {
@@ -452,7 +452,7 @@ export namespace onlyour.imio {
             ids?: string[];
             appIds?: string[];
             fromName?: string;
-            meta?: ReturnType<typeof dependency_1.onlyour.imio.Meta.prototype.toObject>;
+            meta?: ReturnType<typeof dependency_1.only.Meta.prototype.toObject>;
             roomId?: number;
             fromId?: string;
             destId?: string;
@@ -475,13 +475,13 @@ export namespace onlyour.imio {
             host?: string;
             params?: string;
             citeData?: ReturnType<typeof Message.prototype.toObject>;
-            cc?: ReturnType<typeof dependency_2.onlyour.imio.MessageRemind.prototype.toObject>[];
+            cc?: ReturnType<typeof dependency_2.only.MessageRemind.prototype.toObject>[];
             destName?: string;
             talkMode?: number;
             tag?: string;
             deviceKey?: string;
             label?: string;
-            remind?: ReturnType<typeof dependency_2.onlyour.imio.MessageRemind.prototype.toObject>[];
+            remind?: ReturnType<typeof dependency_2.only.MessageRemind.prototype.toObject>[];
             fromAccount?: string;
             destAccount?: string;
             revoke?: string;
@@ -515,7 +515,7 @@ export namespace onlyour.imio {
                 message.fromName = data.fromName;
             }
             if (data.meta != null) {
-                message.meta = dependency_1.onlyour.imio.Meta.fromObject(data.meta);
+                message.meta = dependency_1.only.Meta.fromObject(data.meta);
             }
             if (data.roomId != null) {
                 message.roomId = data.roomId;
@@ -584,7 +584,7 @@ export namespace onlyour.imio {
                 message.citeData = Message.fromObject(data.citeData);
             }
             if (data.cc != null) {
-                message.cc = data.cc.map(item => dependency_2.onlyour.imio.MessageRemind.fromObject(item));
+                message.cc = data.cc.map(item => dependency_2.only.MessageRemind.fromObject(item));
             }
             if (data.destName != null) {
                 message.destName = data.destName;
@@ -602,7 +602,7 @@ export namespace onlyour.imio {
                 message.label = data.label;
             }
             if (data.remind != null) {
-                message.remind = data.remind.map(item => dependency_2.onlyour.imio.MessageRemind.fromObject(item));
+                message.remind = data.remind.map(item => dependency_2.only.MessageRemind.fromObject(item));
             }
             if (data.fromAccount != null) {
                 message.fromAccount = data.fromAccount;
@@ -626,7 +626,7 @@ export namespace onlyour.imio {
                 ids?: string[];
                 appIds?: string[];
                 fromName?: string;
-                meta?: ReturnType<typeof dependency_1.onlyour.imio.Meta.prototype.toObject>;
+                meta?: ReturnType<typeof dependency_1.only.Meta.prototype.toObject>;
                 roomId?: number;
                 fromId?: string;
                 destId?: string;
@@ -649,13 +649,13 @@ export namespace onlyour.imio {
                 host?: string;
                 params?: string;
                 citeData?: ReturnType<typeof Message.prototype.toObject>;
-                cc?: ReturnType<typeof dependency_2.onlyour.imio.MessageRemind.prototype.toObject>[];
+                cc?: ReturnType<typeof dependency_2.only.MessageRemind.prototype.toObject>[];
                 destName?: string;
                 talkMode?: number;
                 tag?: string;
                 deviceKey?: string;
                 label?: string;
-                remind?: ReturnType<typeof dependency_2.onlyour.imio.MessageRemind.prototype.toObject>[];
+                remind?: ReturnType<typeof dependency_2.only.MessageRemind.prototype.toObject>[];
                 fromAccount?: string;
                 destAccount?: string;
                 revoke?: string;
@@ -757,7 +757,7 @@ export namespace onlyour.imio {
                 data.citeData = this.citeData.toObject();
             }
             if (this.cc != null) {
-                data.cc = this.cc.map((item: dependency_2.onlyour.imio.MessageRemind) => item.toObject());
+                data.cc = this.cc.map((item: dependency_2.only.MessageRemind) => item.toObject());
             }
             if (this.destName != null) {
                 data.destName = this.destName;
@@ -775,7 +775,7 @@ export namespace onlyour.imio {
                 data.label = this.label;
             }
             if (this.remind != null) {
-                data.remind = this.remind.map((item: dependency_2.onlyour.imio.MessageRemind) => item.toObject());
+                data.remind = this.remind.map((item: dependency_2.only.MessageRemind) => item.toObject());
             }
             if (this.fromAccount != null) {
                 data.fromAccount = this.fromAccount;
@@ -857,7 +857,7 @@ export namespace onlyour.imio {
             if (this.has_citeData)
                 writer.writeMessage(32, this.citeData, () => this.citeData.serialize(writer));
             if (this.cc.length)
-                writer.writeRepeatedMessage(33, this.cc, (item: dependency_2.onlyour.imio.MessageRemind) => item.serialize(writer));
+                writer.writeRepeatedMessage(33, this.cc, (item: dependency_2.only.MessageRemind) => item.serialize(writer));
             if (this.destName.length)
                 writer.writeString(34, this.destName);
             if (this.talkMode != 0)
@@ -869,7 +869,7 @@ export namespace onlyour.imio {
             if (this.label.length)
                 writer.writeString(38, this.label);
             if (this.remind.length)
-                writer.writeRepeatedMessage(39, this.remind, (item: dependency_2.onlyour.imio.MessageRemind) => item.serialize(writer));
+                writer.writeRepeatedMessage(39, this.remind, (item: dependency_2.only.MessageRemind) => item.serialize(writer));
             if (this.fromAccount.length)
                 writer.writeString(40, this.fromAccount);
             if (this.destAccount.length)
@@ -913,7 +913,7 @@ export namespace onlyour.imio {
                         message.fromName = reader.readString();
                         break;
                     case 10:
-                        reader.readMessage(message.meta, () => message.meta = dependency_1.onlyour.imio.Meta.deserialize(reader));
+                        reader.readMessage(message.meta, () => message.meta = dependency_1.only.Meta.deserialize(reader));
                         break;
                     case 11:
                         message.roomId = reader.readInt64();
@@ -982,7 +982,7 @@ export namespace onlyour.imio {
                         reader.readMessage(message.citeData, () => message.citeData = Message.deserialize(reader));
                         break;
                     case 33:
-                        reader.readMessage(message.cc, () => pb_1.Message.addToRepeatedWrapperField(message, 33, dependency_2.onlyour.imio.MessageRemind.deserialize(reader), dependency_2.onlyour.imio.MessageRemind));
+                        reader.readMessage(message.cc, () => pb_1.Message.addToRepeatedWrapperField(message, 33, dependency_2.only.MessageRemind.deserialize(reader), dependency_2.only.MessageRemind));
                         break;
                     case 34:
                         message.destName = reader.readString();
@@ -1000,7 +1000,7 @@ export namespace onlyour.imio {
                         message.label = reader.readString();
                         break;
                     case 39:
-                        reader.readMessage(message.remind, () => pb_1.Message.addToRepeatedWrapperField(message, 39, dependency_2.onlyour.imio.MessageRemind.deserialize(reader), dependency_2.onlyour.imio.MessageRemind));
+                        reader.readMessage(message.remind, () => pb_1.Message.addToRepeatedWrapperField(message, 39, dependency_2.only.MessageRemind.deserialize(reader), dependency_2.only.MessageRemind));
                         break;
                     case 40:
                         message.fromAccount = reader.readString();

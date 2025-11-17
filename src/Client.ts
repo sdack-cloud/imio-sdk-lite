@@ -20,18 +20,18 @@ import {IMIOContactManager} from "./manager/ContactManager";
 import fp from '@fingerprintjs/fingerprintjs';
 
 // =======
-import {onlyour as MetaPB} from "./protocol/Meta";
-import {onlyour as ConnectPB} from "./protocol/Connect";
-import {onlyour as ContactPB} from "./protocol/Contacts";
-import {onlyour as ContactStatusPB} from "./protocol/ContactStatus";
-import {onlyour as MessagePB} from "./protocol/Message";
-import {onlyour as GatewayPB} from "./protocol/Gateway";
-import Meta = MetaPB.imio.Meta;
-import Connect = ConnectPB.imio.Connect;
-import ContactStatus = ContactStatusPB.imio.ContactStatus;
-import Contacts = ContactPB.imio.Contacts;
-import Message = MessagePB.imio.Message;
-import Gateway = GatewayPB.imio.Gateway;
+import {only as MetaPB} from "./protocol/Meta";
+import {only as ConnectPB} from "./protocol/Connect";
+import {only as ContactPB} from "./protocol/Contacts";
+import {only as ContactStatusPB} from "./protocol/ContactStatus";
+import {only as MessagePB} from "./protocol/Message";
+import {only as GatewayPB} from "./protocol/Gateway";
+import Meta = MetaPB.Meta;
+import Connect = ConnectPB.Connect;
+import ContactStatus = ContactStatusPB.ContactStatus;
+import Contacts = ContactPB.Contacts;
+import Message = MessagePB.Message;
+import Gateway = GatewayPB.Gateway;
 import {IMIOHostNode} from "./entity/HostNode";
 import {IMIOContactStatus} from "./entity/Contact";
 import {IMIODeviceStatus} from "./entity/Status";
@@ -59,9 +59,9 @@ export class IMIOClient extends IMIOBase {
                 const buffer: Buffer = Buffer.from("Buffer 支持度测试文本");
                 const str: string = buffer.toString();
                 // console.log("Buffer:", buffer)
-                console.log("Buffer Text:", str)
+                // console.log("Buffer Text:", str)
             } catch (e) {
-                console.error("浏览器环境不支持 Buffer")
+                // console.error("浏览器环境不支持 Buffer")
             }
         }
         return IMIOClient.instance;
@@ -85,7 +85,9 @@ export class IMIOClient extends IMIOBase {
         }
 
         this.option = option;
-
+        if (option.protocol) {
+            this.protocol = "wss"
+        }
         this.userAgent = window.navigator.userAgent;
         let n1 = window.navigator.userAgent.indexOf('(');
         let n2 = window.navigator.userAgent.indexOf(')');
@@ -120,6 +122,8 @@ export class IMIOClient extends IMIOBase {
 
     private userAgent = "";
 
+    private protocol = "ws";
+
     private hostAddress = ""; // 当前决策的链接地址
 
     private readonly hostNodeList: Array<IMIOHostNode> = [];
@@ -148,11 +152,15 @@ export class IMIOClient extends IMIOBase {
             let payload = this.getJwtPayload(token);
             this.tokenAppId = Number(payload.aud)
             if ((this.tokenAppId+"" != this.option?.appId)) {
-                console.warn("IMIO：token中的AppId 与 IMIOClientOption不一致")
+                if (this.option?.debug) {
+                    console.warn("IMIO：token中的AppId 与 IMIOClientOption不一致")
+                }
             }
         }catch (e) {
             this.tokenAppId = 0;
-            console.warn("IMIO: token中的AppId 解析错误")
+            if (this.option?.debug) {
+                console.warn("IMIO: token中的AppId 解析错误")
+            }
         }
         return this;
     }
@@ -372,7 +380,7 @@ export class IMIOClient extends IMIOBase {
             },
             transport: new WebsocketClientTransport({
                 debug: true,
-                url: `ws://${this.hostAddress}`,
+                url: `${this.protocol}://${this.hostAddress}`,
             }),
             responder: {
                 fireAndForget: (payload: Payload, responderStream: OnTerminalSubscriber): Cancellable => {

@@ -6,7 +6,7 @@
 import * as dependency_1 from "./Meta";
 import * as dependency_2 from "./Message";
 import * as pb_1 from "google-protobuf";
-export namespace onlyour.imio {
+export namespace only {
     export class MessageSign extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
@@ -19,7 +19,7 @@ export namespace onlyour.imio {
             ids?: string[];
             appIds?: string[];
             remark?: string;
-            meta?: dependency_1.onlyour.imio.Meta;
+            meta?: dependency_1.only.Meta;
             roomId?: number;
             fromId?: string;
             fromName?: string;
@@ -28,7 +28,7 @@ export namespace onlyour.imio {
             device?: string;
             level?: number;
             deviceKey?: string;
-            message?: dependency_2.onlyour.imio.Message;
+            message?: dependency_2.only.Message;
             sent?: string;
             succeed?: string;
             read?: string;
@@ -203,9 +203,9 @@ export namespace onlyour.imio {
             pb_1.Message.setField(this, 9, value);
         }
         get meta() {
-            return pb_1.Message.getWrapperField(this, dependency_1.onlyour.imio.Meta, 10) as dependency_1.onlyour.imio.Meta;
+            return pb_1.Message.getWrapperField(this, dependency_1.only.Meta, 10) as dependency_1.only.Meta;
         }
-        set meta(value: dependency_1.onlyour.imio.Meta) {
+        set meta(value: dependency_1.only.Meta) {
             pb_1.Message.setWrapperField(this, 10, value);
         }
         get has_meta() {
@@ -260,9 +260,9 @@ export namespace onlyour.imio {
             pb_1.Message.setField(this, 18, value);
         }
         get message() {
-            return pb_1.Message.getWrapperField(this, dependency_2.onlyour.imio.Message, 19) as dependency_2.onlyour.imio.Message;
+            return pb_1.Message.getWrapperField(this, dependency_2.only.Message, 19) as dependency_2.only.Message;
         }
-        set message(value: dependency_2.onlyour.imio.Message) {
+        set message(value: dependency_2.only.Message) {
             pb_1.Message.setWrapperField(this, 19, value);
         }
         get has_message() {
@@ -362,7 +362,7 @@ export namespace onlyour.imio {
             ids?: string[];
             appIds?: string[];
             remark?: string;
-            meta?: ReturnType<typeof dependency_1.onlyour.imio.Meta.prototype.toObject>;
+            meta?: ReturnType<typeof dependency_1.only.Meta.prototype.toObject>;
             roomId?: number;
             fromId?: string;
             fromName?: string;
@@ -371,7 +371,7 @@ export namespace onlyour.imio {
             device?: string;
             level?: number;
             deviceKey?: string;
-            message?: ReturnType<typeof dependency_2.onlyour.imio.Message.prototype.toObject>;
+            message?: ReturnType<typeof dependency_2.only.Message.prototype.toObject>;
             sent?: string;
             succeed?: string;
             read?: string;
@@ -416,7 +416,7 @@ export namespace onlyour.imio {
                 message.remark = data.remark;
             }
             if (data.meta != null) {
-                message.meta = dependency_1.onlyour.imio.Meta.fromObject(data.meta);
+                message.meta = dependency_1.only.Meta.fromObject(data.meta);
             }
             if (data.roomId != null) {
                 message.roomId = data.roomId;
@@ -443,7 +443,7 @@ export namespace onlyour.imio {
                 message.deviceKey = data.deviceKey;
             }
             if (data.message != null) {
-                message.message = dependency_2.onlyour.imio.Message.fromObject(data.message);
+                message.message = dependency_2.only.Message.fromObject(data.message);
             }
             if (data.sent != null) {
                 message.sent = data.sent;
@@ -500,7 +500,7 @@ export namespace onlyour.imio {
                 ids?: string[];
                 appIds?: string[];
                 remark?: string;
-                meta?: ReturnType<typeof dependency_1.onlyour.imio.Meta.prototype.toObject>;
+                meta?: ReturnType<typeof dependency_1.only.Meta.prototype.toObject>;
                 roomId?: number;
                 fromId?: string;
                 fromName?: string;
@@ -509,7 +509,7 @@ export namespace onlyour.imio {
                 device?: string;
                 level?: number;
                 deviceKey?: string;
-                message?: ReturnType<typeof dependency_2.onlyour.imio.Message.prototype.toObject>;
+                message?: ReturnType<typeof dependency_2.only.Message.prototype.toObject>;
                 sent?: string;
                 succeed?: string;
                 read?: string;
@@ -733,7 +733,7 @@ export namespace onlyour.imio {
                         message.remark = reader.readString();
                         break;
                     case 10:
-                        reader.readMessage(message.meta, () => message.meta = dependency_1.onlyour.imio.Meta.deserialize(reader));
+                        reader.readMessage(message.meta, () => message.meta = dependency_1.only.Meta.deserialize(reader));
                         break;
                     case 11:
                         message.roomId = reader.readInt64();
@@ -760,7 +760,7 @@ export namespace onlyour.imio {
                         message.deviceKey = reader.readString();
                         break;
                     case 19:
-                        reader.readMessage(message.message, () => message.message = dependency_2.onlyour.imio.Message.deserialize(reader));
+                        reader.readMessage(message.message, () => message.message = dependency_2.only.Message.deserialize(reader));
                         break;
                     case 20:
                         message.sent = reader.readString();

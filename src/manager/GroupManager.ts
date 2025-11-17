@@ -7,10 +7,10 @@ import {IMIOContactManager} from "./ContactManager";
 import {IMIOContact} from "../entity/Contact";
 
 //  ======
-import {onlyour as ContactPB} from "../protocol/Contacts";
-import {onlyour as RoomPB} from "../protocol/Rooms";
-import Contacts = ContactPB.imio.Contacts;
-import Rooms = RoomPB.imio.Rooms;
+import {only as ContactPB} from "../protocol/Contacts";
+import {only as RoomPB} from "../protocol/Rooms";
+import Contacts = ContactPB.Contacts;
+import Rooms = RoomPB.Rooms;
 
 
 export class IMIOGroupManager extends IMIOBaseManager{

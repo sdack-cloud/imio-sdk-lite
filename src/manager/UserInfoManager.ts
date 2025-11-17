@@ -9,15 +9,15 @@ import {IMIOMessage, IMIOMessageLabel} from "../entity/Message";
 import {IMIODeviceStatus} from "../entity/Status";
 
 //  ======
-import {onlyour as ContactPB} from "../protocol/Contacts";
-import {onlyour as RoomPB} from "../protocol/Rooms";
-import {onlyour as UserPB} from "../protocol/Users";
-import Users = UserPB.imio.Users;
-import {onlyour as MessagePB} from "../protocol/Message";
-import Message = MessagePB.imio.Message;
-import Contacts = ContactPB.imio.Contacts;
-import {onlyour as UserStatusPB} from "../protocol/UserStatus";
-import UserStatus = UserStatusPB.imio.UserStatus;
+import {only as ContactPB} from "../protocol/Contacts";
+import {only as RoomPB} from "../protocol/Rooms";
+import {only as UserPB} from "../protocol/Users";
+import Users = UserPB.Users;
+import {only as MessagePB} from "../protocol/Message";
+import Message = MessagePB.Message;
+import Contacts = ContactPB.Contacts;
+import {only as UserStatusPB} from "../protocol/UserStatus";
+import UserStatus = UserStatusPB.UserStatus;
 
 export class IMIOUserInfoManager extends IMIOBaseManager{
 // ========= 单例模式 =========

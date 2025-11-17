@@ -5,7 +5,7 @@
  * git: https://github.com/thesayyn/protoc-gen-ts */
 import * as dependency_1 from "./Meta";
 import * as pb_1 from "google-protobuf";
-export namespace onlyour.imio {
+export namespace only {
     export class UserStatus extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
@@ -18,7 +18,7 @@ export namespace onlyour.imio {
             ids?: string[];
             appIds?: string[];
             remark?: string;
-            meta?: dependency_1.onlyour.imio.Meta;
+            meta?: dependency_1.only.Meta;
             userId?: string;
             device?: string;
             roomId?: number;
@@ -146,9 +146,9 @@ export namespace onlyour.imio {
             pb_1.Message.setField(this, 9, value);
         }
         get meta() {
-            return pb_1.Message.getWrapperField(this, dependency_1.onlyour.imio.Meta, 10) as dependency_1.onlyour.imio.Meta;
+            return pb_1.Message.getWrapperField(this, dependency_1.only.Meta, 10) as dependency_1.only.Meta;
         }
-        set meta(value: dependency_1.onlyour.imio.Meta) {
+        set meta(value: dependency_1.only.Meta) {
             pb_1.Message.setWrapperField(this, 10, value);
         }
         get has_meta() {
@@ -218,7 +218,7 @@ export namespace onlyour.imio {
             ids?: string[];
             appIds?: string[];
             remark?: string;
-            meta?: ReturnType<typeof dependency_1.onlyour.imio.Meta.prototype.toObject>;
+            meta?: ReturnType<typeof dependency_1.only.Meta.prototype.toObject>;
             userId?: string;
             device?: string;
             roomId?: number;
@@ -258,7 +258,7 @@ export namespace onlyour.imio {
                 message.remark = data.remark;
             }
             if (data.meta != null) {
-                message.meta = dependency_1.onlyour.imio.Meta.fromObject(data.meta);
+                message.meta = dependency_1.only.Meta.fromObject(data.meta);
             }
             if (data.userId != null) {
                 message.userId = data.userId;
@@ -300,7 +300,7 @@ export namespace onlyour.imio {
                 ids?: string[];
                 appIds?: string[];
                 remark?: string;
-                meta?: ReturnType<typeof dependency_1.onlyour.imio.Meta.prototype.toObject>;
+                meta?: ReturnType<typeof dependency_1.only.Meta.prototype.toObject>;
                 userId?: string;
                 device?: string;
                 roomId?: number;
@@ -449,7 +449,7 @@ export namespace onlyour.imio {
                         message.remark = reader.readString();
                         break;
                     case 10:
-                        reader.readMessage(message.meta, () => message.meta = dependency_1.onlyour.imio.Meta.deserialize(reader));
+                        reader.readMessage(message.meta, () => message.meta = dependency_1.only.Meta.deserialize(reader));
                         break;
                     case 11:
                         message.userId = reader.readString();

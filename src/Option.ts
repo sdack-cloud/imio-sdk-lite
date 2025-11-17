@@ -7,6 +7,7 @@ export class IMIOClientOption {
     private _host: string = '';
     private _hosts: Array<string> = [];
     private _debug: boolean = false;
+    private _protocol: boolean = false;
 
     private constructor() {
     }
@@ -40,6 +41,11 @@ export class IMIOClientOption {
         return this
     }
 
+    public whitProtocol(col: boolean) : IMIOClientOption {
+        this._protocol = col
+        return this
+    }
+
     public build() {
         return this
     }
@@ -68,6 +74,9 @@ export class IMIOClientOption {
 
     get debug(): boolean {
         return this._debug;
+    }
+    get protocol(): boolean {
+        return this._protocol;
     }
 
 }

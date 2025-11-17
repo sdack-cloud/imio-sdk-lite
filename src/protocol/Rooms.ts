@@ -6,7 +6,7 @@
 import * as dependency_1 from "./Meta";
 import * as dependency_2 from "./Contacts";
 import * as pb_1 from "google-protobuf";
-export namespace onlyour.imio {
+export namespace only {
     export class Rooms extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
@@ -19,7 +19,7 @@ export namespace onlyour.imio {
             ids?: string[];
             appIds?: string[];
             remark?: string;
-            meta?: dependency_1.onlyour.imio.Meta;
+            meta?: dependency_1.only.Meta;
             userId?: string;
             roomname?: string;
             level?: string;
@@ -38,7 +38,7 @@ export namespace onlyour.imio {
             downed?: number;
             revoke?: number;
             tags?: string[];
-            users?: dependency_2.onlyour.imio.Contacts[];
+            users?: dependency_2.only.Contacts[];
             avatar?: string;
             groupToOne?: number;
             roomCount?: number;
@@ -231,9 +231,9 @@ export namespace onlyour.imio {
             pb_1.Message.setField(this, 9, value);
         }
         get meta() {
-            return pb_1.Message.getWrapperField(this, dependency_1.onlyour.imio.Meta, 10) as dependency_1.onlyour.imio.Meta;
+            return pb_1.Message.getWrapperField(this, dependency_1.only.Meta, 10) as dependency_1.only.Meta;
         }
-        set meta(value: dependency_1.onlyour.imio.Meta) {
+        set meta(value: dependency_1.only.Meta) {
             pb_1.Message.setWrapperField(this, 10, value);
         }
         get has_meta() {
@@ -348,9 +348,9 @@ export namespace onlyour.imio {
             pb_1.Message.setField(this, 28, value);
         }
         get users() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.onlyour.imio.Contacts, 29) as dependency_2.onlyour.imio.Contacts[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.only.Contacts, 29) as dependency_2.only.Contacts[];
         }
-        set users(value: dependency_2.onlyour.imio.Contacts[]) {
+        set users(value: dependency_2.only.Contacts[]) {
             pb_1.Message.setRepeatedWrapperField(this, 29, value);
         }
         get avatar() {
@@ -429,7 +429,7 @@ export namespace onlyour.imio {
             ids?: string[];
             appIds?: string[];
             remark?: string;
-            meta?: ReturnType<typeof dependency_1.onlyour.imio.Meta.prototype.toObject>;
+            meta?: ReturnType<typeof dependency_1.only.Meta.prototype.toObject>;
             userId?: string;
             roomname?: string;
             level?: string;
@@ -448,7 +448,7 @@ export namespace onlyour.imio {
             downed?: number;
             revoke?: number;
             tags?: string[];
-            users?: ReturnType<typeof dependency_2.onlyour.imio.Contacts.prototype.toObject>[];
+            users?: ReturnType<typeof dependency_2.only.Contacts.prototype.toObject>[];
             avatar?: string;
             groupToOne?: number;
             roomCount?: number;
@@ -490,7 +490,7 @@ export namespace onlyour.imio {
                 message.remark = data.remark;
             }
             if (data.meta != null) {
-                message.meta = dependency_1.onlyour.imio.Meta.fromObject(data.meta);
+                message.meta = dependency_1.only.Meta.fromObject(data.meta);
             }
             if (data.userId != null) {
                 message.userId = data.userId;
@@ -547,7 +547,7 @@ export namespace onlyour.imio {
                 message.tags = data.tags;
             }
             if (data.users != null) {
-                message.users = data.users.map(item => dependency_2.onlyour.imio.Contacts.fromObject(item));
+                message.users = data.users.map(item => dependency_2.only.Contacts.fromObject(item));
             }
             if (data.avatar != null) {
                 message.avatar = data.avatar;
@@ -595,7 +595,7 @@ export namespace onlyour.imio {
                 ids?: string[];
                 appIds?: string[];
                 remark?: string;
-                meta?: ReturnType<typeof dependency_1.onlyour.imio.Meta.prototype.toObject>;
+                meta?: ReturnType<typeof dependency_1.only.Meta.prototype.toObject>;
                 userId?: string;
                 roomname?: string;
                 level?: string;
@@ -614,7 +614,7 @@ export namespace onlyour.imio {
                 downed?: number;
                 revoke?: number;
                 tags?: string[];
-                users?: ReturnType<typeof dependency_2.onlyour.imio.Contacts.prototype.toObject>[];
+                users?: ReturnType<typeof dependency_2.only.Contacts.prototype.toObject>[];
                 avatar?: string;
                 groupToOne?: number;
                 roomCount?: number;
@@ -712,7 +712,7 @@ export namespace onlyour.imio {
                 data.tags = this.tags;
             }
             if (this.users != null) {
-                data.users = this.users.map((item: dependency_2.onlyour.imio.Contacts) => item.toObject());
+                data.users = this.users.map((item: dependency_2.only.Contacts) => item.toObject());
             }
             if (this.avatar != null) {
                 data.avatar = this.avatar;
@@ -810,7 +810,7 @@ export namespace onlyour.imio {
             if (this.tags.length)
                 writer.writeRepeatedString(28, this.tags);
             if (this.users.length)
-                writer.writeRepeatedMessage(29, this.users, (item: dependency_2.onlyour.imio.Contacts) => item.serialize(writer));
+                writer.writeRepeatedMessage(29, this.users, (item: dependency_2.only.Contacts) => item.serialize(writer));
             if (this.avatar.length)
                 writer.writeString(30, this.avatar);
             if (this.groupToOne != 0)
@@ -870,7 +870,7 @@ export namespace onlyour.imio {
                         message.remark = reader.readString();
                         break;
                     case 10:
-                        reader.readMessage(message.meta, () => message.meta = dependency_1.onlyour.imio.Meta.deserialize(reader));
+                        reader.readMessage(message.meta, () => message.meta = dependency_1.only.Meta.deserialize(reader));
                         break;
                     case 11:
                         message.userId = reader.readString();
@@ -927,7 +927,7 @@ export namespace onlyour.imio {
                         pb_1.Message.addToRepeatedField(message, 28, reader.readString());
                         break;
                     case 29:
-                        reader.readMessage(message.users, () => pb_1.Message.addToRepeatedWrapperField(message, 29, dependency_2.onlyour.imio.Contacts.deserialize(reader), dependency_2.onlyour.imio.Contacts));
+                        reader.readMessage(message.users, () => pb_1.Message.addToRepeatedWrapperField(message, 29, dependency_2.only.Contacts.deserialize(reader), dependency_2.only.Contacts));
                         break;
                     case 30:
                         message.avatar = reader.readString();

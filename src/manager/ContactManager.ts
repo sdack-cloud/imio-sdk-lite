@@ -5,10 +5,10 @@ import {IMIOMember} from "../entity/Member";
 import {IMIOContact, IMIOContactNotice} from "../entity/Contact";
 
 //  ======
-import {onlyour as ContactPB} from "../protocol/Contacts";
-import {onlyour as RoomPB} from "../protocol/Rooms";
-import Contacts = ContactPB.imio.Contacts;
-import Rooms = RoomPB.imio.Rooms;
+import {only as ContactPB} from "../protocol/Contacts";
+import {only as RoomPB} from "../protocol/Rooms";
+import Contacts = ContactPB.Contacts;
+import Rooms = RoomPB.Rooms;
 
 
 
@@ -299,7 +299,7 @@ export class IMIOContactManager extends IMIOBaseManager {
                 reject(new Error(this.checkSocket()))
                 return;
             }
-            console.log("meta :",this.imioClient!!.meta.toObject());
+            // console.log("meta :", this.imioClient!!.meta.toObject());
             const param = new Contacts({
                 meta: this.imioClient!!.meta,
                 account: messageId,

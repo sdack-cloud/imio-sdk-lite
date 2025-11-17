@@ -6,19 +6,19 @@ import {IMIOMember} from "../entity/Member";
 import {IMIOContact} from "../entity/Contact";
 import {IMIOMessageSender} from "../entity/MessageSender";
 import {IMIOMessage} from "../entity/Message";
+import {IMIOGroup} from "../entity/Group";
 
 //  ======
-import {onlyour as ContactPB} from "../protocol/Contacts";
-import {onlyour as RoomPB} from "../protocol/Rooms";
-import {onlyour as MessagePB} from "../protocol/Message";
-import {onlyour as MessageSignPB} from "../protocol/MessageSign";
-import {onlyour as MessageRemindPB} from "../protocol/MessageRemind";
-import Contacts = ContactPB.imio.Contacts;
-import Rooms = RoomPB.imio.Rooms;
-import Message = MessagePB.imio.Message;
-import MessageSign = MessageSignPB.imio.MessageSign;
-import MessageRemind = MessageRemindPB.imio.MessageRemind;
-import {IMIOGroup} from "../entity/Group";
+import {only as ContactPB} from "../protocol/Contacts";
+import {only as RoomPB} from "../protocol/Rooms";
+import {only as MessagePB} from "../protocol/Message";
+import {only as MessageSignPB} from "../protocol/MessageSign";
+import {only as MessageRemindPB} from "../protocol/MessageRemind";
+import Rooms = RoomPB.Rooms;
+import Message = MessagePB.Message;
+import MessageSign = MessageSignPB.MessageSign;
+import MessageRemind = MessageRemindPB.MessageRemind;
+import Contacts = ContactPB.Contacts;
 
 export class IMIOChatManager extends IMIOBaseManager {
     // ========= 单例模式 =========
@@ -350,7 +350,6 @@ export class IMIOChatManager extends IMIOBaseManager {
                 reject(new Error("联系人不存在"))
                 return
             }
-            console.warn(imioContact);
             this.imioClient!!.meta.page = page;
             this.imioClient!!.meta.pageSize = pageSize;
             const param = new Message({
