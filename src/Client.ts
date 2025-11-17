@@ -153,13 +153,13 @@ export class IMIOClient extends IMIOBase {
             this.tokenAppId = Number(payload.aud)
             if ((this.tokenAppId+"" != this.option?.appId)) {
                 if (this.option?.debug) {
-                    console.warn("IMIO：token中的AppId 与 IMIOClientOption不一致")
+                    console.warn("IO：token中的AppId 与 IMIOClientOption不一致")
                 }
             }
         }catch (e) {
             this.tokenAppId = 0;
             if (this.option?.debug) {
-                console.warn("IMIO: token中的AppId 解析错误")
+                console.warn("IO: token中的AppId 解析错误")
             }
         }
         return this;
@@ -257,14 +257,14 @@ export class IMIOClient extends IMIOBase {
                    clientListener?: IMIOClientListener): IMIOClient {
 
         if (!token || token.length < 50) {
-            throw new Error("IMIO 连接 token 必须")
+            throw new Error("IO 连接 token 必须")
         }
         if (clientListener) {
             this.clientListener = clientListener;
         }
         this.token = token;
         if (!this.option){
-            throw new Error("IMIOClientOption 缺失")
+            throw new Error("IOClientOption 缺失")
         }
         try {
             let payload = this.getJwtPayload(token);
@@ -363,7 +363,7 @@ export class IMIOClient extends IMIOBase {
             return;
         }
         if (this.option?.debug) {
-            console.warn("IMIO host", this.hostAddress);
+            console.warn("IO host", this.hostAddress);
         }
         let connector = new RSocketConnector({
             setup: {
@@ -394,13 +394,13 @@ export class IMIOClient extends IMIOBase {
                         route = metadataMap.get("route");
                     }
                     if (this.option?.debug) {
-                        console.warn("IMIO fireAndForget...",route);
+                        console.warn("IO fireAndForget...",route);
                     }
                     this.routerParse(route, payloadData)
 
                     return {
                         cancel() {
-                            // console.warn("IMIO responder cancel ");
+                            // console.warn("IO responder cancel ");
                         }
                     }
                 },
@@ -415,7 +415,7 @@ export class IMIOClient extends IMIOBase {
                         route = metadataMap.get("route");
                     }
                     if (this.option?.debug) {
-                        console.warn("IMIO requestResponse...",route);
+                        console.warn("IO requestResponse...",route);
                     }
                     this.routerParse(route, payloadData)
 
@@ -451,7 +451,7 @@ export class IMIOClient extends IMIOBase {
         connector.connect()
             .then((res) => {
                 if (this.option?.debug) {
-                console.warn("IMIO connect success...")
+                console.warn("IO connect success...")
                 }
                 if (this.account) {
                     this.account.status = IMIOContactStatus.online
@@ -471,7 +471,7 @@ export class IMIOClient extends IMIOBase {
                 res.onClose(err => {
                     let message = err?.message + "";
                     if (this.option?.debug) {
-                    console.error("IMIOServer connect onClose", message)
+                    console.error("IOServer connect onClose", message)
                     }
                     if (this.account) {
                         this.account.status = IMIOContactStatus.done
@@ -481,7 +481,7 @@ export class IMIOClient extends IMIOBase {
             })
             .catch(err => {
                 if (this.option?.debug) {
-                console.error("IMIOServer Connect Error", err);
+                console.error("IOServer Connect Error", err);
                 }
                 if (err) {
                     let message = err?.message + "";
@@ -511,7 +511,7 @@ export class IMIOClient extends IMIOBase {
             })
             .finally(() => {
                 if (this.option?.debug) {
-                    console.warn("IMIO connect finally");
+                    console.warn("IO connect finally");
                 }
             })
         ;
@@ -815,8 +815,8 @@ export class IMIOClient extends IMIOBase {
                 this.meta.avatar = pongData.avatar;
             }
             if (this.option?.debug) {
-                console.warn("IMIO meta", this.meta.toObject());
-                console.warn("IMIO userinfo", this.account);
+                console.warn("IO meta", this.meta.toObject());
+                console.warn("IO userinfo", this.account);
             }
         }catch (e) {
         }

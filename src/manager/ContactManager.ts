@@ -75,7 +75,7 @@ export class IMIOContactManager extends IMIOBaseManager {
                             }
                         }
                     }catch (e) {
-                        reject(new Error("IMIO Client Error"))
+                        reject(new Error("IO Client Error"))
                     }
                 },
                 onError: (error: Error) => {
@@ -121,7 +121,7 @@ export class IMIOContactManager extends IMIOBaseManager {
                             res.push(data);
                         }
                     }catch (e) {
-                        reject(new Error("IMIO Client Error"))
+                        reject(new Error("IO Client Error"))
                     }
                 },
                 onError: (error: Error) => {
@@ -167,7 +167,7 @@ export class IMIOContactManager extends IMIOBaseManager {
                             res.push(data);
                         }
                     }catch (e) {
-                        reject(new Error("IMIO Client Error"))
+                        reject(new Error("IO Client Error"))
                     }
                 },
                 onError: (error: Error) => {
@@ -216,7 +216,7 @@ export class IMIOContactManager extends IMIOBaseManager {
                             }
                         }
                     }catch (e) {
-                        reject(new Error("IMIO Client Error"))
+                        reject(new Error("IO Client Error"))
                     }
                 },
                 onError: (error: Error) => {
@@ -270,7 +270,7 @@ export class IMIOContactManager extends IMIOBaseManager {
                        }
                     }catch (e) {
 
-                        reject(new Error("IMIO Client Error"))
+                        reject(new Error("IO Client Error"))
                     }
                 },
                 onError: (error: Error) => {
@@ -324,7 +324,7 @@ export class IMIOContactManager extends IMIOBaseManager {
                            }
                        }
                     }catch (e) {
-                        reject(new Error("IMIO Client Error"))
+                        reject(new Error("IO Client Error"))
                     }
                 },
                 onError: (error: Error) => {
@@ -382,7 +382,7 @@ export class IMIOContactManager extends IMIOBaseManager {
                            }
                        }
                     }catch (e) {
-                        reject(new Error("IMIO Client Error"))
+                        reject(new Error("IO Client Error"))
                     }
                 }, onError: (error: Error) => {
                     let message = error?.message + "";
@@ -439,7 +439,7 @@ export class IMIOContactManager extends IMIOBaseManager {
                            }
                        }
                     }catch (e) {
-                        reject(new Error("IMIO Client Error"))
+                        reject(new Error("IO Client Error"))
                     }
                 }, onError: (error: Error) => {
                     let message = error?.message + "";
@@ -500,7 +500,7 @@ export class IMIOContactManager extends IMIOBaseManager {
                            }
                        }
                     }catch (e) {
-                        reject(new Error("IMIO Client Error"))
+                        reject(new Error("IO Client Error"))
                     }
                 }, onError: (error: Error) => {
                     let message = error?.message + "";
@@ -556,7 +556,7 @@ export class IMIOContactManager extends IMIOBaseManager {
                            }
                        }
                     }catch (e) {
-                        reject(new Error("IMIO Client Error"))
+                        reject(new Error("IO Client Error"))
                     }
                 }, onError: (error: Error) => {
                     let message = error?.message + "";
@@ -611,7 +611,7 @@ export class IMIOContactManager extends IMIOBaseManager {
                            }
                        }
                     }catch (e) {
-                        reject(new Error("IMIO Client Error"))
+                        reject(new Error("IO Client Error"))
                     }
                 }, onError: (error: Error) => {
                     let message = error?.message + "";
@@ -660,7 +660,7 @@ export class IMIOContactManager extends IMIOBaseManager {
                             }
                        }
                     }catch (e) {
-                        reject(new Error("IMIO Client Error"))
+                        reject(new Error("IO Client Error"))
                     }
                 }, onError: (error: Error) => {
                     let message = error?.message + "";
@@ -686,10 +686,10 @@ export class IMIOContactManager extends IMIOBaseManager {
                 this.imioClient!!.clientListener?.onTokenExpired();
             } catch (e) {
             }
-            return 'IMIO Token 已过期';
+            return 'IO Token 已过期';
         }
         if (message.indexOf("SQL") > -1 || message.indexOf('connect') > -1) {
-            return ("IMIO System Error");
+            return ("IO System Error");
         }
         if (message.indexOf("terminal") > -1 || message.indexOf('signal') > -1) {
             return ("请求超时");
@@ -698,10 +698,10 @@ export class IMIOContactManager extends IMIOBaseManager {
     }
     private checkSocket(): string {
         if (!this.imioClient) {
-            return ("IMIO Client 不存在")
+            return ("IO Client 不存在")
         }
         if (!this.imioClient.socket) {
-            return ("IMIO Client 尚未建立连接")
+            return ("IO Client 尚未建立连接")
         }
         if (this.imioClient!!.getTokenAppId() == 0 || (this.imioClient!!.getTokenAppId() != this.imioClient!!.meta.appId)) {
             return ("token中的AppId 与 IMIOClientOption不一致")
