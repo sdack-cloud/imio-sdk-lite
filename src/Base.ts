@@ -19,9 +19,12 @@ import axios, {Axios, AxiosInstance} from "axios";
 import {only as MetaPB} from "./protocol/Meta";
 import {only as ContactPB} from "./protocol/Contacts";
 import {only as RoomPB} from "./protocol/Rooms";
+import {only as TeamPB} from "./protocol/Teams";
+import {only as TeamContactPB} from "./protocol/TeamContact";
 import {only as MessagePB} from "./protocol/Message";
 import {only as GatewayPB} from "./protocol/Gateway";
 import {only as UserStatusPB} from "./protocol/UserStatus";
+import {IMIOTeam} from "./entity/Team";
 
 
 export class IMIOBase {
@@ -237,6 +240,33 @@ export class IMIOBase {
         return data;
     }
 
+    protected buildTeamMember(proto: TeamContactPB.TeamContact): IMIOMember {
+        let data = new IMIOMember();
+        data.memberId = proto.id
+        data.joinId = proto.joinTeamId;
+        data.userId = proto.userId+"";
+        data.nickname = proto.nickname;
+        data.username = proto.username;
+        data.avatar = proto.avatar;
+        // data.status = proto.status;
+        data.joinTime = proto.joinTime;
+        data.isMuted = proto.muted == 1;
+        data.role = proto.role;
+        // data.isGroup = proto.talkMode == 2;
+        return data;
+    }
+
+    protected buildTeam(proto: TeamPB.Teams): IMIOTeam {
+        let data = new IMIOTeam();
+        data.teamId = proto.id;
+        data.teamName = proto.teamname
+        data.teamNumber = proto.account;
+        data.userId = proto.userId;
+        data.avatar = proto.avatar;
+        data.isMute = proto.muted == 1;
+        return data;
+    }
+
     protected buildMessage(proto: MessagePB.Message) : IMIOMessage {
         let imioMessage = new IMIOMessage();
         imioMessage.messageId = proto.messageId;
@@ -260,6 +290,8 @@ export class IMIOBase {
         imioMessage.size = proto.size;
         imioMessage.length = proto.length;
         imioMessage.sent = proto.sent;
+        imioMessage.deviceKey = proto.deviceKey;
+        imioMessage.deviceTag = proto.deviceTag;
         imioMessage.sentDate = new Date(proto.sent);
         imioMessage.revoke = proto.revoke.length != 0;
 

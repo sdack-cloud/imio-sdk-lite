@@ -35,6 +35,7 @@ import Gateway = GatewayPB.Gateway;
 import {IMIOHostNode} from "./entity/HostNode";
 import {IMIOContactStatus} from "./entity/Contact";
 import {IMIODeviceStatus} from "./entity/Status";
+import {IMIOTeamListener} from "./listener/TeamListener";
 
 
 export class IMIOClient extends IMIOBase {
@@ -146,6 +147,8 @@ export class IMIOClient extends IMIOBase {
 
     readonly contactListener: Array<Partial<IMIOContactListener>> = []
 
+    readonly teamListener: Array<Partial<IMIOTeamListener>> = []
+
     public setToken(token: string): IMIOClient {
         this.token = token;
         try {
@@ -203,6 +206,25 @@ export class IMIOClient extends IMIOBase {
         if (indexs.length > 0) {
             for (let index of indexs) {
                 this.messageListener.splice(index,1)
+            }
+        }
+    }
+    /**
+     * 会过滤引用相等的
+     * @param listener
+     */
+    public addTeamListener(listener:Partial<IMIOTeamListener>) {
+        let index = this.teamListener.findIndex(it => it === listener);
+        if (index == -1) {
+            this.teamListener.push(listener)
+        }
+    }
+
+    public removeTeamListener(listener:Partial<IMIOTeamListener>) {
+        let indexs = this.teamListener.filter(it => it === listener).map((_,index) => index);
+        if (indexs.length > 0) {
+            for (let index of indexs) {
+                this.teamListener.splice(index,1)
             }
         }
     }
@@ -731,6 +753,9 @@ export class IMIOClient extends IMIOBase {
             case 'message':
                 this.handleMessage(payloadData);
                 break;
+            case 'message-team':
+                this.handleMessageTeam(payloadData);
+                break;
         }
     }
 
@@ -927,6 +952,23 @@ export class IMIOClient extends IMIOBase {
             }catch (_) {
             }
             for (const listener of this.messageListener) {
+                try {
+                    listener.onMessage?.(imioMessage);
+                }catch (_) {
+                }
+            }
+        }catch (e) {
+        }
+    }
+
+    private handleMessageTeam(payloadData: Buffer | null | undefined) {
+        if (!payloadData) {
+            return;
+        }
+        try {
+            let deserialize = Message.deserialize(payloadData);
+            let imioMessage = this.buildMessage(deserialize);
+            for (const listener of this.teamListener) {
                 try {
                     listener.onMessage?.(imioMessage);
                 }catch (_) {

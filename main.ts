@@ -1,7 +1,7 @@
 import {IMIOClient} from "./src/Client";
 
 import {IMIOClientOption} from './src/Option'
-import {IMIORoomManager} from "./src/manager/RoomManager";
+import {IMIOTeamManager} from "./src/manager/TeamManager";
 import {IMIOClientConnectStatus} from "./src/listener/ClientListener";
 import {IMIOContactManager} from "./src/manager/ContactManager";
 import {IMIOGroupManager} from "./src/manager/GroupManager";
@@ -22,7 +22,7 @@ export default {
     IMIOGroupManager,
     IMIOContactManager,
     IMIOClientConnectStatus,
-    IMIORoomManager,
+    IMIOTeamManager,
     IMIOMessageSender,
     IMIOMessageSenderHint,
     IMIOMessageType,

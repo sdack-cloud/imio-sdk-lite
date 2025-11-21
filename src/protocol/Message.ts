@@ -52,6 +52,7 @@ export namespace only {
             fromAccount?: string;
             destAccount?: string;
             revoke?: string;
+            deviceTag?: string;
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [7, 8, 33, 39], this.#one_of_decls);
@@ -181,6 +182,9 @@ export namespace only {
                 }
                 if ("revoke" in data && data.revoke != undefined) {
                     this.revoke = data.revoke;
+                }
+                if ("deviceTag" in data && data.deviceTag != undefined) {
+                    this.deviceTag = data.deviceTag;
                 }
             }
         }
@@ -442,6 +446,12 @@ export namespace only {
         set revoke(value: string) {
             pb_1.Message.setField(this, 42, value);
         }
+        get deviceTag() {
+            return pb_1.Message.getFieldWithDefault(this, 43, "") as string;
+        }
+        set deviceTag(value: string) {
+            pb_1.Message.setField(this, 43, value);
+        }
         static fromObject(data: {
             messageId?: string;
             appId?: number;
@@ -485,6 +495,7 @@ export namespace only {
             fromAccount?: string;
             destAccount?: string;
             revoke?: string;
+            deviceTag?: string;
         }): Message {
             const message = new Message({});
             if (data.messageId != null) {
@@ -613,6 +624,9 @@ export namespace only {
             if (data.revoke != null) {
                 message.revoke = data.revoke;
             }
+            if (data.deviceTag != null) {
+                message.deviceTag = data.deviceTag;
+            }
             return message;
         }
         toObject() {
@@ -659,6 +673,7 @@ export namespace only {
                 fromAccount?: string;
                 destAccount?: string;
                 revoke?: string;
+                deviceTag?: string;
             } = {};
             if (this.messageId != null) {
                 data.messageId = this.messageId;
@@ -786,6 +801,9 @@ export namespace only {
             if (this.revoke != null) {
                 data.revoke = this.revoke;
             }
+            if (this.deviceTag != null) {
+                data.deviceTag = this.deviceTag;
+            }
             return data;
         }
         serialize(): Uint8Array;
@@ -876,6 +894,8 @@ export namespace only {
                 writer.writeString(41, this.destAccount);
             if (this.revoke.length)
                 writer.writeString(42, this.revoke);
+            if (this.deviceTag.length)
+                writer.writeString(43, this.deviceTag);
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -1010,6 +1030,9 @@ export namespace only {
                         break;
                     case 42:
                         message.revoke = reader.readString();
+                        break;
+                    case 43:
+                        message.deviceTag = reader.readString();
                         break;
                     default: reader.skipField();
                 }

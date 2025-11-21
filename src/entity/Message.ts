@@ -22,6 +22,8 @@ export class IMIOMessage {
     label: IMIOMessageLabel | null = null;
     tag: string = '';
     sent: string = '';
+    deviceKey: string = '';
+    deviceTag: string = '';
     revoke: boolean = false;
     talk:IMIOMessageTalk = IMIOMessageTalk.default;
     citeData: IMIOMessage | null = null;
