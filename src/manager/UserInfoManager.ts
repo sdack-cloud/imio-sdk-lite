@@ -23,7 +23,7 @@ export class IMIOUserInfoManager extends IMIOBaseManager{
 // ========= 单例模式 =========
     private static instance: IMIOUserInfoManager;
 
-    public imioClient: IMIOClient | null = null;
+    public client: IMIOClient | null = null;
 
     private constructor() {
         super();
@@ -37,7 +37,7 @@ export class IMIOUserInfoManager extends IMIOBaseManager{
     }
 
     public setClient(client : IMIOClient) : IMIOUserInfoManager{
-        this.imioClient = client
+        this.client = client
         return this
     }
     // ========= 单例模式 END =========
@@ -53,11 +53,11 @@ export class IMIOUserInfoManager extends IMIOBaseManager{
                 return;
             }
             const param = new UserStatus({
-                meta: this.imioClient!!.meta,
+                meta: this.client!!.meta,
                 userId,
             });
             let res : Array<IMIODeviceStatus> = [];
-            this.imioClient!!.socket?.requestStream({
+            this.client!!.socket?.requestStream({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('device.status.byUserid')
             }, 100,{
@@ -98,11 +98,11 @@ export class IMIOUserInfoManager extends IMIOBaseManager{
                 return;
             }
             const param = new UserStatus({
-                meta: this.imioClient!!.meta,
+                meta: this.client!!.meta,
                 status: status.toString()
             });
             let res : Array<IMIODeviceStatus> = [];
-            this.imioClient!!.socket?.requestStream({
+            this.client!!.socket?.requestStream({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('device.status.update')
             }, 100,{
@@ -145,8 +145,8 @@ export class IMIOUserInfoManager extends IMIOBaseManager{
                 reject(new Error(this.checkSocket()))
                 return;
             }
-            this.imioClient!!.meta.page = page;
-            this.imioClient!!.meta.pageSize = pageSize;
+            this.client!!.meta.page = page;
+            this.client!!.meta.pageSize = pageSize;
             let label = type.toString()
             if (type == "notify") {
                 label = 'cc';
@@ -155,12 +155,12 @@ export class IMIOUserInfoManager extends IMIOBaseManager{
                 label = 'bcc';
             }
             const param = new Message({
-                meta: this.imioClient!!.meta,
-                roomId: this.imioClient!!.meta.roomId,
+                meta: this.client!!.meta,
+                roomId: this.client!!.meta.roomId,
                 label: label
             });
             let res : Array<IMIOMessage>  = [];
-            this.imioClient!!.socket?.requestStream({
+            this.client!!.socket?.requestStream({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('message.notice.page')
             }, 500,{
@@ -205,12 +205,12 @@ export class IMIOUserInfoManager extends IMIOBaseManager{
                 return;
             }
             const param = new Users({
-                meta: this.imioClient!!.meta,
+                meta: this.client!!.meta,
                 nickname: nickname,
                 avatar: avatar
             });
             let res : Object | null = null;
-            this.imioClient!!.socket?.requestResponse({
+            this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('user.update.info')
             }, {
@@ -247,7 +247,7 @@ export class IMIOUserInfoManager extends IMIOBaseManager{
     private onError(message: string): string {
         if (message.indexOf("Jwt") > -1) {
             try {
-                this.imioClient!!.clientListener?.onTokenExpired();
+                this.client!!.clientListener?.onTokenExpired();
             } catch (e) {
             }
             return 'IO Token 已过期';
@@ -261,13 +261,13 @@ export class IMIOUserInfoManager extends IMIOBaseManager{
         return "";
     }
     private checkSocket(): string {
-        if (!this.imioClient) {
+        if (!this.client) {
             return ("IO Client 不存在")
         }
-        if (!this.imioClient.socket) {
+        if (!this.client.socket) {
             return ("IO Client 尚未建立连接")
         }
-        if (this.imioClient!!.getTokenAppId() == 0 || (this.imioClient!!.getTokenAppId() != this.imioClient!!.meta.appId)) {
+        if (this.client!!.getTokenAppId() == 0 || (this.client!!.getTokenAppId() != this.client!!.meta.appId)) {
             return ("token中的AppId 与 IMIOClientOption不一致")
         }
         return ''

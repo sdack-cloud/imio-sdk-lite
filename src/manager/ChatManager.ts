@@ -29,7 +29,7 @@ export class IMIOChatManager extends IMIOBaseManager {
     // ========= 单例模式 =========
     private static instance: IMIOChatManager;
 
-    public imioClient: IMIOClient | null = null;
+    public client: IMIOClient | null = null;
 
     private constructor() {
         super();
@@ -43,7 +43,7 @@ export class IMIOChatManager extends IMIOBaseManager {
     }
 
     public setClient(client: IMIOClient): IMIOChatManager {
-        this.imioClient = client
+        this.client = client
         return this
     }
 
@@ -66,7 +66,7 @@ export class IMIOChatManager extends IMIOBaseManager {
             let message1 = this.buildMessageProto( userId,sender);
             message1.appId = joinId;
             let res: Object | null = null;
-            this.imioClient!!.socket?.requestResponse({
+            this.client!!.socket?.requestResponse({
                 data: Buffer.from(message1.serializeBinary().buffer),
                 metadata: this.buildRoute('dialogue')
             }, {
@@ -106,7 +106,7 @@ export class IMIOChatManager extends IMIOBaseManager {
                 return;
             }
 
-            let contactManager = IMIOContactManager.getInstance().setClient(this.imioClient!!);
+            let contactManager = IMIOContactManager.getInstance().setClient(this.client!!);
             let imioContact = await contactManager.getContactByJoinId(sender.joinId);
             if (!imioContact) {
                 reject(new Error("联系人不存在"))
@@ -118,7 +118,7 @@ export class IMIOChatManager extends IMIOBaseManager {
             }
             let message1 = this.buildMessageProto(imioContact.userId,sender);
             let res: Object | null = null;
-            this.imioClient!!.socket?.requestResponse({
+            this.client!!.socket?.requestResponse({
                 data: Buffer.from(message1.serializeBinary().buffer),
                 metadata: this.buildRoute('oneToOne')
             }, {
@@ -158,7 +158,7 @@ export class IMIOChatManager extends IMIOBaseManager {
                 reject(new Error(this.checkSocket()))
                 return;
             }
-            let contactManager = IMIOContactManager.getInstance().setClient(this.imioClient!!);
+            let contactManager = IMIOContactManager.getInstance().setClient(this.client!!);
             let imioContact = await contactManager.getContactByJoinId(sender.joinId);
             if (!imioContact) {
                 reject(new Error("联系人不存在"))
@@ -170,7 +170,7 @@ export class IMIOChatManager extends IMIOBaseManager {
             }
             let message1 = this.buildMessageProto("",sender);
             let res: Object | null = null;
-            this.imioClient!!.socket?.requestResponse({
+            this.client!!.socket?.requestResponse({
                 data: Buffer.from(message1.serializeBinary().buffer),
                 metadata: this.buildRoute('oneToMany')
             }, {
@@ -215,7 +215,7 @@ export class IMIOChatManager extends IMIOBaseManager {
             }
             let message1 = this.buildMessageProto("",sender);
             let res: Object | null = null;
-            this.imioClient!!.socket?.requestResponse({
+            this.client!!.socket?.requestResponse({
                 data: Buffer.from(message1.serializeBinary().buffer),
                 metadata: this.buildRoute('oneToTeam')
             }, {
@@ -260,14 +260,14 @@ export class IMIOChatManager extends IMIOBaseManager {
                 return;
             }
             let message = new MessageSign({
-                meta:this.imioClient!!.meta,
+                meta:this.client!!.meta,
                 messageId: messageId,
                 roomId: joinId,
-                destId:this.imioClient!!.meta.userId,
+                destId:this.client!!.meta.userId,
                 deviceTag:'h5',
-                deviceKey:this.imioClient?.getDeviceKey()
+                deviceKey:this.client?.getDeviceKey()
             });
-            this.imioClient!!.socket?.requestResponse({
+            this.client!!.socket?.requestResponse({
                 data: Buffer.from(message.serializeBinary().buffer),
                 metadata: this.buildRoute('message.sign')
             }, {
@@ -308,12 +308,12 @@ export class IMIOChatManager extends IMIOBaseManager {
                 return;
             }
             let message = new MessageSign({
-                meta:this.imioClient!!.meta,
+                meta:this.client!!.meta,
                 messageId: messageId,
                 roomId: joinId,
-                destId:this.imioClient!!.meta.userId
+                destId:this.client!!.meta.userId
             });
-            this.imioClient!!.socket?.requestResponse({
+            this.client!!.socket?.requestResponse({
                 data: Buffer.from(message.serializeBinary().buffer),
                 metadata: this.buildRoute('message.read')
             }, {
@@ -355,11 +355,11 @@ export class IMIOChatManager extends IMIOBaseManager {
                 return;
             }
             let message = new MessageSign({
-                meta:this.imioClient!!.meta,
+                meta:this.client!!.meta,
                 messageId: messageId,
                 roomId: joinId,
             });
-            this.imioClient!!.socket?.requestResponse({
+            this.client!!.socket?.requestResponse({
                 data: Buffer.from(message.serializeBinary().buffer),
                 metadata: this.buildRoute('message.revoke')
             }, {
@@ -399,21 +399,21 @@ export class IMIOChatManager extends IMIOBaseManager {
                 reject(new Error(this.checkSocket()))
                 return;
             }
-            let contactManager = IMIOContactManager.getInstance().setClient(this.imioClient!!);
+            let contactManager = IMIOContactManager.getInstance().setClient(this.client!!);
             let imioContact = await contactManager.getContactByJoinId(joinId);
             if (!imioContact) {
                 reject(new Error("联系人不存在"))
                 return
             }
-            this.imioClient!!.meta.page = page;
-            this.imioClient!!.meta.pageSize = pageSize;
+            this.client!!.meta.page = page;
+            this.client!!.meta.pageSize = pageSize;
             const param = new Message({
-                meta: this.imioClient!!.meta,
+                meta: this.client!!.meta,
                 roomId: imioContact.joinId,
                 created: imioContact.joinTime
             });
             let res : Array<IMIOMessage>  = [];
-            this.imioClient!!.socket?.requestStream({
+            this.client!!.socket?.requestStream({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('message.page')
             }, 500,{
@@ -456,21 +456,21 @@ export class IMIOChatManager extends IMIOBaseManager {
                 reject(new Error(this.checkSocket()))
                 return;
             }
-            let teamManager = IMIOTeamManager.getInstance().setClient(this.imioClient!!);
-            let imioMember = await teamManager.getMember(teamId,this.imioClient!!.meta.userId,this.imioClient!!.meta.deviceKey,this.imioClient!!.meta.deviceTag );
+            let teamManager = IMIOTeamManager.getInstance().setClient(this.client!!);
+            let imioMember = await teamManager.getMember(teamId,this.client!!.meta.userId,this.client!!.meta.deviceKey,this.client!!.meta.deviceTag );
             if (!imioMember) { // 获取成员主要是获取加入时间
                 reject(new Error('您不在小队中'))
                 return;
             }
-            this.imioClient!!.meta.page = page;
-            this.imioClient!!.meta.pageSize = pageSize;
+            this.client!!.meta.page = page;
+            this.client!!.meta.pageSize = pageSize;
             const param = new Message({
-                meta: this.imioClient!!.meta,
+                meta: this.client!!.meta,
                 roomId: teamId,
                 created: imioMember.joinTime
             });
             let res : Array<IMIOMessage>  = [];
-            this.imioClient!!.socket?.requestStream({
+            this.client!!.socket?.requestStream({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('message.team.page')
             }, 500,{
@@ -512,12 +512,12 @@ export class IMIOChatManager extends IMIOBaseManager {
                 return;
             }
             const param = new Message({
-                meta: this.imioClient!!.meta,
+                meta: this.client!!.meta,
                 roomId: teamId,
                 messageId: messageId
             });
             let res : IMIOMessage | null  = null;
-            this.imioClient!!.socket?.requestResponse({
+            this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('message.team.byId')
             }, {
@@ -564,12 +564,12 @@ export class IMIOChatManager extends IMIOBaseManager {
             }
 
             const param = new Contacts({
-                meta: this.imioClient!!.meta,
+                meta: this.client!!.meta,
                 userId: userId,
                 joinRoomId:joinId
             });
             let res : IMIOGroup | null = null;
-            this.imioClient!!.socket?.requestResponse({
+            this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('dialogue.create')
             }, {
@@ -687,11 +687,11 @@ export class IMIOChatManager extends IMIOBaseManager {
         }
 
         let message = new Message({
-            meta:this.imioClient?.meta,
+            meta:this.client?.meta,
             messageId: sender.messageId,
             roomId: sender.joinId,
-            fromId: this.imioClient?.meta?.userId,
-            fromName: this.imioClient?.meta?.nickname,
+            fromId: this.client?.meta?.userId,
+            fromName: this.client?.meta?.nickname,
             destId: destId,
             subtype: this.messageType(sender.type),
             title: sender.title,
@@ -738,7 +738,7 @@ export class IMIOChatManager extends IMIOBaseManager {
     private onError(message: string): string {
         if (message.indexOf("Jwt") > -1) {
             try {
-                this.imioClient!!.clientListener?.onTokenExpired();
+                this.client!!.clientListener?.onTokenExpired();
             } catch (e) {
             }
             return 'IO Token 已过期';
@@ -753,13 +753,13 @@ export class IMIOChatManager extends IMIOBaseManager {
     }
 
     private checkSocket(): string {
-        if (!this.imioClient) {
+        if (!this.client) {
             return ("IO Client 不存在")
         }
-        if (!this.imioClient.socket) {
+        if (!this.client.socket) {
             return ("IO Client 尚未建立连接")
         }
-        if (this.imioClient!!.getTokenAppId() == 0 || (this.imioClient!!.getTokenAppId() != this.imioClient!!.meta.appId)) {
+        if (this.client!!.getTokenAppId() == 0 || (this.client!!.getTokenAppId() != this.client!!.meta.appId)) {
             return ("token中的AppId 与 IMIOClientOption不一致")
         }
         return ''

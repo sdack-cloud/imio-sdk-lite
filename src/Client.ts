@@ -853,12 +853,12 @@ export class IMIOClient extends IMIOBase {
         }
         try {
             let deserialize = Contacts.deserialize(payloadData);
-            let imioData = this.buildContact(deserialize);
-            let findIndex = this.contactList.findIndex(it => it.contactId == imioData.contactId);
+            let data = this.buildContact(deserialize);
+            let findIndex = this.contactList.findIndex(it => it.contactId == data.contactId);
             if (findIndex > -1) {
-                this.contactList[findIndex] = imioData;
+                this.contactList[findIndex] = data;
             } else {
-                this.contactList.push(imioData);
+                this.contactList.push(data);
             }
         }catch (e) {
         }
@@ -928,10 +928,10 @@ export class IMIOClient extends IMIOBase {
         }
         try {
             let deserialize = Message.deserialize(payloadData);
-            let imioMessage = this.buildMessage(deserialize);
+            let message = this.buildMessage(deserialize);
             for (const listener of this.messageListener) {
                 try {
-                    listener.onNotice?.(imioMessage);
+                    listener.onNotice?.(message);
                 }catch (_) {
                 }
             }
@@ -945,15 +945,15 @@ export class IMIOClient extends IMIOBase {
         }
         try {
             let deserialize = Message.deserialize(payloadData);
-            let imioMessage = this.buildMessage(deserialize);
+            let message = this.buildMessage(deserialize);
             try {
                 let chatManager = IMIOChatManager.getInstance().setClient(this);
-                chatManager.signMessage(imioMessage.messageId,imioMessage.joinId).then()
+                chatManager.signMessage(message.messageId,message.joinId).then()
             }catch (_) {
             }
             for (const listener of this.messageListener) {
                 try {
-                    listener.onMessage?.(imioMessage);
+                    listener.onMessage?.(message);
                 }catch (_) {
                 }
             }
@@ -967,10 +967,10 @@ export class IMIOClient extends IMIOBase {
         }
         try {
             let deserialize = Message.deserialize(payloadData);
-            let imioMessage = this.buildMessage(deserialize);
+            let message = this.buildMessage(deserialize);
             for (const listener of this.teamListener) {
                 try {
-                    listener.onMessage?.(imioMessage);
+                    listener.onMessage?.(message);
                 }catch (_) {
                 }
             }

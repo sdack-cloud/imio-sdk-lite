@@ -3,12 +3,17 @@ import {IMIOBaseManager} from "./BaseManager";
 import {Payload} from "rsocket-core";
 import {IMIOMember} from "../entity/Member";
 import {IMIOContact, IMIOContactNotice} from "../entity/Contact";
+import {IMIOMessage} from "../entity/Message";
 
 //  ======
 import {only as ContactPB} from "../protocol/Contacts";
 import {only as RoomPB} from "../protocol/Rooms";
+import {only as MessageSignPB} from "../protocol/MessageSign";
+import {only as MessagePB} from "../protocol/Message";
 import Contacts = ContactPB.Contacts;
 import Rooms = RoomPB.Rooms;
+import MessageSign = MessageSignPB.MessageSign;
+import Message = MessagePB.Message;
 
 
 
@@ -17,7 +22,7 @@ export class IMIOContactManager extends IMIOBaseManager {
     // ========= 单例模式 =========
     private static instance: IMIOContactManager;
 
-    public imioClient: IMIOClient | null = null;
+    public client: IMIOClient | null = null;
 
     private constructor() {
         super();
@@ -31,7 +36,7 @@ export class IMIOContactManager extends IMIOBaseManager {
     }
 
     public setClient(client: IMIOClient): IMIOContactManager {
-        this.imioClient = client
+        this.client = client
         return this
     }
 
@@ -46,14 +51,14 @@ export class IMIOContactManager extends IMIOBaseManager {
                 reject(new Error(this.checkSocket()))
                 return;
             }
-            this.imioClient!!.meta.page = page;
-            this.imioClient!!.meta.pageSize = pageSize;
+            this.client!!.meta.page = page;
+            this.client!!.meta.pageSize = pageSize;
             const param = new Contacts({
-                meta: this.imioClient!!.meta,
-                joinRoomId: this.imioClient!!.meta.roomId,
+                meta: this.client!!.meta,
+                joinRoomId: this.client!!.meta.roomId,
             });
             let res : Array<IMIOContact>  = [];
-            this.imioClient!!.socket?.requestStream({
+            this.client!!.socket?.requestStream({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('contact.list'),
             }, 3000,{
@@ -65,12 +70,12 @@ export class IMIOContactManager extends IMIOBaseManager {
                             let proto = Contacts.deserialize(payload.data);
                             let data = this.buildContact(proto);
                             res.push(data);
-                            if (this.imioClient) {
-                                let index = this.imioClient.contactList.findIndex(it => it.contactId == data.contactId);
+                            if (this.client) {
+                                let index = this.client.contactList.findIndex(it => it.contactId == data.contactId);
                                 if (index == -1) {
-                                    this.imioClient.contactList.push(data);
+                                    this.client.contactList.push(data);
                                 } else {
-                                    this.imioClient.contactList.splice(index,1,data);
+                                    this.client.contactList.splice(index,1,data);
                                 }
                             }
                         }
@@ -101,13 +106,13 @@ export class IMIOContactManager extends IMIOBaseManager {
                 reject(new Error(this.checkSocket()))
                 return;
             }
-            this.imioClient!!.meta.page = page;
+            this.client!!.meta.page = page;
             const param = new Contacts({
-                meta: this.imioClient!!.meta,
-                joinRoomId: this.imioClient!!.meta.roomId,
+                meta: this.client!!.meta,
+                joinRoomId: this.client!!.meta.roomId,
             });
             let res : Array<IMIOContact>  = [];
-            this.imioClient!!.socket?.requestStream({
+            this.client!!.socket?.requestStream({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('contact.black.list'),
             }, 3000,{
@@ -149,11 +154,11 @@ export class IMIOContactManager extends IMIOBaseManager {
                 return;
             }
             const param = new Contacts({
-                meta: this.imioClient!!.meta,
+                meta: this.client!!.meta,
                 userId: userId,
             });
             let res : Array<IMIOContact>  = [];
-            this.imioClient!!.socket?.requestStream({
+            this.client!!.socket?.requestStream({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('contact.byUserId'),
             }, 3000,{
@@ -195,11 +200,11 @@ export class IMIOContactManager extends IMIOBaseManager {
                 return;
             }
             const param = new Contacts({
-                meta: this.imioClient!!.meta,
+                meta: this.client!!.meta,
                 joinRoomId: joinId,
             });
             let res : IMIOContact | null = null;
-            this.imioClient!!.socket?.requestResponse({
+            this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('contact.byJoinId'),
             },{
@@ -247,12 +252,12 @@ export class IMIOContactManager extends IMIOBaseManager {
                 return;
             }
             const param = new Contacts({
-                meta: this.imioClient!!.meta,
+                meta: this.client!!.meta,
                 joinRoomId: groupId,
                 remark: remark
             });
             let res : Object | null = null;
-            this.imioClient!!.socket?.requestResponse({
+            this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('contact.add')
             }, {
@@ -299,15 +304,15 @@ export class IMIOContactManager extends IMIOBaseManager {
                 reject(new Error(this.checkSocket()))
                 return;
             }
-            // console.log("meta :", this.imioClient!!.meta.toObject());
+            // console.log("meta :", this.client!!.meta.toObject());
             const param = new Contacts({
-                meta: this.imioClient!!.meta,
+                meta: this.client!!.meta,
                 account: messageId,
                 apply: apply? 1 : 0,
                 remark: remark
             });
             let res : Object | null = null;
-            this.imioClient!!.socket?.requestResponse({
+            this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('handle.apply')
             }, {
@@ -360,12 +365,12 @@ export class IMIOContactManager extends IMIOBaseManager {
                 return;
             }
             const param = new Contacts({
-                meta: this.imioClient!!.meta,
+                meta: this.client!!.meta,
                 id: contact.contactId,
                 username: remark
             });
             let res : Object | null = null;
-            this.imioClient!!.socket?.requestResponse({
+            this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('contact.username')
             }, {
@@ -417,12 +422,12 @@ export class IMIOContactManager extends IMIOBaseManager {
                 return;
             }
             const param = new Contacts({
-                meta: this.imioClient!!.meta,
+                meta: this.client!!.meta,
                 id: contact.contactId,
                 noise: rule
             });
             let res : Object | null = null;
-            this.imioClient!!.socket?.requestResponse({
+            this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('contact.noise')
             }, {
@@ -478,12 +483,12 @@ export class IMIOContactManager extends IMIOBaseManager {
                 return;
             }
             const param = new Contacts({
-                meta: this.imioClient!!.meta,
+                meta: this.client!!.meta,
                 userId: contact.userId,
                 black: black
             });
             let res : Object | null = null;
-            this.imioClient!!.socket?.requestResponse({
+            this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('contact.black')
             }, {
@@ -534,12 +539,12 @@ export class IMIOContactManager extends IMIOBaseManager {
                 return;
             }
             const param = new Contacts({
-                meta: this.imioClient!!.meta,
+                meta: this.client!!.meta,
                 userId: contact.userId,
                 subgroup: name
             });
             let res : Object | null = null;
-            this.imioClient!!.socket?.requestResponse({
+            this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('contact.subgroup')
             }, {
@@ -589,12 +594,12 @@ export class IMIOContactManager extends IMIOBaseManager {
                 return;
             }
             const param = new Contacts({
-                meta: this.imioClient!!.meta,
+                meta: this.client!!.meta,
                 userId: contact.userId,
                 sort: sort
             });
             let res : Object | null = null;
-            this.imioClient!!.socket?.requestResponse({
+            this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('contact.sort')
             }, {
@@ -628,6 +633,60 @@ export class IMIOContactManager extends IMIOBaseManager {
     }
 
 
+   /**
+     * 消息未签收的
+     */
+    public messageNotSign(): Promise<Array<IMIOMessage>> {
+        return new Promise<any>(async (resolve, reject) => {
+            if (this.checkSocket().length) {
+                reject(new Error(this.checkSocket()))
+                return;
+            }
+            const param = new MessageSign({
+                meta: this.client!!.meta,
+                roomId: this.client!!.meta.roomId,
+            });
+            let res : Array<IMIOMessage>  = [];
+            this.client!!.socket?.requestStream({
+                data: Buffer.from(param.serializeBinary().buffer),
+                metadata: this.buildRoute('message.not.sign')
+            }, 300,{
+                onComplete: () => {
+                    resolve(res)
+                }, onNext: (payload: Payload, isComplete: boolean) => {
+                    try {
+                       if (payload.data) {
+                           let proto = Message.deserialize(payload.data);
+                           let data = this.buildMessage(proto);
+                           res.push(data);
+                           try {
+                               for (let messageListener of this.client!!.messageListener) {
+                                   try {
+                                       messageListener?.onMessage?.(data)
+                                   }catch (e) {
+                                   }
+                               }
+                           }catch (e) {
+                           }
+                       }
+                    }catch (e) {
+                        reject(new Error("IO Client Error"))
+                    }
+                }, onError: (error: Error) => {
+                    let message = error?.message + "";
+                    let errorMsg = this.onError(message);
+                    if (errorMsg.length > 0) {
+                        reject(new Error(errorMsg))
+                    }else {
+                        reject(new Error(message))
+                    }
+                }, onExtension(extendedType: number, content: Buffer | null | undefined, canBeIgnored: boolean): void {
+                }
+            })
+        });
+    }
+
+
 
 
     /*
@@ -638,12 +697,12 @@ export class IMIOContactManager extends IMIOBaseManager {
                 return;
             }
             const param = new Contacts({
-                meta: this.imioClient!!.meta,
+                meta: this.client!!.meta,
                 userId: userId,
                 remark: remark
             });
             let res : Object | null = null;
-            this.imioClient!!.socket?.requestResponse({
+            this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('')
             }, {
@@ -683,7 +742,7 @@ export class IMIOContactManager extends IMIOBaseManager {
     private onError(message: string): string {
         if (message.indexOf("Jwt") > -1) {
             try {
-                this.imioClient!!.clientListener?.onTokenExpired();
+                this.client!!.clientListener?.onTokenExpired();
             } catch (e) {
             }
             return 'IO Token 已过期';
@@ -697,13 +756,13 @@ export class IMIOContactManager extends IMIOBaseManager {
         return "";
     }
     private checkSocket(): string {
-        if (!this.imioClient) {
+        if (!this.client) {
             return ("IO Client 不存在")
         }
-        if (!this.imioClient.socket) {
+        if (!this.client.socket) {
             return ("IO Client 尚未建立连接")
         }
-        if (this.imioClient!!.getTokenAppId() == 0 || (this.imioClient!!.getTokenAppId() != this.imioClient!!.meta.appId)) {
+        if (this.client!!.getTokenAppId() == 0 || (this.client!!.getTokenAppId() != this.client!!.meta.appId)) {
             return ("token中的AppId 与 IMIOClientOption不一致")
         }
         return ''

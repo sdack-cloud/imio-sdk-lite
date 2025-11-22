@@ -18,7 +18,7 @@ export class IMIOTeamManager extends IMIOBaseManager{
     // ========= 单例模式 =========
     private static instance: IMIOTeamManager;
 
-    public imioClient: IMIOClient | null = null;
+    public client: IMIOClient | null = null;
 
     private constructor() {
         super();
@@ -32,7 +32,7 @@ export class IMIOTeamManager extends IMIOBaseManager{
     }
 
     public setClient(client : IMIOClient) : IMIOTeamManager{
-        this.imioClient = client
+        this.client = client
         return this
     }
     // ========= 单例模式 END =========
@@ -46,11 +46,11 @@ export class IMIOTeamManager extends IMIOBaseManager{
                 return;
             }
             const param = new TeamContact({
-                meta: this.imioClient!!.meta,
+                meta: this.client!!.meta,
                 fromTeamId: teamId,
             });
             let res : Array<IMIOMember> = [];
-            this.imioClient!!.socket?.requestStream({
+            this.client!!.socket?.requestStream({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('team.members'),
             }, 300,{
@@ -92,14 +92,14 @@ export class IMIOTeamManager extends IMIOBaseManager{
                 return;
             }
             const param = new Teams({
-                meta: this.imioClient!!.meta,
+                meta: this.client!!.meta,
                 teamname: name,
-                userId: (this.imioClient!!.meta!!.userId),
-                deviceKey: (this.imioClient!!.meta!!.deviceKey),
-                deviceTag: (this.imioClient!!.meta!!.deviceTag),
+                userId: (this.client!!.meta!!.userId),
+                deviceKey: (this.client!!.meta!!.deviceKey),
+                deviceTag: (this.client!!.meta!!.deviceTag),
             });
             let res : IMIOTeam | null  = null;
-            this.imioClient!!.socket?.requestResponse({
+            this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('team.create'),
             }, {
@@ -143,11 +143,11 @@ export class IMIOTeamManager extends IMIOBaseManager{
                 return;
             }
             const param = new Teams({
-                meta: this.imioClient!!.meta,
+                meta: this.client!!.meta,
                 id: teamId,
             });
             let res : IMIOTeam | null  = null;
-            this.imioClient!!.socket?.requestResponse({
+            this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('team.byId'),
             }, {
@@ -194,14 +194,14 @@ export class IMIOTeamManager extends IMIOBaseManager{
                 return;
             }
             const param = new TeamContact({
-                meta: this.imioClient!!.meta,
+                meta: this.client!!.meta,
                 fromTeamId: teamId,
-                userId: (this.imioClient!!.meta!!.userId),
-                deviceKey: (this.imioClient!!.meta!!.deviceKey),
-                deviceTag: (this.imioClient!!.meta!!.deviceTag),
+                userId: (this.client!!.meta!!.userId),
+                deviceKey: (this.client!!.meta!!.deviceKey),
+                deviceTag: (this.client!!.meta!!.deviceTag),
             });
             let res : IMIOTeam | null  = null;
-            this.imioClient!!.socket?.requestResponse({
+            this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('team.join'),
             }, {
@@ -252,14 +252,14 @@ export class IMIOTeamManager extends IMIOBaseManager{
                 return;
             }
             const param = new TeamContact({
-                meta: this.imioClient!!.meta,
+                meta: this.client!!.meta,
                 fromTeamId: teamId,
                 userId: userId,
                 deviceKey: deviceKey,
                 deviceTag: "h5",
             });
             let res : IMIOTeam | null  = null;
-            this.imioClient!!.socket?.requestResponse({
+            this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('team.join'),
             }, {
@@ -306,11 +306,11 @@ export class IMIOTeamManager extends IMIOBaseManager{
                 return;
             }
             const param = new TeamContact({
-                meta: this.imioClient!!.meta,
+                meta: this.client!!.meta,
                 fromTeamId: teamId,
             });
             let res : IMIOTeam | null  = null;
-            this.imioClient!!.socket?.requestResponse({
+            this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('team.disband'),
             },{
@@ -356,11 +356,11 @@ export class IMIOTeamManager extends IMIOBaseManager{
                 return;
             }
             const param = new TeamContact({
-                meta: this.imioClient!!.meta,
+                meta: this.client!!.meta,
                 fromTeamId: teamId,
             });
             let res : IMIOTeam | null  = null;
-            this.imioClient!!.socket?.requestResponse({
+            this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('team.regain'),
             }, {
@@ -407,12 +407,12 @@ export class IMIOTeamManager extends IMIOBaseManager{
                 return;
             }
             const param = new TeamContact({
-                meta: this.imioClient!!.meta,
+                meta: this.client!!.meta,
                 fromTeamId: teamId,
                 muted: operate?1:0
             });
             let res : IMIOTeam | null  = null;
-            this.imioClient!!.socket?.requestResponse({
+            this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('team.muted'),
             }, {
@@ -465,14 +465,14 @@ export class IMIOTeamManager extends IMIOBaseManager{
                 return;
             }
             const param = new TeamContact({
-                meta: this.imioClient!!.meta,
+                meta: this.client!!.meta,
                 fromTeamId: teamId,
                 userId : userId,
                 deviceKey: deviceKey,
                 deviceTag: 'h5'
             });
             let res : IMIOMember | null  = null;
-            this.imioClient!!.socket?.requestResponse({
+            this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('team.member.get'),
             }, {
@@ -522,7 +522,7 @@ export class IMIOTeamManager extends IMIOBaseManager{
     private onError(message: string): string {
         if (message.indexOf("Jwt") > -1) {
             try {
-                this.imioClient!!.clientListener?.onTokenExpired();
+                this.client!!.clientListener?.onTokenExpired();
             } catch (e) {
             }
             return 'IO Token 已过期';
@@ -537,13 +537,13 @@ export class IMIOTeamManager extends IMIOBaseManager{
     }
 
     private checkSocket(): string {
-        if (!this.imioClient) {
+        if (!this.client) {
             return ("IO Client 不存在")
         }
-        if (!this.imioClient.socket) {
+        if (!this.client.socket) {
             return ("IO Client 尚未建立连接")
         }
-        if (this.imioClient!!.getTokenAppId() == 0 || (this.imioClient!!.getTokenAppId() != this.imioClient!!.meta.appId)) {
+        if (this.client!!.getTokenAppId() == 0 || (this.client!!.getTokenAppId() != this.client!!.meta.appId)) {
             return ("token中的AppId 与 IMIOClientOption不一致")
         }
         return ''
