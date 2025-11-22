@@ -457,7 +457,7 @@ export class IMIOChatManager extends IMIOBaseManager {
                 return;
             }
             let teamManager = IMIOTeamManager.getInstance().setClient(this.client!!);
-            let imioMember = await teamManager.getMember(teamId,this.client!!.meta.userId,this.client!!.meta.deviceKey,this.client!!.meta.deviceTag );
+            let imioMember = await teamManager.getMember(teamId,this.client!!.meta.userId,this.client!!.meta.deviceKey );
             if (!imioMember) { // 获取成员主要是获取加入时间
                 reject(new Error('您不在小队中'))
                 return;

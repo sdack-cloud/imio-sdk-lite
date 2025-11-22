@@ -724,6 +724,9 @@ export class IMIOClient extends IMIOBase {
             case 'link-to-many': // 切换接入点
                 this.handleToMany(payloadData)
                 break;
+            case 'shutdown': // 强制剔出
+                this.handleShutdown(payloadData)
+                break;
             case 'gateway': // 切换接入点
                 this.handleGateway(payloadData)
                 break;
@@ -756,6 +759,17 @@ export class IMIOClient extends IMIOBase {
             case 'message-team':
                 this.handleMessageTeam(payloadData);
                 break;
+        }
+    }
+
+    private handleShutdown(payloadData: Buffer | null | undefined) {
+        if (!payloadData) {
+            return;
+        }
+        try{
+            this.clientListener?.onShutdown()
+        }catch (e) {
+
         }
     }
 

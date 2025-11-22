@@ -20,6 +20,8 @@
 
         // 服务端强制下线，设备剔除登录,连接被终止 ，可根据需求重新发起请求
         onDisconnected(): void
+
+        onShutdown(): void
     }
 
     export enum IMIOClientConnectStatus {
