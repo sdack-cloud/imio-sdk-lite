@@ -28,14 +28,26 @@ export class IMIOMessageSender {
 
     public static buildSimpleText(joinId: number,text: string): IMIOMessageSender {
         let sender = new IMIOMessageSender(IMIOMessageType.TEXT);
-
+        if (text.length > 80000) {
+            throw Error("文本太长")
+        }
         sender.joinId = joinId;
         sender.text = text;
+
         return sender;
     }
 
     public static buildImage(joinId: number,host: string,url: string,secret: string = ''): IMIOMessageSender {
         let sender = new IMIOMessageSender(IMIOMessageType.IMG);
+        if (host.length > 200) {
+            throw Error("host 太长")
+        }
+        if (url.length > 2000) {
+            throw Error("URL 太长")
+        }
+        if (secret.length > 500) {
+            throw Error("secret 太长")
+        }
         sender.joinId = joinId;
         sender.host = host;
         sender.url = url;
@@ -44,6 +56,15 @@ export class IMIOMessageSender {
     }
     public static buildFile(joinId: number,host: string,url: string,filename: string,secret: string = ''): IMIOMessageSender {
         let sender = new IMIOMessageSender(IMIOMessageType.FILE);
+        if (host.length > 200) {
+            throw Error("host 太长")
+        }
+        if (url.length > 2000) {
+            throw Error("URL 太长")
+        }
+        if (secret.length > 500) {
+            throw Error("secret 太长")
+        }
         sender.joinId = joinId;
         sender.host = host;
         sender.url = url;
@@ -54,6 +75,15 @@ export class IMIOMessageSender {
 
     public static buildVideo(joinId: number,host: string,url: string,size:number,secret: string = ''): IMIOMessageSender {
         let sender = new IMIOMessageSender(IMIOMessageType.VIDEO);
+        if (host.length > 200) {
+            throw Error("host 太长")
+        }
+        if (url.length > 2000) {
+            throw Error("URL 太长")
+        }
+        if (secret.length > 500) {
+            throw Error("secret 太长")
+        }
         sender.joinId = joinId;
         sender.host = host;
         sender.url = url;
@@ -64,6 +94,15 @@ export class IMIOMessageSender {
 
     public static buildAudio(joinId: number,host: string,url: string,length:number,secret: string = ''): IMIOMessageSender {
         let sender = new IMIOMessageSender(IMIOMessageType.AUDIO);
+        if (host.length > 200) {
+            throw Error("host 太长")
+        }
+        if (url.length > 2000) {
+            throw Error("URL 太长")
+        }
+        if (secret.length > 500) {
+            throw Error("secret 太长")
+        }
         sender.joinId = joinId;
         sender.host = host;
         sender.url = url;
@@ -77,16 +116,25 @@ export class IMIOMessageSender {
      * @param messageId
      */
     public withCite(messageId: string): IMIOMessageSender {
+        if (messageId.length > 100) {
+            throw Error("Cite 太长")
+        }
         this.cite = messageId;
         return this
     }
 
     public withTitle(title: string): IMIOMessageSender {
+        if (title.length > 200) {
+            throw Error("title 太长")
+        }
         this.title = title;
         return this
     }
 
     public withSubtitle(subtitle: string): IMIOMessageSender {
+        if (subtitle.length > 200) {
+            throw Error("subtitle 太长")
+        }
         this.subtitle = subtitle;
         return this
     }
@@ -114,6 +162,9 @@ export class IMIOMessageSender {
         if (this.type == IMIOMessageType.TEXT) {
             throw new Error("Thumb 属性与消息类型不匹配")
         }
+        if (thumb.length > 2000) {
+            throw Error("thumb 太长")
+        }
         this.thumb = thumb;
         return this
     }
@@ -140,6 +191,9 @@ export class IMIOMessageSender {
     public withUrl(url: string): IMIOMessageSender {
         if (this.type == IMIOMessageType.TEXT) {
             throw new Error("Url 属性与消息类型不匹配")
+        }
+        if (url.length > 2000) {
+            throw Error("URL 太长")
         }
         this.url = url;
         return this
