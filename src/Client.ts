@@ -402,7 +402,7 @@ export class IMIOClient extends IMIOBase {
             },
             transport: new WebsocketClientTransport({
                 debug: true,
-                url: `${this.protocol}://${this.hostAddress}`,
+                url: `${this.protocol}://${this.hostAddress}/ws`,
             }),
             responder: {
                 fireAndForget: (payload: Payload, responderStream: OnTerminalSubscriber): Cancellable => {
