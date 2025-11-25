@@ -1,4 +1,5 @@
 import {IMIOClientOption} from "./Option";
+import {TcpClientTransport} from "rsocket-tcp-client";
 import {
     Cancellable,
     OnExtensionSubscriber,
@@ -154,12 +155,12 @@ export class IMIOClient extends IMIOBase {
         try {
             let payload = this.getJwtPayload(token);
             this.tokenAppId = Number(payload.aud)
-            if ((this.tokenAppId+"" != this.option?.appId)) {
+            if ((this.tokenAppId + "" != this.option?.appId)) {
                 if (this.option?.debug) {
                     console.warn("IO：token中的AppId 与 IMIOClientOption不一致")
                 }
             }
-        }catch (e) {
+        } catch (e) {
             this.tokenAppId = 0;
             if (this.option?.debug) {
                 console.warn("IO: token中的AppId 解析错误")
@@ -186,7 +187,7 @@ export class IMIOClient extends IMIOBase {
         return this.deviceId;
     }
 
-    public getUserInfo() : Object | null {
+    public getUserInfo(): Object | null {
         return this.account
     }
 
@@ -194,37 +195,38 @@ export class IMIOClient extends IMIOBase {
      * 会过滤引用相等的
      * @param listener
      */
-    public addMessageListener(listener:Partial<IMIOMessageListener>) {
+    public addMessageListener(listener: Partial<IMIOMessageListener>) {
         let index = this.messageListener.findIndex(it => it === listener);
         if (index == -1) {
             this.messageListener.push(listener)
         }
     }
 
-    public removeMessageListener(listener:Partial<IMIOMessageListener>) {
-        let indexs = this.messageListener.filter(it => it === listener).map((_,index) => index);
+    public removeMessageListener(listener: Partial<IMIOMessageListener>) {
+        let indexs = this.messageListener.filter(it => it === listener).map((_, index) => index);
         if (indexs.length > 0) {
             for (let index of indexs) {
-                this.messageListener.splice(index,1)
+                this.messageListener.splice(index, 1)
             }
         }
     }
+
     /**
      * 会过滤引用相等的
      * @param listener
      */
-    public addTeamListener(listener:Partial<IMIOTeamListener>) {
+    public addTeamListener(listener: Partial<IMIOTeamListener>) {
         let index = this.teamListener.findIndex(it => it === listener);
         if (index == -1) {
             this.teamListener.push(listener)
         }
     }
 
-    public removeTeamListener(listener:Partial<IMIOTeamListener>) {
-        let indexs = this.teamListener.filter(it => it === listener).map((_,index) => index);
+    public removeTeamListener(listener: Partial<IMIOTeamListener>) {
+        let indexs = this.teamListener.filter(it => it === listener).map((_, index) => index);
         if (indexs.length > 0) {
             for (let index of indexs) {
-                this.teamListener.splice(index,1)
+                this.teamListener.splice(index, 1)
             }
         }
     }
@@ -233,18 +235,18 @@ export class IMIOClient extends IMIOBase {
      * 会过滤引用相等的
      * @param listener
      */
-    public addContactListener(listener:Partial<IMIOContactListener>) {
+    public addContactListener(listener: Partial<IMIOContactListener>) {
         let index = this.contactListener.findIndex(it => it === listener);
         if (index == -1) {
             this.contactListener.push(listener)
         }
     }
 
-    public removeContactListener(listener:Partial<IMIOContactListener>) {
-        let indexs = this.contactListener.filter(it => it === listener).map((_,index) => index);
+    public removeContactListener(listener: Partial<IMIOContactListener>) {
+        let indexs = this.contactListener.filter(it => it === listener).map((_, index) => index);
         if (indexs.length > 0) {
             for (let index of indexs) {
-                this.contactListener.splice(index,1)
+                this.contactListener.splice(index, 1)
             }
         }
     }
@@ -285,7 +287,7 @@ export class IMIOClient extends IMIOBase {
             this.clientListener = clientListener;
         }
         this.token = token;
-        if (!this.option){
+        if (!this.option) {
             throw new Error("IOClientOption 缺失")
         }
         try {
@@ -294,7 +296,7 @@ export class IMIOClient extends IMIOBase {
         } catch (e) {
             this.tokenAppId = 0;
         }
-        if (this.tokenAppId == 0 || (this.tokenAppId+'' != this.option?.appId)) {
+        if (this.tokenAppId == 0 || (this.tokenAppId + '' != this.option?.appId)) {
             throw new Error("token中的AppId 与 IMIOClientOption不一致")
         }
         if (this.option?.debug) {
@@ -367,9 +369,9 @@ export class IMIOClient extends IMIOBase {
             phone: accountId > 0 ? phone : "",
             deviceModel: this.deviceModel,
             deviceName: this.deviceName,
-            ip: this.ip+'',
-            country:this.country+'',
-            city:this.city+''
+            ip: this.ip + '',
+            country: this.country + '',
+            city: this.city + ''
         });
 
         let metadata = null;
@@ -387,6 +389,16 @@ export class IMIOClient extends IMIOBase {
         if (this.option?.debug) {
             console.warn("IO host", this.hostAddress);
         }
+        // let clientTransport = new TcpClientTransport({
+        //     connectionOptions: {
+        //         host: this.hostAddress,
+        //         port: 8000,
+        //     },
+        // });
+        let clientTransport = new WebsocketClientTransport({
+            debug: true,
+            url: `${this.protocol}://${this.hostAddress}/ws`,
+        });
         let connector = new RSocketConnector({
             setup: {
                 keepAlive: 5 * 1000,
@@ -400,10 +412,7 @@ export class IMIOClient extends IMIOBase {
                     ]),
                 },
             },
-            transport: new WebsocketClientTransport({
-                debug: true,
-                url: `${this.protocol}://${this.hostAddress}/ws`,
-            }),
+            transport: clientTransport,
             responder: {
                 fireAndForget: (payload: Payload, responderStream: OnTerminalSubscriber): Cancellable => {
 
@@ -416,7 +425,7 @@ export class IMIOClient extends IMIOBase {
                         route = metadataMap.get("route");
                     }
                     if (this.option?.debug) {
-                        console.warn("IO fireAndForget...",route);
+                        console.warn("IO fireAndForget...", route);
                     }
                     this.routerParse(route, payloadData)
 
@@ -437,7 +446,7 @@ export class IMIOClient extends IMIOBase {
                         route = metadataMap.get("route");
                     }
                     if (this.option?.debug) {
-                        console.warn("IO requestResponse...",route);
+                        console.warn("IO requestResponse...", route);
                     }
                     this.routerParse(route, payloadData)
 
@@ -462,18 +471,18 @@ export class IMIOClient extends IMIOBase {
                 }
             } catch (e) {
             }
-            try{
+            try {
                 if (this.connectStatus == IMIOClientConnectStatus.SUCCESS
                     || this.connectStatus == IMIOClientConnectStatus.SUCCESS_PULL) {
                     this.ping()
                 }
-            }catch (e) {
+            } catch (e) {
             }
         }, 2 * 1000);
         connector.connect()
             .then((res) => {
                 if (this.option?.debug) {
-                console.warn("IO connect success...")
+                    console.warn("IO connect success...")
                 }
                 if (this.account) {
                     this.account.status = IMIOContactStatus.online
@@ -493,7 +502,7 @@ export class IMIOClient extends IMIOBase {
                 res.onClose(err => {
                     let message = err?.message + "";
                     if (this.option?.debug) {
-                    console.error("IOServer connect onClose", message)
+                        console.error("IOServer connect onClose", message)
                     }
                     if (this.account) {
                         this.account.status = IMIOContactStatus.done
@@ -503,7 +512,7 @@ export class IMIOClient extends IMIOBase {
             })
             .catch(err => {
                 if (this.option?.debug) {
-                console.error("IOServer Connect Error", err);
+                    console.error("IOServer Connect Error", err);
                 }
                 if (err) {
                     let message = err?.message + "";
@@ -546,7 +555,7 @@ export class IMIOClient extends IMIOBase {
         if (!this.option!!.appId.length) {
             return;
         }
-        if (!this.socket){
+        if (!this.socket) {
             return;
         }
         const connect = new Connect({
@@ -662,7 +671,7 @@ export class IMIOClient extends IMIOBase {
             try {
                 this.connectStatus = IMIOClientConnectStatus.TOKEN_EXPIRED;
                 this.clientListener?.onTokenExpired();
-                this.clientListener?.onConnectStatus(this.connectStatus,this.retryConnectNum);
+                this.clientListener?.onConnectStatus(this.connectStatus, this.retryConnectNum);
             } catch (e) {
             }
             return;
@@ -766,9 +775,9 @@ export class IMIOClient extends IMIOBase {
         if (!payloadData) {
             return;
         }
-        try{
+        try {
             this.clientListener?.onShutdown()
-        }catch (e) {
+        } catch (e) {
 
         }
     }
@@ -777,7 +786,7 @@ export class IMIOClient extends IMIOBase {
         if (!payloadData) {
             return;
         }
-        try{
+        try {
             let data = Gateway.deserialize(payloadData);
             let hostNode = this.buildGateway(data);
             let find = this.hostNodeList.find(it => it.host == it.host);
@@ -786,7 +795,7 @@ export class IMIOClient extends IMIOBase {
             } else {
                 find.current = hostNode.current;
             }
-        }catch (e) {
+        } catch (e) {
 
         }
     }
@@ -857,7 +866,7 @@ export class IMIOClient extends IMIOBase {
                 console.warn("IO meta", this.meta.toObject());
                 console.warn("IO userinfo", this.account);
             }
-        }catch (e) {
+        } catch (e) {
         }
     }
 
@@ -874,7 +883,7 @@ export class IMIOClient extends IMIOBase {
             } else {
                 this.contactList.push(data);
             }
-        }catch (e) {
+        } catch (e) {
         }
     }
 
@@ -906,10 +915,11 @@ export class IMIOClient extends IMIOBase {
                 for (const listener of this.contactListener) {
                     try {
                         listener.onContactChange?.(false, this.contactList[findIndex]);
-                    } catch (e) {}
+                    } catch (e) {
+                    }
                 }
             }
-        }catch (e) {
+        } catch (e) {
         }
     }
 
@@ -923,16 +933,17 @@ export class IMIOClient extends IMIOBase {
                 IMIOContactManager.getInstance().getContactByUserId(deserialize.text).then(res => {
                     let findIndex = this.contactList.findIndex(it => !it.isGroup && it.userId == res.userId);
                     if (findIndex > -1) {
-                        this.contactList.splice(findIndex,1, res)
+                        this.contactList.splice(findIndex, 1, res)
                         for (const listener of this.contactListener) {
                             try {
                                 listener.onContactChange?.(false, res);
-                            } catch (e) {}
+                            } catch (e) {
+                            }
                         }
                     }
                 })
             }
-        }catch (e) {
+        } catch (e) {
         }
     }
 
@@ -946,10 +957,10 @@ export class IMIOClient extends IMIOBase {
             for (const listener of this.messageListener) {
                 try {
                     listener.onNotice?.(message);
-                }catch (_) {
+                } catch (_) {
                 }
             }
-        }catch (e) {
+        } catch (e) {
         }
     }
 
@@ -962,16 +973,16 @@ export class IMIOClient extends IMIOBase {
             let message = this.buildMessage(deserialize);
             try {
                 let chatManager = IMIOChatManager.getInstance().setClient(this);
-                chatManager.signMessage(message.messageId,message.joinId).then()
-            }catch (_) {
+                chatManager.signMessage(message.messageId, message.joinId).then()
+            } catch (_) {
             }
             for (const listener of this.messageListener) {
                 try {
                     listener.onMessage?.(message);
-                }catch (_) {
+                } catch (_) {
                 }
             }
-        }catch (e) {
+        } catch (e) {
         }
     }
 
@@ -985,14 +996,12 @@ export class IMIOClient extends IMIOBase {
             for (const listener of this.teamListener) {
                 try {
                     listener.onMessage?.(message);
-                }catch (_) {
+                } catch (_) {
                 }
             }
-        }catch (e) {
+        } catch (e) {
         }
     }
-
-
 
 
 }
