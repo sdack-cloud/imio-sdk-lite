@@ -107,16 +107,16 @@ export class IMIOChatManager extends IMIOBaseManager {
             }
 
             let contactManager = IMIOContactManager.getInstance().setClient(this.client!!);
-            let imioContact = await contactManager.getContactByJoinId(sender.joinId);
-            if (!imioContact) {
+            let ioContact = await contactManager.getContactByJoinId(sender.joinId);
+            if (!ioContact) {
                 reject(new Error("联系人不存在"))
                 return
             }
-            if (imioContact.isGroup) {
+            if (ioContact.isGroup) {
                 reject(new Error("联系人是群组"))
                 return;
             }
-            let message1 = this.buildMessageProto(imioContact.userId,sender);
+            let message1 = this.buildMessageProto(ioContact.userId,sender);
             let res: Object | null = null;
             this.client!!.socket?.requestResponse({
                 data: Buffer.from(message1.serializeBinary().buffer),
@@ -159,12 +159,12 @@ export class IMIOChatManager extends IMIOBaseManager {
                 return;
             }
             let contactManager = IMIOContactManager.getInstance().setClient(this.client!!);
-            let imioContact = await contactManager.getContactByJoinId(sender.joinId);
-            if (!imioContact) {
+            let ioContact = await contactManager.getContactByJoinId(sender.joinId);
+            if (!ioContact) {
                 reject(new Error("联系人不存在"))
                 return
             }
-            if (!imioContact.isGroup) {
+            if (!ioContact.isGroup) {
                 reject(new Error("联系人不是群组"))
                 return;
             }
@@ -400,8 +400,8 @@ export class IMIOChatManager extends IMIOBaseManager {
                 return;
             }
             let contactManager = IMIOContactManager.getInstance().setClient(this.client!!);
-            let imioContact = await contactManager.getContactByJoinId(joinId);
-            if (!imioContact) {
+            let ioContact = await contactManager.getContactByJoinId(joinId);
+            if (!ioContact) {
                 reject(new Error("联系人不存在"))
                 return
             }
@@ -409,8 +409,8 @@ export class IMIOChatManager extends IMIOBaseManager {
             this.client!!.meta.pageSize = pageSize;
             const param = new Message({
                 meta: this.client!!.meta,
-                roomId: imioContact.joinId,
-                created: imioContact.joinTime
+                roomId: ioContact.joinId,
+                created: ioContact.joinTime
             });
             let res : Array<IMIOMessage>  = [];
             this.client!!.socket?.requestStream({
@@ -457,8 +457,8 @@ export class IMIOChatManager extends IMIOBaseManager {
                 return;
             }
             let teamManager = IMIOTeamManager.getInstance().setClient(this.client!!);
-            let imioMember = await teamManager.getMember(teamId,this.client!!.meta.userId,this.client!!.meta.deviceKey );
-            if (!imioMember) { // 获取成员主要是获取加入时间
+            let ioMember = await teamManager.getMember(teamId,this.client!!.meta.userId,this.client!!.meta.deviceKey );
+            if (!ioMember) { // 获取成员主要是获取加入时间
                 reject(new Error('您不在小队中'))
                 return;
             }
@@ -467,7 +467,7 @@ export class IMIOChatManager extends IMIOBaseManager {
             const param = new Message({
                 meta: this.client!!.meta,
                 roomId: teamId,
-                created: imioMember.joinTime
+                created: ioMember.joinTime
             });
             let res : Array<IMIOMessage>  = [];
             this.client!!.socket?.requestStream({
@@ -606,50 +606,50 @@ export class IMIOChatManager extends IMIOBaseManager {
 
 
     private senderBuildMessage(sender: IMIOMessageSender): IMIOMessage {
-        let imioMessage = new IMIOMessage();
-        imioMessage.messageId = sender.messageId;
-        imioMessage.joinId = sender.joinId;
-        imioMessage.cite = sender.cite;
-        imioMessage.type = sender.type;
-        imioMessage.title = sender.title;
-        imioMessage.subtitle = sender.subtitle;
-        imioMessage.text = sender.text;
-        imioMessage.secret = sender.secret;
-        imioMessage.thumb = sender.thumb;
-        imioMessage.host = sender.host;
-        imioMessage.url = sender.url;
-        imioMessage.lng = sender.lng;
-        imioMessage.lat = sender.lat;
-        imioMessage.size = sender.size;
-        imioMessage.length = sender.length;
+        let ioMessage = new IMIOMessage();
+        ioMessage.messageId = sender.messageId;
+        ioMessage.joinId = sender.joinId;
+        ioMessage.cite = sender.cite;
+        ioMessage.type = sender.type;
+        ioMessage.title = sender.title;
+        ioMessage.subtitle = sender.subtitle;
+        ioMessage.text = sender.text;
+        ioMessage.secret = sender.secret;
+        ioMessage.thumb = sender.thumb;
+        ioMessage.host = sender.host;
+        ioMessage.url = sender.url;
+        ioMessage.lng = sender.lng;
+        ioMessage.lat = sender.lat;
+        ioMessage.size = sender.size;
+        ioMessage.length = sender.length;
         if (sender.hintList && sender.hintList.length) {
-            imioMessage.hintList = [];
+            ioMessage.hintList = [];
             for (let item of sender.hintList) {
-                let imioMessage1 = new IMIOMessage();
-                imioMessage1.destId = item.targetId
-                imioMessage1.destName = item.targetName
-                imioMessage.hintList.push(imioMessage1)
+                let ioMessage1 = new IMIOMessage();
+                ioMessage1.destId = item.targetId
+                ioMessage1.destName = item.targetName
+                ioMessage.hintList.push(ioMessage1)
             }
         }
         if (sender.notifyList && sender.notifyList.length) {
-            imioMessage.notifyList = [];
+            ioMessage.notifyList = [];
             for (let item of sender.notifyList) {
-                let imioMessage1 = new IMIOMessage();
-                imioMessage1.destId = item.targetId
-                imioMessage1.destName = item.targetName
-                imioMessage.notifyList.push(imioMessage1)
+                let ioMessage1 = new IMIOMessage();
+                ioMessage1.destId = item.targetId
+                ioMessage1.destName = item.targetName
+                ioMessage.notifyList.push(ioMessage1)
             }
         }
         if (sender.quietlyList && sender.quietlyList.length) {
-            imioMessage.quietlyList = [];
+            ioMessage.quietlyList = [];
             for (let item of sender.quietlyList) {
-                let imioMessage1 = new IMIOMessage();
-                imioMessage1.destId = item.targetId
-                imioMessage1.destName = item.targetName
-                imioMessage.quietlyList.push(imioMessage1)
+                let ioMessage1 = new IMIOMessage();
+                ioMessage1.destId = item.targetId
+                ioMessage1.destName = item.targetName
+                ioMessage.quietlyList.push(ioMessage1)
             }
         }
-        return imioMessage;
+        return ioMessage;
     }
 
     private buildMessageProto(destId:string,sender: IMIOMessageSender): Message {

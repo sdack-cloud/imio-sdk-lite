@@ -268,94 +268,94 @@ export class IMIOBase {
     }
 
     protected buildMessage(proto: MessagePB.Message) : IMIOMessage {
-        let imioMessage = new IMIOMessage();
-        imioMessage.messageId = proto.messageId;
-        imioMessage.joinId = proto.roomId;
-        imioMessage.tag = proto.tag;
-        imioMessage.fromId = proto.fromId;
-        imioMessage.fromName = proto.fromName;
-        imioMessage.destId = proto.destId;
-        imioMessage.destName = proto.destName;
-        imioMessage.cite = proto.cite;
-        imioMessage.type = this.subtype(proto.subtype);
-        imioMessage.title = proto.title;
-        imioMessage.subtitle = proto.subtitle;
-        imioMessage.text = proto.text;
-        imioMessage.secret = proto.secret;
-        imioMessage.thumb = proto.thumb;
-        imioMessage.host = proto.host;
-        imioMessage.url = proto.url;
-        imioMessage.lng = proto.lng;
-        imioMessage.lat = proto.lat;
-        imioMessage.size = proto.size;
-        imioMessage.length = proto.length;
-        imioMessage.sent = proto.sent;
-        imioMessage.deviceKey = proto.deviceKey;
-        imioMessage.deviceTag = proto.deviceTag;
-        imioMessage.sentDate = new Date(proto.sent);
-        imioMessage.revoke = proto.revoke.length != 0;
+        let ioMessage = new IMIOMessage();
+        ioMessage.messageId = proto.messageId;
+        ioMessage.joinId = proto.roomId;
+        ioMessage.tag = proto.tag;
+        ioMessage.fromId = proto.fromId;
+        ioMessage.fromName = proto.fromName;
+        ioMessage.destId = proto.destId;
+        ioMessage.destName = proto.destName;
+        ioMessage.cite = proto.cite;
+        ioMessage.type = this.subtype(proto.subtype);
+        ioMessage.title = proto.title;
+        ioMessage.subtitle = proto.subtitle;
+        ioMessage.text = proto.text;
+        ioMessage.secret = proto.secret;
+        ioMessage.thumb = proto.thumb;
+        ioMessage.host = proto.host;
+        ioMessage.url = proto.url;
+        ioMessage.lng = proto.lng;
+        ioMessage.lat = proto.lat;
+        ioMessage.size = proto.size;
+        ioMessage.length = proto.length;
+        ioMessage.sent = proto.sent;
+        ioMessage.deviceKey = proto.deviceKey;
+        ioMessage.deviceTag = proto.deviceTag;
+        ioMessage.sentDate = new Date(proto.sent);
+        ioMessage.revoke = proto.revoke.length != 0;
 
         switch (proto.talkMode) {
             case 1:
-                imioMessage.talk = IMIOMessageTalk.default;
+                ioMessage.talk = IMIOMessageTalk.default;
                 break;
             case 2:
-                imioMessage.talk = IMIOMessageTalk.group;
+                ioMessage.talk = IMIOMessageTalk.group;
                 break;
             case 3:
-                imioMessage.talk = IMIOMessageTalk.team;
+                ioMessage.talk = IMIOMessageTalk.team;
                 break;
         }
 
         switch (proto.label) {
             case 'tip':
-                imioMessage.label = IMIOMessageLabel.tip;
+                ioMessage.label = IMIOMessageLabel.tip;
                 break;
             case 'notice':
-                imioMessage.label = IMIOMessageLabel.notice;
+                ioMessage.label = IMIOMessageLabel.notice;
                 break;
             case 'action':
-                imioMessage.label = IMIOMessageLabel.action;
+                ioMessage.label = IMIOMessageLabel.action;
                 break;
             case 'cc':
-                imioMessage.label = IMIOMessageLabel.notify;
+                ioMessage.label = IMIOMessageLabel.notify;
                 break;
             case 'bcc':
-                imioMessage.label = IMIOMessageLabel.quietly;
+                ioMessage.label = IMIOMessageLabel.quietly;
                 break;
         }
 
         if (proto.citeData) {
-            imioMessage.citeData = this.buildMessage(proto.citeData)
+            ioMessage.citeData = this.buildMessage(proto.citeData)
         }
         if (proto.remind && proto.remind.length) {
-            imioMessage.hintList = [];
+            ioMessage.hintList = [];
             for (let item of proto.remind) {
-                let imioMessage1 = new IMIOMessage();
-                imioMessage1.fromId = item.fromId;
-                imioMessage1.destId = item.destId;
-                imioMessage1.destName = item.nickname
-                imioMessage1.joinId = item.roomId
-                imioMessage.hintList.push(imioMessage1);
+                let ioMessage1 = new IMIOMessage();
+                ioMessage1.fromId = item.fromId;
+                ioMessage1.destId = item.destId;
+                ioMessage1.destName = item.nickname
+                ioMessage1.joinId = item.roomId
+                ioMessage.hintList.push(ioMessage1);
             }
         }
         if (proto.cc && proto.cc.length) {
-            imioMessage.notifyList = [];
-            imioMessage.quietlyList = [];
+            ioMessage.notifyList = [];
+            ioMessage.quietlyList = [];
             for (let item of proto.cc) {
-                let imioMessage1 = new IMIOMessage();
-                imioMessage1.fromId = item.fromId;
-                imioMessage1.destId = item.destId;
-                imioMessage1.destName = item.nickname
-                imioMessage1.joinId = item.roomId
+                let ioMessage1 = new IMIOMessage();
+                ioMessage1.fromId = item.fromId;
+                ioMessage1.destId = item.destId;
+                ioMessage1.destName = item.nickname
+                ioMessage1.joinId = item.roomId
                 if (item.sort == 0) {
-                    imioMessage.notifyList.push(imioMessage1);
+                    ioMessage.notifyList.push(ioMessage1);
                 } else {
-                    imioMessage.quietlyList.push(imioMessage1);
+                    ioMessage.quietlyList.push(ioMessage1);
                 }
             }
         }
-        return imioMessage;
+        return ioMessage;
     }
 
     private subtype(d: number):string {
