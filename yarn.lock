@@ -2006,6 +2006,13 @@ rsocket-messaging@^1.0.0-alpha.3:
     rsocket-composite-metadata "^1.0.0-alpha.3"
     rsocket-core "^1.0.0-alpha.3"
 
+rsocket-tcp-client@^1.0.0-alpha.3:
+  version "1.0.0-alpha-rxjs-adapter-optional-metadata.0"
+  resolved "https://registry.npmjs.org/rsocket-tcp-client/-/rsocket-tcp-client-1.0.0-alpha-rxjs-adapter-optional-metadata.0.tgz"
+  integrity sha512-yMJx3oTuY0MpbiUcb0aE/3RCdcqtjQQ6SmIOXDpeltd9xHeYfh3PmR3cD2N+lnlAcfF1HahyMTKRkJ5k0HxG7Q==
+  dependencies:
+    rsocket-core "^1.0.0-alpha-rxjs-adapter-optional-metadata.0"
+
 rsocket-websocket-client@^1.0.0-alpha.3:
   version "1.0.0-alpha-rxjs-adapter-optional-metadata.0"
   resolved "https://registry.npmjs.org/rsocket-websocket-client/-/rsocket-websocket-client-1.0.0-alpha-rxjs-adapter-optional-metadata.0.tgz"
