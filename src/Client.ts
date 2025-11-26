@@ -87,7 +87,7 @@ export class IMIOClient extends IMIOBase {
         }
 
         this.option = option;
-        if (option.protocol) {
+        if (option.isWss) {
             this.protocol = "wss"
         }
         this.userAgent = window.navigator.userAgent;

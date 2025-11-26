@@ -7,7 +7,7 @@ export class IMIOClientOption {
     private _host: string = '';
     private _hosts: Array<string> = [];
     private _debug: boolean = false;
-    private _protocol: boolean = false;
+    private _wss: boolean = false;
 
     private constructor() {
     }
@@ -41,8 +41,8 @@ export class IMIOClientOption {
         return this
     }
 
-    public whitProtocol(col: boolean) : IMIOClientOption {
-        this._protocol = col
+    public whitWss(col: boolean) : IMIOClientOption {
+        this._wss = col
         return this
     }
 
@@ -75,8 +75,8 @@ export class IMIOClientOption {
     get debug(): boolean {
         return this._debug;
     }
-    get protocol(): boolean {
-        return this._protocol;
+    get isWss(): boolean {
+        return this._wss;
     }
 
 }
