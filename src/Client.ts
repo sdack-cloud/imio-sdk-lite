@@ -1,5 +1,4 @@
 import {IMIOClientOption} from "./Option";
-import {TcpClientTransport} from "rsocket-tcp-client";
 import {
     Cancellable,
     OnExtensionSubscriber,
@@ -19,6 +18,7 @@ import {IMIOAccountUser} from "./entity/AccountUser";
 import {IMIOChatManager} from "./manager/ChatManager";
 import {IMIOContactManager} from "./manager/ContactManager";
 import fp from '@fingerprintjs/fingerprintjs';
+import {decryptAES} from "./utils/encrypt";
 
 // =======
 import {only as MetaPB} from "./protocol/Meta";
@@ -37,6 +37,7 @@ import {IMIOHostNode} from "./entity/HostNode";
 import {IMIOContactStatus} from "./entity/Contact";
 import {IMIODeviceStatus} from "./entity/Status";
 import {IMIOTeamListener} from "./listener/TeamListener";
+import {post} from "axios";
 
 
 export class IMIOClient extends IMIOBase {
@@ -723,8 +724,35 @@ export class IMIOClient extends IMIOBase {
      */
     private hostAddressProvider(): string {
         if (this.option && this.option?.host) {
-            return this.option.host.toString()
+            let hosts = this.option!!.host.split(":");
+            let index = this.hostNodeList.findIndex(it => it.host == hosts[0]);
+            if (index == -1) {
+                let hostNode = new IMIOHostNode();
+                hostNode.host = hosts[0];
+                if (hosts.length > 1) {
+                    hostNode.port = hostNode[1];
+                }
+                this.hostNodeList.push(hostNode);
+            }
         }
+        if (this.hostNodeList.length == 1) {
+            let hostNode1 = this.hostNodeList[0];
+            let host = hostNode1.host;
+            if (hostNode1.port.length) {
+                host = host+":"+hostNode1.port
+            }
+            return host
+        } else if (this.hostNodeList.length > 1) {
+            let sortedArr = this.hostNodeList.sort((a,b) =>
+                (b.max - b.current) - (a.max - a.current))
+            let hostNode1 = sortedArr[0];
+            let host = hostNode1.host;
+            if (hostNode1.port.length) {
+                host = host+":"+hostNode1.port
+            }
+            return host
+        }
+
         return ''
     }
 
@@ -789,11 +817,14 @@ export class IMIOClient extends IMIOBase {
         try {
             let data = Gateway.deserialize(payloadData);
             let hostNode = this.buildGateway(data);
-            let find = this.hostNodeList.find(it => it.host == it.host);
+            let s = this.deviceId.substring(0,16);
+            let host = decryptAES(hostNode.host,s,s);
+            hostNode.host = host;
+            let find = this.hostNodeList.find(it => it.host == host);
             if (!find) {
                 this.hostNodeList.push(hostNode);
             } else {
-                find.current = hostNode.current;
+                find.current = hostNode.current
             }
         } catch (e) {
 
@@ -812,15 +843,21 @@ export class IMIOClient extends IMIOBase {
         } catch (e) {
         }
         const pongData = Connect.deserialize(payloadData);
-        this.hostAddress = pongData.ip;
         try {
-            let ips = pongData.ip.split(':');
+            let s = this.deviceId.substring(0,16);
+            let ipAddr = decryptAES(pongData.ip,s,s);
+            this.hostAddress = ipAddr
+            let ips = ipAddr.split(':');
             let hostNode = new IMIOHostNode();
             hostNode.max = pongData.appId;
             hostNode.current = pongData.roomId;
             hostNode.name = pongData.nickname;
-            hostNode.host = ips[0];
-            hostNode.port = ips[1];
+            if (ips.length > 1) {
+                hostNode.host = ips[0];
+                hostNode.port = ips[1];
+            } else {
+                hostNode.host = ipAddr;
+            }
             let find = this.hostNodeList.find(it => it.name == hostNode.name);
             if (find) {
                 find.max = hostNode.max;

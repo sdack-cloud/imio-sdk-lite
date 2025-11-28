@@ -151,11 +151,11 @@ export class IMIOBase {
         let data = new IMIOHostNode();
         if (proto.ip == 4) {
             data.type = true;
-            data.host = `${proto.one}.${proto.two}.${proto.three}.${proto.four}`
         } else {
             data.type = false;
-            data.host = proto.host
         }
+        data.name = proto.name
+        data.host = proto.host
         data.max = proto.max
         data.port = proto.port
         data.region = proto.remark
