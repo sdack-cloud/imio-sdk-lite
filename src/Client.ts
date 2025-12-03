@@ -161,6 +161,11 @@ export class IMIOClient extends IMIOBase {
                     console.warn("IO：token中的AppId 与 IMIOClientOption不一致")
                 }
             }
+            if (this.account) {
+                if (this.isClose() && this.retryTimer < 0 ) {
+                    this.callSocket(Number(this.account!.accountId))
+                }
+            }
         } catch (e) {
             this.tokenAppId = 0;
             if (this.option?.debug) {
