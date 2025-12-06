@@ -47,7 +47,6 @@ export class IMIOClient extends IMIOBase {
 
     private constructor() {
         super();
-        this.getIP1();
     }
 
     public static getInstance(): IMIOClient {
@@ -359,9 +358,7 @@ export class IMIOClient extends IMIOBase {
         }
         // 获取ip地址
         try {
-            if (this.ip.length <= 6) {
-                this.getIP1();
-            }
+            this.getIP1();
         } catch (e) {
         }
 
