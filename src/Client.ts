@@ -37,7 +37,6 @@ import {IMIOHostNode} from "./entity/HostNode";
 import {IMIOContactStatus} from "./entity/Contact";
 import {IMIODeviceStatus} from "./entity/Status";
 import {IMIOTeamListener} from "./listener/TeamListener";
-import {post} from "axios";
 
 
 export class IMIOClient extends IMIOBase {
@@ -161,7 +160,7 @@ export class IMIOClient extends IMIOBase {
                 }
             }
             if (this.account) {
-                if (this.isClose() && this.retryTimer < 0 ) {
+                if (this.isClose() && (!this.retryTimer) ) {
                     this.callSocket(Number(this.account!.accountId))
                 }
             }
@@ -732,7 +731,7 @@ export class IMIOClient extends IMIOBase {
                 let hostNode = new IMIOHostNode();
                 hostNode.host = hosts[0];
                 if (hosts.length > 1) {
-                    hostNode.port = hostNode[1];
+                    hostNode.port = hosts[1];
                 }
                 this.hostNodeList.push(hostNode);
             }

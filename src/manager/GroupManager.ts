@@ -54,12 +54,19 @@ export class IMIOGroupManager extends IMIOBaseManager{
             }
             this.client!!.meta.page = page;
             this.client!!.meta.pageSize = pageSie;
+            let groupAccount  = 0;
+            try {
+                if (mode > 1) {
+                    groupAccount = Number(name)
+                }
+            }catch (e) {
+            }
             const param = new Rooms({
                 meta: this.client!!.meta,
                 talkMode: mode,
-                type: mode == 1? 'protected':'protected',
-                roomname: mode == 1?'': name,
-                account: mode == 1?name: ''
+                type: mode == 1? 'protected':'',
+                roomname: mode == 1 ?'': groupAccount?'':name,
+                account: mode == 1?name: groupAccount?groupAccount+"":""
             });
             let res : Array<IMIOGroup>  = [];
             this.client!!.socket?.requestStream({
