@@ -1,6 +1,8 @@
 
 
     export interface IMIOClientListener {
+        id : string;
+
         /**
          *  客户端已连接
          */

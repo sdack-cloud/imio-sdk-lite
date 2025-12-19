@@ -200,18 +200,16 @@ export class IMIOClient extends IMIOBase {
      * @param listener
      */
     public addMessageListener(listener: Partial<IMIOMessageListener>) {
-        let index = this.messageListener.findIndex(it => it === listener);
+        let index = this.messageListener.findIndex(it => it.id == listener.id);
         if (index == -1) {
             this.messageListener.push(listener)
         }
     }
 
     public removeMessageListener(listener: Partial<IMIOMessageListener>) {
-        let indexs = this.messageListener.filter(it => it === listener).map((_, index) => index);
-        if (indexs.length > 0) {
-            for (let index of indexs) {
-                this.messageListener.splice(index, 1)
-            }
+        let index = this.messageListener.findIndex(it => it.id == listener.id);
+        if (index > -1) {
+            this.messageListener.splice(index, 1)
         }
     }
 
@@ -220,18 +218,16 @@ export class IMIOClient extends IMIOBase {
      * @param listener
      */
     public addTeamListener(listener: Partial<IMIOTeamListener>) {
-        let index = this.teamListener.findIndex(it => it === listener);
+        let index = this.teamListener.findIndex(it => it.id == listener.id);
         if (index == -1) {
             this.teamListener.push(listener)
         }
     }
 
     public removeTeamListener(listener: Partial<IMIOTeamListener>) {
-        let indexs = this.teamListener.filter(it => it === listener).map((_, index) => index);
-        if (indexs.length > 0) {
-            for (let index of indexs) {
-                this.teamListener.splice(index, 1)
-            }
+        let index = this.teamListener.findIndex(it => it.id == listener.id);
+        if (index > -1) {
+            this.teamListener.splice(index, 1)
         }
     }
 
@@ -240,18 +236,16 @@ export class IMIOClient extends IMIOBase {
      * @param listener
      */
     public addContactListener(listener: Partial<IMIOContactListener>) {
-        let index = this.contactListener.findIndex(it => it === listener);
+        let index = this.contactListener.findIndex(it => it.id == listener.id);
         if (index == -1) {
             this.contactListener.push(listener)
         }
     }
 
     public removeContactListener(listener: Partial<IMIOContactListener>) {
-        let indexs = this.contactListener.filter(it => it === listener).map((_, index) => index);
-        if (indexs.length > 0) {
-            for (let index of indexs) {
-                this.contactListener.splice(index, 1)
-            }
+        let index = this.contactListener.findIndex(it => it.id == listener.id);
+        if (index > -1) {
+            this.contactListener.splice(index, 1)
         }
     }
 

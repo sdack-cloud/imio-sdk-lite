@@ -1,6 +1,7 @@
 import {IMIOContact} from "../entity/Contact";
 
 export interface IMIOGroupListener {
+    id : string;
 
     /**
      * 联系人变化通知

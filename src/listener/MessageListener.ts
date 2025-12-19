@@ -3,6 +3,8 @@ import {IMIOMessage} from "../entity/Message";
 
 export interface IMIOMessageListener {
 
+    id : string;
+
     /**
      * 系统通知
      * message.label 有2种类型
