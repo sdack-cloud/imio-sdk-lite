@@ -521,6 +521,61 @@ export class IMIOContactManager extends IMIOBaseManager {
         });
     }
 
+    /**
+     * 删除好友
+     * @param joinId
+     */
+    public delete(joinId: number): Promise<any> {
+        return new Promise<any>(async (resolve, reject) => {
+            if (this.checkSocket().length) {
+                reject(new Error(this.checkSocket()))
+                return;
+            }
+
+            let contact = await this.getContactByJoinId(joinId);
+            if (!contact) {
+                reject(new Error('联系人获取失败'))
+                return;
+            }
+            if (contact.isGroup) {
+                reject(new Error('群禁止设置'))
+                return;
+            }
+            const param = new Contacts({
+                meta: this.client!!.meta,
+                userId: contact.userId,
+            });
+            let res : Object | null = null;
+            this.client!!.socket?.requestResponse({
+                data: Buffer.from(param.serializeBinary().buffer),
+                metadata: this.buildRoute('contact.delete')
+            }, {
+                onComplete: () => {
+                    resolve(res)
+                }, onNext: (payload: Payload, isComplete: boolean) => {
+                    try {
+                       if (payload.data) {
+                           if (isComplete) {
+                               resolve("")
+                           }
+                       }
+                    }catch (e) {
+                        reject(new Error("IO Client Error"))
+                    }
+                }, onError: (error: Error) => {
+                    let message = error?.message + "";
+                    let errorMsg = this.onError(message);
+                    if (errorMsg.length > 0) {
+                        reject(new Error(errorMsg))
+                    }else {
+                        reject(new Error(message))
+                    }
+                }, onExtension(extendedType: number, content: Buffer | null | undefined, canBeIgnored: boolean): void {
+                }
+            })
+        });
+    }
+
 
     /**
      * 设置 联系人分组
