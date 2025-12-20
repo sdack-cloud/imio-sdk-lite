@@ -1,5 +1,5 @@
 
-export class IMIOMessage {
+export class IOIMessage {
     messageId:string = '';
     joinId : number = 0;
     fromId: string = '';
@@ -19,22 +19,22 @@ export class IMIOMessage {
     lat: string = '';
     size:number = 0;
     length :number = 0;
-    label: IMIOMessageLabel | null = null;
+    label: IOIMessageLabel | null = null;
     tag: string = '';
     sent: string = '';
     deviceKey: string = '';
     deviceTag: string = '';
     revoke: boolean = false;
-    talk:IMIOMessageTalk = IMIOMessageTalk.default;
-    citeData: IMIOMessage | null = null;
+    talk:IOIMessageTalk = IOIMessageTalk.default;
+    citeData: IOIMessage | null = null;
     sentDate: Date | null = null;
 
-    hintList:Array<IMIOMessage> | null = null;// 提及人列表
-    notifyList:Array<IMIOMessage> | null = null // 抄送人
-    quietlyList:Array<IMIOMessage> | null = null // 密送人
+    hintList:Array<IOIMessage> | null = null;// 提及人列表
+    notifyList:Array<IOIMessage> | null = null // 抄送人
+    quietlyList:Array<IOIMessage> | null = null // 密送人
 }
 
-export enum IMIOMessageLabel {
+export enum IOIMessageLabel {
     tip = 'tip', // 提示消息
     notice = 'notice', // 通知消息
     action = 'action', // 审批消息
@@ -42,7 +42,7 @@ export enum IMIOMessageLabel {
     quietly = 'quietly', // 密送消息
 }
 
-export enum IMIOMessageTalk {
+export enum IOIMessageTalk {
     default = 1, // 联系人
     group = 2, // 群组
     team = 3 // 小队

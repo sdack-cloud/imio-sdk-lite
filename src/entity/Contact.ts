@@ -1,4 +1,4 @@
-export class IMIOContact {
+export class IOIContact {
     contactId : number = 0;
     userId : string = '';
     joinId : number = 0;
@@ -6,7 +6,7 @@ export class IMIOContact {
     username : string = '';
     avatar : string = '';
     subgroup : string = '';
-    status : IMIOContactStatus = IMIOContactStatus.done;
+    status : IOIContactStatus = IOIContactStatus.done;
     isGroup: boolean = false;
     joinTime: string = '';
     isMuted: boolean = false;
@@ -14,12 +14,12 @@ export class IMIOContact {
     sort: number = 0;
 }
 
-export enum IMIOContactNotice {
+export enum IOIContactNotice {
     normal = 1, // 正常提醒
     not_notify = 2, // 不通知
     reject = 0 // 拒收信息
 }
-export enum IMIOContactStatus {
+export enum IOIContactStatus {
     done = '',
     offline = 'offline',
     online = 'online',

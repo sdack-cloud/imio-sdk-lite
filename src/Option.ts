@@ -1,6 +1,6 @@
 
 
-export class IMIOClientOption {
+export class IOIClientOption {
 
     private _appId: string = '';
     private _issuer: string = '';
@@ -13,35 +13,35 @@ export class IMIOClientOption {
     }
 
 
-    public static newBuilder() : IMIOClientOption {
-        return new IMIOClientOption()
+    public static newBuilder() : IOIClientOption {
+        return new IOIClientOption()
     }
 
-    public whitAppId(appId: string) : IMIOClientOption {
+    public whitAppId(appId: string) : IOIClientOption {
         this._appId = appId
         return this
     }
-    public whitIssuer(issuer: string) : IMIOClientOption {
+    public whitIssuer(issuer: string) : IOIClientOption {
         this._issuer = issuer
         return this
     }
-    public whitHost(host: string) : IMIOClientOption {
+    public whitHost(host: string) : IOIClientOption {
         this._host = host
         this._hosts.push(host);
         return this
     }
 
-    public whitHosts(hosts: Array<string>) : IMIOClientOption {
+    public whitHosts(hosts: Array<string>) : IOIClientOption {
         this._hosts = hosts
         return this
     }
 
-    public whitDebug(debug: boolean) : IMIOClientOption {
+    public whitDebug(debug: boolean) : IOIClientOption {
         this._debug = debug
         return this
     }
 
-    public whitWss(col: boolean) : IMIOClientOption {
+    public whitWss(col: boolean) : IOIClientOption {
         this._wss = col
         return this
     }

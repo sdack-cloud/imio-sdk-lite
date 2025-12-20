@@ -7,13 +7,13 @@ import {
     ExplicitMimeTimeEntry,
     WellKnownMimeType
 } from "rsocket-composite-metadata";
-import {IMIOMessage, IMIOMessageLabel, IMIOMessageTalk} from "./entity/Message";
-import {IMIOAccountUser} from "./entity/AccountUser";
-import {IMIOContact, IMIOContactStatus} from "./entity/Contact";
-import {IMIOMember} from "./entity/Member";
-import {IMIOHostNode} from "./entity/HostNode";
-import {IMIODeviceStatus} from "./entity/Status";
-import {IMIOGroup, IMIOGroupType} from "./entity/Group";
+import {IOIMessage, IOIMessageLabel, IOIMessageTalk} from "./entity/Message";
+import {IOIAccountUser} from "./entity/AccountUser";
+import {IOIContact, IOIContactStatus} from "./entity/Contact";
+import {IOIMember} from "./entity/Member";
+import {IOIHostNode} from "./entity/HostNode";
+import {IOIDeviceStatus} from "./entity/Status";
+import {IOIGroup, IOIGroupType} from "./entity/Group";
 import axios, {Axios, AxiosInstance} from "axios";
 // =======
 import {only as MetaPB} from "./protocol/Meta";
@@ -24,17 +24,17 @@ import {only as TeamContactPB} from "./protocol/TeamContact";
 import {only as MessagePB} from "./protocol/Message";
 import {only as GatewayPB} from "./protocol/Gateway";
 import {only as UserStatusPB} from "./protocol/UserStatus";
-import {IMIOTeam} from "./entity/Team";
+import {IOITeam} from "./entity/Team";
 
 
-export class IMIOBase {
+export class IOIBase {
 
     protected static _version = 1.0
 
     public token = ""; // token
     protected tokenAppId = 0;
     public pageSize = 300;
-    protected account : IMIOAccountUser | null = null; // 这里为 null 是为了，切换用户后重新赋值
+    protected account : IOIAccountUser | null = null; // 这里为 null 是为了，切换用户后重新赋值
     protected deviceId = ""; // 浏览器指纹码
     protected deviceName = ""; //浏览器设备
     protected deviceModel = ""; //浏览器设备
@@ -46,7 +46,7 @@ export class IMIOBase {
         return this.tokenAppId;
     }
     public readonly meta: MetaPB.Meta =  new MetaPB.Meta({
-        v: IMIOBase._version,
+        v: IOIBase._version,
         deviceTag: 'h5',
         page: 0, pageSize: 30
     });
@@ -57,7 +57,7 @@ export class IMIOBase {
 
     public socket?: RSocket | null;
 
-    public readonly contactList:Array<IMIOContact> = [];
+    public readonly contactList:Array<IOIContact> = [];
 
     protected getIP1() {
         axios.get("https://api.ipbase.com/v1/json/").then(res => {
@@ -133,8 +133,8 @@ export class IMIOBase {
         return compositeMetaData;
     }
 
-    protected buildDeviceStatus(proto: UserStatusPB.UserStatus) : IMIODeviceStatus {
-        let data = new IMIODeviceStatus();
+    protected buildDeviceStatus(proto: UserStatusPB.UserStatus) : IOIDeviceStatus {
+        let data = new IOIDeviceStatus();
         data.deviceTag = proto.deviceTag;
         data.deviceId = proto.device;
         data.deviceKey = proto.deviceKey;
@@ -147,8 +147,8 @@ export class IMIOBase {
     }
 
 
-    protected buildGateway(proto: GatewayPB.Gateway) : IMIOHostNode {
-        let data = new IMIOHostNode();
+    protected buildGateway(proto: GatewayPB.Gateway) : IOIHostNode {
+        let data = new IOIHostNode();
         if (proto.ip == 4) {
             data.type = true;
         } else {
@@ -162,8 +162,8 @@ export class IMIOBase {
         data.current = proto.sort
         return data;
     }
-    protected buildContact(proto: ContactPB.Contacts): IMIOContact {
-        let data = new IMIOContact();
+    protected buildContact(proto: ContactPB.Contacts): IOIContact {
+        let data = new IOIContact();
         data.contactId = proto.id
         data.joinId = proto.joinRoomId;
         data.userId = proto.userId;
@@ -176,23 +176,23 @@ export class IMIOBase {
         data.isMuted = proto.muted == 1;
         data.noise = proto.noise;
         data.sort = proto.sort;
-        if (proto.status == IMIOContactStatus.offline) {
-            data.status = IMIOContactStatus.offline;
+        if (proto.status == IOIContactStatus.offline) {
+            data.status = IOIContactStatus.offline;
         }
-        if (proto.status == IMIOContactStatus.online) {
-            data.status = IMIOContactStatus.online;
+        if (proto.status == IOIContactStatus.online) {
+            data.status = IOIContactStatus.online;
         }
-        if (proto.status == IMIOContactStatus.online_busy) {
-            data.status = IMIOContactStatus.online_busy;
+        if (proto.status == IOIContactStatus.online_busy) {
+            data.status = IOIContactStatus.online_busy;
         }
-        if (proto.status == IMIOContactStatus.online_leave) {
-            data.status = IMIOContactStatus.online_leave;
+        if (proto.status == IOIContactStatus.online_leave) {
+            data.status = IOIContactStatus.online_leave;
         }
         return data;
     }
 
-    protected buildMember(proto: ContactPB.Contacts): IMIOMember {
-        let data = new IMIOMember();
+    protected buildMember(proto: ContactPB.Contacts): IOIMember {
+        let data = new IOIMember();
         data.memberId = proto.id
         data.joinId = proto.joinRoomId;
         data.userId = proto.userId;
@@ -207,8 +207,8 @@ export class IMIOBase {
         return data;
     }
 
-    protected buildGroup(proto: RoomPB.Rooms): IMIOGroup {
-        let data = new IMIOGroup();
+    protected buildGroup(proto: RoomPB.Rooms): IOIGroup {
+        let data = new IOIGroup();
         data.groupId = proto.id;
         data.joinId = proto.id;
         data.groupName = proto.roomname
@@ -227,21 +227,21 @@ export class IMIOBase {
         data.ask = proto.ask;
         switch (proto.type) {
             case 'protected':
-                data.type = IMIOGroupType.protected;
+                data.type = IOIGroupType.protected;
                 break;
             case 'public':
-                data.type = IMIOGroupType.public;
+                data.type = IOIGroupType.public;
                 break;
             case 'private':
-                data.type = IMIOGroupType.private;
+                data.type = IOIGroupType.private;
                 break;
         }
 
         return data;
     }
 
-    protected buildTeamMember(proto: TeamContactPB.TeamContact): IMIOMember {
-        let data = new IMIOMember();
+    protected buildTeamMember(proto: TeamContactPB.TeamContact): IOIMember {
+        let data = new IOIMember();
         data.memberId = proto.id
         data.joinId = proto.joinTeamId;
         data.userId = proto.userId+"";
@@ -256,8 +256,8 @@ export class IMIOBase {
         return data;
     }
 
-    protected buildTeam(proto: TeamPB.Teams): IMIOTeam {
-        let data = new IMIOTeam();
+    protected buildTeam(proto: TeamPB.Teams): IOITeam {
+        let data = new IOITeam();
         data.teamId = proto.id;
         data.teamName = proto.teamname
         data.teamNumber = proto.account;
@@ -267,8 +267,8 @@ export class IMIOBase {
         return data;
     }
 
-    protected buildMessage(proto: MessagePB.Message) : IMIOMessage {
-        let ioMessage = new IMIOMessage();
+    protected buildMessage(proto: MessagePB.Message) : IOIMessage {
+        let ioMessage = new IOIMessage();
         ioMessage.messageId = proto.messageId;
         ioMessage.joinId = proto.roomId;
         ioMessage.tag = proto.tag;
@@ -297,31 +297,31 @@ export class IMIOBase {
 
         switch (proto.talkMode) {
             case 1:
-                ioMessage.talk = IMIOMessageTalk.default;
+                ioMessage.talk = IOIMessageTalk.default;
                 break;
             case 2:
-                ioMessage.talk = IMIOMessageTalk.group;
+                ioMessage.talk = IOIMessageTalk.group;
                 break;
             case 3:
-                ioMessage.talk = IMIOMessageTalk.team;
+                ioMessage.talk = IOIMessageTalk.team;
                 break;
         }
 
         switch (proto.label) {
             case 'tip':
-                ioMessage.label = IMIOMessageLabel.tip;
+                ioMessage.label = IOIMessageLabel.tip;
                 break;
             case 'notice':
-                ioMessage.label = IMIOMessageLabel.notice;
+                ioMessage.label = IOIMessageLabel.notice;
                 break;
             case 'action':
-                ioMessage.label = IMIOMessageLabel.action;
+                ioMessage.label = IOIMessageLabel.action;
                 break;
             case 'cc':
-                ioMessage.label = IMIOMessageLabel.notify;
+                ioMessage.label = IOIMessageLabel.notify;
                 break;
             case 'bcc':
-                ioMessage.label = IMIOMessageLabel.quietly;
+                ioMessage.label = IOIMessageLabel.quietly;
                 break;
         }
 
@@ -331,7 +331,7 @@ export class IMIOBase {
         if (proto.remind && proto.remind.length) {
             ioMessage.hintList = [];
             for (let item of proto.remind) {
-                let ioMessage1 = new IMIOMessage();
+                let ioMessage1 = new IOIMessage();
                 ioMessage1.fromId = item.fromId;
                 ioMessage1.destId = item.destId;
                 ioMessage1.destName = item.nickname
@@ -343,7 +343,7 @@ export class IMIOBase {
             ioMessage.notifyList = [];
             ioMessage.quietlyList = [];
             for (let item of proto.cc) {
-                let ioMessage1 = new IMIOMessage();
+                let ioMessage1 = new IOIMessage();
                 ioMessage1.fromId = item.fromId;
                 ioMessage1.destId = item.destId;
                 ioMessage1.destName = item.nickname

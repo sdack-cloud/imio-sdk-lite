@@ -1,40 +1,40 @@
-import {IMIOClient} from "../Client";
+import {IOIClient} from "../Client";
 import {Payload} from "rsocket-core";
-import {IMIOBaseManager} from "./BaseManager";
-import {IMIOMember} from "../entity/Member";
-import {IMIOGroup, IMIOGroupType} from "../entity/Group";
-import {IMIOContactManager} from "./ContactManager";
-import {IMIOContact} from "../entity/Contact";
+import {IOIBaseManager} from "./BaseManager";
+import {IOIMember} from "../entity/Member";
+import {IOIGroup, IOIGroupType} from "../entity/Group";
+import {IOIContactManager} from "./ContactManager";
+import {IOIContact} from "../entity/Contact";
 
 //  ======
 import {only as ContactPB} from "../protocol/Contacts";
 import {only as RoomPB} from "../protocol/Rooms";
 import Contacts = ContactPB.Contacts;
 import Rooms = RoomPB.Rooms;
-import {IMIOMessage} from "../entity/Message";
+import {IOIMessage} from "../entity/Message";
 import {only as MessageSignPB} from "../protocol/MessageSign";
 import {only as MessagePB} from "../protocol/Message";
 import MessageSign = MessageSignPB.MessageSign;
 import Message = MessagePB.Message;
-export class IMIOGroupManager extends IMIOBaseManager{
+export class IOIGroupManager extends IOIBaseManager{
 
     // ========= 单例模式 =========
-    private static instance: IMIOGroupManager;
+    private static instance: IOIGroupManager;
 
-    public client: IMIOClient | null = null;
+    public client: IOIClient | null = null;
 
     private constructor() {
         super();
     }
 
-    public static getInstance(): IMIOGroupManager {
-        if (!IMIOGroupManager.instance) {
-            IMIOGroupManager.instance = new IMIOGroupManager();
+    public static getInstance(): IOIGroupManager {
+        if (!IOIGroupManager.instance) {
+            IOIGroupManager.instance = new IOIGroupManager();
         }
-        return IMIOGroupManager.instance;
+        return IOIGroupManager.instance;
     }
 
-    public setClient(client : IMIOClient) : IMIOGroupManager{
+    public setClient(client : IOIClient) : IOIGroupManager{
         this.client = client
         return this
     }
@@ -46,7 +46,7 @@ export class IMIOGroupManager extends IMIOBaseManager{
      * @param mode 1,人员，2 群组
      * @param name 人员用账号，群组用名称
      */
-    public search(mode:number,name: string,page: number = 1, pageSie: number = 50): Promise<Array<IMIOGroup>> {
+    public search(mode:number,name: string,page: number = 1, pageSie: number = 50): Promise<Array<IOIGroup>> {
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -68,7 +68,7 @@ export class IMIOGroupManager extends IMIOBaseManager{
                 roomname: mode == 1 ?'': groupAccount?'':name,
                 account: mode == 1?name: groupAccount?groupAccount+"":""
             });
-            let res : Array<IMIOGroup>  = [];
+            let res : Array<IOIGroup>  = [];
             this.client!!.socket?.requestStream({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('group.search'),
@@ -104,7 +104,7 @@ export class IMIOGroupManager extends IMIOBaseManager{
      * 获取群成员
       * @param groupId joinId
      */
-    public getMembers(groupId: number,page: number = 1): Promise<Array<IMIOMember>> {
+    public getMembers(groupId: number,page: number = 1): Promise<Array<IOIMember>> {
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -115,7 +115,7 @@ export class IMIOGroupManager extends IMIOBaseManager{
                 meta: this.client!!.meta,
                 joinRoomId: groupId,
             });
-            let res : Array<IMIOMember>  = [];
+            let res : Array<IOIMember>  = [];
             this.client!!.socket?.requestStream({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('group.members'),
@@ -151,7 +151,7 @@ export class IMIOGroupManager extends IMIOBaseManager{
      * 获取一个群组
      * @param groupId
      */
-    public getGroupById(groupId: number): Promise<IMIOGroup> {
+    public getGroupById(groupId: number): Promise<IOIGroup> {
         return new Promise<any>(async (resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -162,7 +162,7 @@ export class IMIOGroupManager extends IMIOBaseManager{
                 meta: this.client!!.meta,
                 joinRoomId: groupId,
             });
-            let res : IMIOGroup | null = null;
+            let res : IOIGroup | null = null;
             this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('group.byId')
@@ -204,14 +204,14 @@ export class IMIOGroupManager extends IMIOBaseManager{
      * @param name 群名称
      * @param member 群成员
      */
-    public createGroup(name: string, member: Array<string>): Promise<IMIOGroup> {
+    public createGroup(name: string, member: Array<string>): Promise<IOIGroup> {
         return new Promise<any>(async (resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
                 return;
             }
 
-            let contacts = await IMIOContactManager.getInstance()
+            let contacts = await IOIContactManager.getInstance()
                 .setClient(this.client!!).getContactList();
             if (contacts.length <= 0) {
                 reject(new Error("联系人获取失败"))
@@ -230,7 +230,7 @@ export class IMIOGroupManager extends IMIOBaseManager{
                 roomname: name,
                 users: userIds
             });
-            let res : IMIOGroup | null = null;
+            let res : IOIGroup | null = null;
             this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('group.create')
@@ -272,7 +272,7 @@ export class IMIOGroupManager extends IMIOBaseManager{
      * @param groupId
      * @param remark
      */
-    public joinGroup(groupId: number,remark:string): Promise<Array<IMIOMember>> {
+    public joinGroup(groupId: number,remark:string): Promise<Array<IOIMember>> {
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -283,7 +283,7 @@ export class IMIOGroupManager extends IMIOBaseManager{
                 joinRoomId: groupId,
                 remark:remark
             });
-            let res : Array<IMIOMember>  = [];
+            let res : Array<IOIMember>  = [];
             this.client!!.socket?.requestStream({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('group.join'),
@@ -323,7 +323,7 @@ export class IMIOGroupManager extends IMIOBaseManager{
      * @param groupId
      * @param userId
      */
-    public groupInvite(groupId : number,userId: string): Promise<IMIOGroup> {
+    public groupInvite(groupId : number,userId: string): Promise<IOIGroup> {
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -479,7 +479,7 @@ export class IMIOGroupManager extends IMIOBaseManager{
      * @param joinId
      * @param userId 继任者
      */
-    public changeOwner(joinId : number,userId: string): Promise<IMIOContact> {
+    public changeOwner(joinId : number,userId: string): Promise<IOIContact> {
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -583,7 +583,7 @@ export class IMIOGroupManager extends IMIOBaseManager{
      * @param userId 继任者
      * @param operate true 拉黑，false 恢复
      */
-    public addBlack(joinId : number,userId: string,operate: boolean): Promise<IMIOContact> {
+    public addBlack(joinId : number,userId: string,operate: boolean): Promise<IOIContact> {
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -637,7 +637,7 @@ export class IMIOGroupManager extends IMIOBaseManager{
      * @param userId 继任者
      * @param operate true 禁言，false 恢复
      */
-    public memberMuted(joinId : number,userId: string,operate: boolean): Promise<IMIOContact> {
+    public memberMuted(joinId : number,userId: string,operate: boolean): Promise<IOIContact> {
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -690,7 +690,7 @@ export class IMIOGroupManager extends IMIOBaseManager{
      * @param joinId
      * @param operate true 禁言，false 恢复
      */
-    public groupMuted(joinId : number,operate: boolean): Promise<IMIOGroup> {
+    public groupMuted(joinId : number,operate: boolean): Promise<IOIGroup> {
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -795,7 +795,7 @@ export class IMIOGroupManager extends IMIOBaseManager{
      * @param joinId
      * @param name
      */
-    public setGroupName(joinId : number,name: string): Promise<IMIOGroup> {
+    public setGroupName(joinId : number,name: string): Promise<IOIGroup> {
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -846,7 +846,7 @@ export class IMIOGroupManager extends IMIOBaseManager{
      * @param joinId
      * @param avatar
      */
-    public setGroupAvatar(joinId : number,avatar: string): Promise<IMIOGroup> {
+    public setGroupAvatar(joinId : number,avatar: string): Promise<IOIGroup> {
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -898,7 +898,7 @@ export class IMIOGroupManager extends IMIOBaseManager{
      * @param joinId
      * @param depict
      */
-    public setGroupDepict(joinId : number,depict: string): Promise<IMIOGroup> {
+    public setGroupDepict(joinId : number,depict: string): Promise<IOIGroup> {
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -950,7 +950,7 @@ export class IMIOGroupManager extends IMIOBaseManager{
      * @param userId
      * @param name
      */
-    public setGroupMemberName(joinId : number,userId: string,name: string): Promise<IMIOGroup> {
+    public setGroupMemberName(joinId : number,userId: string,name: string): Promise<IOIGroup> {
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -1002,7 +1002,7 @@ export class IMIOGroupManager extends IMIOBaseManager{
      * @param joinId
      * @param type
      */
-    public setGroupType(joinId : number,type: IMIOGroupType): Promise<string> {
+    public setGroupType(joinId : number,type: IOIGroupType): Promise<string> {
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -1054,7 +1054,7 @@ export class IMIOGroupManager extends IMIOBaseManager{
      * @param joinId
      * @param operate true 可以，false 不可以
      */
-    public isPrivateChat(joinId : number,operate: boolean): Promise<IMIOGroup> {
+    public isPrivateChat(joinId : number,operate: boolean): Promise<IOIGroup> {
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -1105,7 +1105,7 @@ export class IMIOGroupManager extends IMIOBaseManager{
      * @param joinId
      * @param operate true 是，false 否
      */
-    public isApply(joinId : number,operate: boolean): Promise<IMIOGroup> {
+    public isApply(joinId : number,operate: boolean): Promise<IOIGroup> {
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -1156,7 +1156,7 @@ export class IMIOGroupManager extends IMIOBaseManager{
      * @param joinId
      * @param operate true 是，false 否
      */
-    public isInviteApply(joinId : number,operate: boolean): Promise<IMIOGroup> {
+    public isInviteApply(joinId : number,operate: boolean): Promise<IOIGroup> {
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -1208,7 +1208,7 @@ export class IMIOGroupManager extends IMIOBaseManager{
      * @param joinId
      * @param operate true 是，false 否
      */
-    public isInvite(joinId : number,operate: boolean): Promise<IMIOGroup> {
+    public isInvite(joinId : number,operate: boolean): Promise<IOIGroup> {
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -1260,7 +1260,7 @@ export class IMIOGroupManager extends IMIOBaseManager{
      * @param joinId
      * @param operate true 是，false 否
      */
-    public isRevokeMessage(joinId : number,operate: boolean): Promise<IMIOGroup> {
+    public isRevokeMessage(joinId : number,operate: boolean): Promise<IOIGroup> {
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -1311,13 +1311,13 @@ export class IMIOGroupManager extends IMIOBaseManager{
     /**
      * 消息未签收的
      */
-    public messageNotSign(joinId : number): Promise<Array<IMIOMessage>> {
+    public messageNotSign(joinId : number): Promise<Array<IOIMessage>> {
         return new Promise<any>(async (resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
                 return;
             }
-            let contacts = await IMIOContactManager.getInstance()
+            let contacts = await IOIContactManager.getInstance()
                 .setClient(this.client!!).getContactByJoinId(joinId);
             if (!contacts) {
                 reject(new Error("联系人获取失败"))
@@ -1327,7 +1327,7 @@ export class IMIOGroupManager extends IMIOBaseManager{
                 meta: this.client!!.meta,
                 roomId: contacts.joinId,
             });
-            let res : Array<IMIOMessage>  = [];
+            let res : Array<IOIMessage>  = [];
             this.client!!.socket?.requestStream({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('message.not.sign')
@@ -1394,7 +1394,7 @@ export class IMIOGroupManager extends IMIOBaseManager{
             return ("IO Client 尚未建立连接")
         }
         if (this.client!!.getTokenAppId() == 0 || (this.client!!.getTokenAppId() != this.client!!.meta.appId)) {
-            return ("token中的AppId 与 IMIOClientOption不一致")
+            return ("token中的AppId 与 IOIClientOption不一致")
         }
         return ''
     }

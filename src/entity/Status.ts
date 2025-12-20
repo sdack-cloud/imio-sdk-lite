@@ -1,6 +1,6 @@
 
 
-export class IMIODeviceStatus {
+export class IOIDeviceStatus {
     deviceId:string = '';
     deviceKey:string = '';
     deviceTag:string = '';

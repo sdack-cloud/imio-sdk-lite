@@ -1,4 +1,4 @@
-import {IMIOClientOption} from "./Option";
+import {IOIClientOption} from "./Option";
 import {
     Cancellable,
     OnExtensionSubscriber,
@@ -10,13 +10,13 @@ import {
 import {WebsocketClientTransport} from "rsocket-websocket-client";
 
 import {encodeBearerAuthMetadata, encodeCompositeMetadata, WellKnownMimeType} from "rsocket-composite-metadata";
-import {IMIOBase} from "./Base";
-import {IMIOClientConnectStatus, IMIOClientListener} from "./listener/ClientListener";
-import {IMIOMessageListener} from "./listener/MessageListener";
-import {IMIOContactListener} from "./listener/ContactListener";
-import {IMIOAccountUser} from "./entity/AccountUser";
-import {IMIOChatManager} from "./manager/ChatManager";
-import {IMIOContactManager} from "./manager/ContactManager";
+import {IOIBase} from "./Base";
+import {IOIClientConnectStatus, IOIClientListener} from "./listener/ClientListener";
+import {IOIMessageListener} from "./listener/MessageListener";
+import {IOIContactListener} from "./listener/ContactListener";
+import {IOIAccountUser} from "./entity/AccountUser";
+import {IOIChatManager} from "./manager/ChatManager";
+import {IOIContactManager} from "./manager/ContactManager";
 import fp from '@fingerprintjs/fingerprintjs';
 import {decryptAES} from "./utils/encrypt";
 
@@ -33,27 +33,27 @@ import ContactStatus = ContactStatusPB.ContactStatus;
 import Contacts = ContactPB.Contacts;
 import Message = MessagePB.Message;
 import Gateway = GatewayPB.Gateway;
-import {IMIOHostNode} from "./entity/HostNode";
-import {IMIOContactStatus} from "./entity/Contact";
-import {IMIODeviceStatus} from "./entity/Status";
-import {IMIOTeamListener} from "./listener/TeamListener";
+import {IOIHostNode} from "./entity/HostNode";
+import {IOIContactStatus} from "./entity/Contact";
+import {IOIDeviceStatus} from "./entity/Status";
+import {IOITeamListener} from "./listener/TeamListener";
 
 
-export class IMIOClient extends IMIOBase {
+export class IOIClient extends IOIBase {
 
     // ========= 单例模式 =========
-    private static instance: IMIOClient;
+    private static instance: IOIClient;
 
     private constructor() {
         super();
     }
 
-    public static getInstance(): IMIOClient {
-        if (!IMIOClient.instance) {
-            IMIOClient.instance = new IMIOClient();
+    public static getInstance(): IOIClient {
+        if (!IOIClient.instance) {
+            IOIClient.instance = new IOIClient();
             fp.load().then(it => it.get())
                 .then(res => {
-                    IMIOClient.instance.deviceId = res.visitorId;
+                    IOIClient.instance.deviceId = res.visitorId;
                     // this._instance.meta?.appId = Number(option.appId);
                 });
             try {
@@ -65,12 +65,12 @@ export class IMIOClient extends IMIOBase {
                 // console.error("浏览器环境不支持 Buffer")
             }
         }
-        return IMIOClient.instance;
+        return IOIClient.instance;
     }
 
     // ========= 单例模式 END =========
 
-    public whitOption(option: IMIOClientOption): IMIOClient {
+    public whitOption(option: IOIClientOption): IOIClient {
 
         if (!option) {
             throw new Error("初始化失败")
@@ -127,13 +127,13 @@ export class IMIOClient extends IMIOBase {
 
     private hostAddress = ""; // 当前决策的链接地址
 
-    private readonly hostNodeList: Array<IMIOHostNode> = [];
+    private readonly hostNodeList: Array<IOIHostNode> = [];
 
-    protected option ?: IMIOClientOption;
+    protected option ?: IOIClientOption;
 
-    public clientListener ?: IMIOClientListener
+    public clientListener ?: IOIClientListener
 
-    public connectStatus: IMIOClientConnectStatus = IMIOClientConnectStatus.DONE // 连接中的状态
+    public connectStatus: IOIClientConnectStatus = IOIClientConnectStatus.DONE // 连接中的状态
 
     private retryTimer: NodeJS.Timeout | number = -2; // 重试连接 定时器
 
@@ -143,20 +143,20 @@ export class IMIOClient extends IMIOBase {
 
     private unexpectedly: number = 0;// 意外关闭次数
 
-    readonly messageListener: Array<Partial<IMIOMessageListener>> = []
+    readonly messageListener: Array<Partial<IOIMessageListener>> = []
 
-    readonly contactListener: Array<Partial<IMIOContactListener>> = []
+    readonly contactListener: Array<Partial<IOIContactListener>> = []
 
-    readonly teamListener: Array<Partial<IMIOTeamListener>> = []
+    readonly teamListener: Array<Partial<IOITeamListener>> = []
 
-    public setToken(token: string): IMIOClient {
+    public setToken(token: string): IOIClient {
         this.token = token;
         try {
             let payload = this.getJwtPayload(token);
             this.tokenAppId = Number(payload.aud)
             if ((this.tokenAppId + "" != this.option?.appId)) {
                 if (this.option?.debug) {
-                    console.warn("IO：token中的AppId 与 IMIOClientOption不一致")
+                    console.warn("IO：token中的AppId 与 IOIClientOption不一致")
                 }
             }
             if (this.account) {
@@ -199,14 +199,14 @@ export class IMIOClient extends IMIOBase {
      * 会过滤引用相等的
      * @param listener
      */
-    public addMessageListener(listener: Partial<IMIOMessageListener>) {
+    public addMessageListener(listener: Partial<IOIMessageListener>) {
         let index = this.messageListener.findIndex(it => it.id == listener.id);
         if (index == -1) {
             this.messageListener.push(listener)
         }
     }
 
-    public removeMessageListener(listener: Partial<IMIOMessageListener>) {
+    public removeMessageListener(listener: Partial<IOIMessageListener>) {
         let index = this.messageListener.findIndex(it => it.id == listener.id);
         if (index > -1) {
             this.messageListener.splice(index, 1)
@@ -217,14 +217,14 @@ export class IMIOClient extends IMIOBase {
      * 会过滤引用相等的
      * @param listener
      */
-    public addTeamListener(listener: Partial<IMIOTeamListener>) {
+    public addTeamListener(listener: Partial<IOITeamListener>) {
         let index = this.teamListener.findIndex(it => it.id == listener.id);
         if (index == -1) {
             this.teamListener.push(listener)
         }
     }
 
-    public removeTeamListener(listener: Partial<IMIOTeamListener>) {
+    public removeTeamListener(listener: Partial<IOITeamListener>) {
         let index = this.teamListener.findIndex(it => it.id == listener.id);
         if (index > -1) {
             this.teamListener.splice(index, 1)
@@ -235,25 +235,25 @@ export class IMIOClient extends IMIOBase {
      * 会过滤引用相等的
      * @param listener
      */
-    public addContactListener(listener: Partial<IMIOContactListener>) {
+    public addContactListener(listener: Partial<IOIContactListener>) {
         let index = this.contactListener.findIndex(it => it.id == listener.id);
         if (index == -1) {
             this.contactListener.push(listener)
         }
     }
 
-    public removeContactListener(listener: Partial<IMIOContactListener>) {
+    public removeContactListener(listener: Partial<IOIContactListener>) {
         let index = this.contactListener.findIndex(it => it.id == listener.id);
         if (index > -1) {
             this.contactListener.splice(index, 1)
         }
     }
 
-    public disconnect(): IMIOClient {
+    public disconnect(): IOIClient {
         this.account = null;
         clearInterval(this.retryTimer);
         this.unexpectedly = 0;
-        this.connectStatus = IMIOClientConnectStatus.DONE;
+        this.connectStatus = IOIClientConnectStatus.DONE;
         if (this.socket) {
             this.socket.close(new Error("主动关闭"))
             this.socket = null;
@@ -276,7 +276,7 @@ export class IMIOClient extends IMIOBase {
      * @param clientListener 客户端监听者
      */
     public connect(accountId: number, token: string, nickname: string,
-                   clientListener?: IMIOClientListener): IMIOClient {
+                   clientListener?: IOIClientListener): IOIClient {
 
         if (!token || token.length < 50) {
             throw new Error("IO 连接 token 必须")
@@ -295,7 +295,7 @@ export class IMIOClient extends IMIOBase {
             this.tokenAppId = 0;
         }
         if (this.tokenAppId == 0 || (this.tokenAppId + '' != this.option?.appId)) {
-            throw new Error("token中的AppId 与 IMIOClientOption不一致")
+            throw new Error("token中的AppId 与 IOIClientOption不一致")
         }
         if (this.option?.debug) {
             console.warn('connect deviceId', this.deviceId);
@@ -306,7 +306,7 @@ export class IMIOClient extends IMIOBase {
         if (this.isClose()) { // 关闭的连接才能再次连接
             this.disconnect();
         }
-        this.account = new IMIOAccountUser();
+        this.account = new IOIAccountUser();
         this.account.nickname = nickname;
         if (accountId) {
             this.account.accountId = accountId.toString();
@@ -458,7 +458,7 @@ export class IMIOClient extends IMIOBase {
 
         });
 
-        this.connectStatus = IMIOClientConnectStatus.CONNECTING
+        this.connectStatus = IOIClientConnectStatus.CONNECTING
         // 发布连接状态
         this.connectStatusTimer = setInterval(() => {
             try {
@@ -468,8 +468,8 @@ export class IMIOClient extends IMIOBase {
             } catch (e) {
             }
             try {
-                if (this.connectStatus == IMIOClientConnectStatus.SUCCESS
-                    || this.connectStatus == IMIOClientConnectStatus.SUCCESS_PULL) {
+                if (this.connectStatus == IOIClientConnectStatus.SUCCESS
+                    || this.connectStatus == IOIClientConnectStatus.SUCCESS_PULL) {
                     this.ping()
                 }
             } catch (e) {
@@ -481,11 +481,11 @@ export class IMIOClient extends IMIOBase {
                     console.warn("IO connect success...")
                 }
                 if (this.account) {
-                    this.account.status = IMIOContactStatus.online
+                    this.account.status = IOIContactStatus.online
                 }
                 try {
                     // clearInterval(intervalConnectStatus); //  收到 Pong 响应才 停止
-                    this.connectStatus = IMIOClientConnectStatus.SUCCESS_PULL
+                    this.connectStatus = IOIClientConnectStatus.SUCCESS_PULL
                     this.clientListener?.onConnected();
                 } catch (e) {
                 }
@@ -501,7 +501,7 @@ export class IMIOClient extends IMIOBase {
                         console.error("IOServer connect onClose", message)
                     }
                     if (this.account) {
-                        this.account.status = IMIOContactStatus.done
+                        this.account.status = IOIContactStatus.done
                     }
                     this.connectErrorEvent(message)
                 });
@@ -515,14 +515,14 @@ export class IMIOClient extends IMIOBase {
                     this.connectErrorEvent(message);
                 } else { //undefined
                     if (this.account) {
-                        this.account.status = IMIOContactStatus.done
+                        this.account.status = IOIContactStatus.done
                     }
                     // 未知错误原因，尝试几次
                     if (this.unexpectedly > 6) { // 大于重试次数，停止连接
                         clearInterval(this.retryTimer);
                         clearInterval(this.connectStatusTimer);
                         this.socket = null;
-                        this.connectStatus = IMIOClientConnectStatus.ERROR;
+                        this.connectStatus = IOIClientConnectStatus.ERROR;
                         this.retryTimer = -2;
                         try {
                             this.clientListener?.onDisconnected();
@@ -582,7 +582,7 @@ export class IMIOClient extends IMIOBase {
     private connectErrorEvent(eventMessage: String) {
         this.socket = null;
         if (this.account) {
-            this.account.status = IMIOContactStatus.done
+            this.account.status = IOIContactStatus.done
         }
         clearInterval(this.connectStatusTimer);
         this.connectStatusTimer = -2;
@@ -590,7 +590,7 @@ export class IMIOClient extends IMIOBase {
         if (eventMessage.indexOf("主动关闭") > -1) { // 是主动关闭
             clearInterval(this.retryTimer);
             clearInterval(this.connectStatusTimer);
-            this.connectStatus = IMIOClientConnectStatus.DONE;
+            this.connectStatus = IOIClientConnectStatus.DONE;
             this.retryTimer = -2;
             this.connectStatusTimer = -2;
             this.retryConnectNum = 0;
@@ -605,7 +605,7 @@ export class IMIOClient extends IMIOBase {
             if (this.unexpectedly > 6) { // 大于重试次数，停止连接
                 clearInterval(this.retryTimer);
                 clearInterval(this.connectStatusTimer);
-                this.connectStatus = IMIOClientConnectStatus.ERROR;
+                this.connectStatus = IOIClientConnectStatus.ERROR;
                 this.connectStatusTimer = -2;
                 this.retryTimer = -2;
                 try {
@@ -623,7 +623,7 @@ export class IMIOClient extends IMIOBase {
             if (this.unexpectedly > 6) { // 大于重试次数，停止连接
                 clearInterval(this.retryTimer);
                 clearInterval(this.connectStatusTimer);
-                this.connectStatus = IMIOClientConnectStatus.ERROR;
+                this.connectStatus = IOIClientConnectStatus.ERROR;
                 this.connectStatusTimer = -2;
                 this.retryTimer = -2;
                 try {
@@ -642,7 +642,7 @@ export class IMIOClient extends IMIOBase {
             this.connectStatusTimer = -2;
             this.retryTimer = -2;
             try {
-                this.connectStatus = IMIOClientConnectStatus.TOKEN_EXPIRED;
+                this.connectStatus = IOIClientConnectStatus.TOKEN_EXPIRED;
                 this.clientListener?.onConnectStatus(this.connectStatus, this.retryConnectNum);
             } catch (e) {
             }
@@ -655,7 +655,7 @@ export class IMIOClient extends IMIOBase {
 
         if (eventMessage.indexOf("SQL") > -1 || eventMessage.indexOf('connect') > -1) {
             try {
-                this.connectStatus = IMIOClientConnectStatus.ERROR;
+                this.connectStatus = IOIClientConnectStatus.ERROR;
                 this.clientListener?.onConnectStatus(this.connectStatus, this.retryConnectNum);
             } catch (e) {
             }
@@ -665,7 +665,7 @@ export class IMIOClient extends IMIOBase {
         }
         if (eventMessage.indexOf("token") > -1) {
             try {
-                this.connectStatus = IMIOClientConnectStatus.TOKEN_EXPIRED;
+                this.connectStatus = IOIClientConnectStatus.TOKEN_EXPIRED;
                 this.clientListener?.onTokenExpired();
                 this.clientListener?.onConnectStatus(this.connectStatus, this.retryConnectNum);
             } catch (e) {
@@ -686,7 +686,7 @@ export class IMIOClient extends IMIOBase {
                 clearInterval(this.retryTimer);
                 this.retryConnectNum = 0;
                 try {
-                    this.connectStatus = IMIOClientConnectStatus.ERROR;
+                    this.connectStatus = IOIClientConnectStatus.ERROR;
                     this.clientListener?.onConnectStatus(this.connectStatus, this.retryConnectNum);
                     this.clientListener?.onDisconnected()
                 } catch (e) {
@@ -695,7 +695,7 @@ export class IMIOClient extends IMIOBase {
             }
             if (!this.socket) {
                 this.retryConnectNum++;
-                this.connectStatus = IMIOClientConnectStatus.RETRY_CONNECTING;
+                this.connectStatus = IOIClientConnectStatus.RETRY_CONNECTING;
                 try {
                     this.clientListener?.onConnectStatus(this.connectStatus, this.retryConnectNum);
                 } catch (e) {
@@ -722,7 +722,7 @@ export class IMIOClient extends IMIOBase {
             let hosts = this.option!!.host.split(":");
             let index = this.hostNodeList.findIndex(it => it.host == hosts[0]);
             if (index == -1) {
-                let hostNode = new IMIOHostNode();
+                let hostNode = new IOIHostNode();
                 hostNode.host = hosts[0];
                 if (hosts.length > 1) {
                     hostNode.port = hosts[1];
@@ -766,7 +766,7 @@ export class IMIOClient extends IMIOBase {
                 clearInterval(this.connectStatusTimer)
                 this.connectStatusTimer = -2;
                 try {
-                    this.connectStatus = IMIOClientConnectStatus.SUCCESS;
+                    this.connectStatus = IOIClientConnectStatus.SUCCESS;
                     this.clientListener?.onConnectStatus(this.connectStatus, this.retryConnectNum);
                 } catch (e) {
                 }
@@ -833,7 +833,7 @@ export class IMIOClient extends IMIOBase {
         clearInterval(this.retryTimer);
         this.retryTimer = -2;
         try {
-            this.connectStatus = IMIOClientConnectStatus.RETRY_CONNECTING;
+            this.connectStatus = IOIClientConnectStatus.RETRY_CONNECTING;
             this.clientListener?.onConnectStatus(this.connectStatus, this.retryConnectNum);
         } catch (e) {
         }
@@ -843,7 +843,7 @@ export class IMIOClient extends IMIOBase {
             let ipAddr = decryptAES(pongData.ip,s,s);
             this.hostAddress = ipAddr
             let ips = ipAddr.split(':');
-            let hostNode = new IMIOHostNode();
+            let hostNode = new IOIHostNode();
             hostNode.max = pongData.appId;
             hostNode.current = pongData.roomId;
             hostNode.name = pongData.nickname;
@@ -927,18 +927,18 @@ export class IMIOClient extends IMIOBase {
             let deserialize = Message.deserialize(payloadData);
             let findIndex = this.contactList.findIndex(it => !it.isGroup && it.userId == deserialize.fromId);
             if (findIndex > -1) {
-                let status = IMIOContactStatus.done
-                if (deserialize.command == IMIOContactStatus.offline) {
-                    status = IMIOContactStatus.offline
+                let status = IOIContactStatus.done
+                if (deserialize.command == IOIContactStatus.offline) {
+                    status = IOIContactStatus.offline
                 }
-                if (deserialize.command == IMIOContactStatus.online) {
-                    status = IMIOContactStatus.online
+                if (deserialize.command == IOIContactStatus.online) {
+                    status = IOIContactStatus.online
                 }
-                if (deserialize.command == IMIOContactStatus.online_busy) {
-                    status = IMIOContactStatus.online_busy
+                if (deserialize.command == IOIContactStatus.online_busy) {
+                    status = IOIContactStatus.online_busy
                 }
-                if (deserialize.command == IMIOContactStatus.online_leave) {
-                    status = IMIOContactStatus.online_leave
+                if (deserialize.command == IOIContactStatus.online_leave) {
+                    status = IOIContactStatus.online_leave
                 }
                 this.contactList[findIndex].status = status;
                 if (this.account && this.account!!.accountId.length > 0 && deserialize.fromId == this.account!!.accountId) {
@@ -962,7 +962,7 @@ export class IMIOClient extends IMIOBase {
         try {
             let deserialize = Message.deserialize(payloadData);
             if (deserialize.text.length) {
-                IMIOContactManager.getInstance().getContactByUserId(deserialize.text).then(res => {
+                IOIContactManager.getInstance().getContactByUserId(deserialize.text).then(res => {
                     let findIndex = this.contactList.findIndex(it => !it.isGroup && it.userId == res.userId);
                     if (findIndex > -1) {
                         this.contactList.splice(findIndex, 1, res)
@@ -1004,7 +1004,7 @@ export class IMIOClient extends IMIOBase {
             let deserialize = Message.deserialize(payloadData);
             let message = this.buildMessage(deserialize);
             try {
-                let chatManager = IMIOChatManager.getInstance().setClient(this);
+                let chatManager = IOIChatManager.getInstance().setClient(this);
                 chatManager.signMessage(message.messageId, message.joinId).then()
             } catch (_) {
             }

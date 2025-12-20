@@ -1,9 +1,9 @@
-import {IMIOClient} from "../Client";
-import {IMIOBaseManager} from "./BaseManager";
+import {IOIClient} from "../Client";
+import {IOIBaseManager} from "./BaseManager";
 import {Payload} from "rsocket-core";
-import {IMIOMember} from "../entity/Member";
-import {IMIOContact, IMIOContactNotice} from "../entity/Contact";
-import {IMIOMessage} from "../entity/Message";
+import {IOIMember} from "../entity/Member";
+import {IOIContact, IOIContactNotice} from "../entity/Contact";
+import {IOIMessage} from "../entity/Message";
 
 //  ======
 import {only as ContactPB} from "../protocol/Contacts";
@@ -17,25 +17,25 @@ import Message = MessagePB.Message;
 
 
 
-export class IMIOContactManager extends IMIOBaseManager {
+export class IOIContactManager extends IOIBaseManager {
 
     // ========= 单例模式 =========
-    private static instance: IMIOContactManager;
+    private static instance: IOIContactManager;
 
-    public client: IMIOClient | null = null;
+    public client: IOIClient | null = null;
 
     private constructor() {
         super();
     }
 
-    public static getInstance(): IMIOContactManager {
-        if (!IMIOContactManager.instance) {
-            IMIOContactManager.instance = new IMIOContactManager();
+    public static getInstance(): IOIContactManager {
+        if (!IOIContactManager.instance) {
+            IOIContactManager.instance = new IOIContactManager();
         }
-        return IMIOContactManager.instance;
+        return IOIContactManager.instance;
     }
 
-    public setClient(client: IMIOClient): IMIOContactManager {
+    public setClient(client: IOIClient): IOIContactManager {
         this.client = client
         return this
     }
@@ -45,7 +45,7 @@ export class IMIOContactManager extends IMIOBaseManager {
     /**
      * 获取联系人
      */
-    public getContactList(page:number  = 1,pageSize: number = 50): Promise<Array<IMIOContact>> {
+    public getContactList(page:number  = 1,pageSize: number = 50): Promise<Array<IOIContact>> {
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -57,7 +57,7 @@ export class IMIOContactManager extends IMIOBaseManager {
                 meta: this.client!!.meta,
                 joinRoomId: this.client!!.meta.roomId,
             });
-            let res : Array<IMIOContact>  = [];
+            let res : Array<IOIContact>  = [];
             this.client!!.socket?.requestStream({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('contact.list'),
@@ -100,7 +100,7 @@ export class IMIOContactManager extends IMIOBaseManager {
     /**
      * 获取联系人的黑名单
      */
-    public getContactBlackList(page: number = 1): Promise<Array<IMIOContact>> {
+    public getContactBlackList(page: number = 1): Promise<Array<IOIContact>> {
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -111,7 +111,7 @@ export class IMIOContactManager extends IMIOBaseManager {
                 meta: this.client!!.meta,
                 joinRoomId: this.client!!.meta.roomId,
             });
-            let res : Array<IMIOContact>  = [];
+            let res : Array<IOIContact>  = [];
             this.client!!.socket?.requestStream({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('contact.black.list'),
@@ -147,7 +147,7 @@ export class IMIOContactManager extends IMIOBaseManager {
     /**
      * 获取联系人根据用户ID
      */
-    public getContactByUserId(userId: string): Promise<IMIOContact> {
+    public getContactByUserId(userId: string): Promise<IOIContact> {
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -157,7 +157,7 @@ export class IMIOContactManager extends IMIOBaseManager {
                 meta: this.client!!.meta,
                 userId: userId,
             });
-            let res : Array<IMIOContact>  = [];
+            let res : Array<IOIContact>  = [];
             this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('contact.byUserId'),
@@ -195,7 +195,7 @@ export class IMIOContactManager extends IMIOBaseManager {
     /**
      * 获取联系人根据joinID
      */
-    public getContactByJoinId(joinId: number): Promise<IMIOContact | null> {
+    public getContactByJoinId(joinId: number): Promise<IOIContact | null> {
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -205,7 +205,7 @@ export class IMIOContactManager extends IMIOBaseManager {
                 meta: this.client!!.meta,
                 joinRoomId: joinId,
             });
-            let res : IMIOContact | null = null;
+            let res : IOIContact | null = null;
             this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('contact.byJoinId'),
@@ -411,7 +411,7 @@ export class IMIOContactManager extends IMIOBaseManager {
      * @param joinId
      * @param rule
      */
-    public setNoticeLevel(joinId: number, rule: IMIOContactNotice): Promise<any> {
+    public setNoticeLevel(joinId: number, rule: IOIContactNotice): Promise<any> {
         return new Promise<any>(async (resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -707,7 +707,7 @@ export class IMIOContactManager extends IMIOBaseManager {
    /**
      * 消息未签收的
      */
-    public messageNotSign(): Promise<Array<IMIOMessage>> {
+    public messageNotSign(): Promise<Array<IOIMessage>> {
         return new Promise<any>(async (resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -717,7 +717,7 @@ export class IMIOContactManager extends IMIOBaseManager {
                 meta: this.client!!.meta,
                 roomId: this.client!!.meta.roomId,
             });
-            let res : Array<IMIOMessage>  = [];
+            let res : Array<IOIMessage>  = [];
             this.client!!.socket?.requestStream({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('message.not.sign')
@@ -834,7 +834,7 @@ export class IMIOContactManager extends IMIOBaseManager {
             return ("IO Client 尚未建立连接")
         }
         if (this.client!!.getTokenAppId() == 0 || (this.client!!.getTokenAppId() != this.client!!.meta.appId)) {
-            return ("token中的AppId 与 IMIOClientOption不一致")
+            return ("token中的AppId 与 IOIClientOption不一致")
         }
         return ''
     }

@@ -1,6 +1,6 @@
 
 
-export class IMIOHostNode {
+export class IOIHostNode {
     name:string = "";
     region:string = "";
     host:string = "";

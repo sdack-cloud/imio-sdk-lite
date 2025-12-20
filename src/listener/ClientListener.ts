@@ -1,6 +1,6 @@
 
 
-    export interface IMIOClientListener {
+    export interface IOIClientListener {
         id : string;
 
         /**
@@ -10,10 +10,10 @@
 
         /**
          * 连接中的状态
-         * @param status IMIOClientStatus
+         * @param status IOIClientStatus
          * @param retry 发起或重试次数,0 为链接发起
          */
-        onConnectStatus(status:IMIOClientConnectStatus ,retry :number): void
+        onConnectStatus(status:IOIClientConnectStatus ,retry :number): void
 
         /**
          * token 过期事件
@@ -26,7 +26,7 @@
         onShutdown(): void
     }
 
-    export enum IMIOClientConnectStatus {
+    export enum IOIClientConnectStatus {
         DONE = 0, // 初始状态
         ERROR = -1, // 服务器错误 //
         CONNECTING = 1, // 连接中
@@ -36,7 +36,7 @@
         TOKEN_EXPIRED = 5, // token过期引发的失败，不会触发重连,需要手动发起
     }
 
-    export enum IMIOClientStatus {
+    export enum IOIClientStatus {
         ERROR = 0, // 连接错误
         CONNECT = 1, // 连接中
         PULL = 2, // 数据拉取中
@@ -44,7 +44,7 @@
         OFFLINE = 4, // 服务端强制下线
     }
 
-    export enum IMIOSystemMessage {
+    export enum IOISystemMessage {
         APPLY = 1, // 申请
         APPLY_RESOLVE = 2, // 申请被处理
         APPLY_AGREE = 3, // 申请已同意

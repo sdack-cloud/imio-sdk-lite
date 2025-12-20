@@ -4,10 +4,10 @@ import {
     encodeRoute,
     WellKnownMimeType
 } from "rsocket-composite-metadata";
-import {IMIOBase} from "../Base";
+import {IOIBase} from "../Base";
 
 
-export class IMIOBaseManager  extends IMIOBase{
+export class IOIBaseManager  extends IOIBase{
 
 
 

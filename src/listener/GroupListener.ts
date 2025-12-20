@@ -1,6 +1,6 @@
-import {IMIOContact} from "../entity/Contact";
+import {IOIContact} from "../entity/Contact";
 
-export interface IMIOGroupListener {
+export interface IOIGroupListener {
     id : string;
 
     /**
@@ -8,6 +8,6 @@ export interface IMIOGroupListener {
      * @param isDelete 是增加还是删除
      * @param contact 联系人
      */
-    onContactChange(isDelete: boolean, contact: IMIOContact):void;
+    onContactChange(isDelete: boolean, contact: IOIContact):void;
 
 }

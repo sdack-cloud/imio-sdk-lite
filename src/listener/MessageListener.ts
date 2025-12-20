@@ -1,19 +1,19 @@
-import {IMIOMessage} from "../entity/Message";
+import {IOIMessage} from "../entity/Message";
 
 
-export interface IMIOMessageListener {
+export interface IOIMessageListener {
 
     id : string;
 
     /**
      * 系统通知
      * message.label 有2种类型
-     * IMIOMessageLabel.notice 和 IMIOMessageLabel.action
+     * IOIMessageLabel.notice 和 IOIMessageLabel.action
      */
-    onNotice(message: IMIOMessage): void
+    onNotice(message: IOIMessage): void
 
     // 正常消息
-    onMessage(message: IMIOMessage): void
+    onMessage(message: IOIMessage): void
 
     /**
      * 消息撤销

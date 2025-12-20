@@ -1,7 +1,7 @@
-import {IMIOClient} from "../Client";
-import {IMIOMember} from "../entity/Member";
+import {IOIClient} from "../Client";
+import {IOIMember} from "../entity/Member";
 import {Payload} from "rsocket-core";
-import {IMIOTeam} from "../entity/Team";
+import {IOITeam} from "../entity/Team";
 
 
 // =====
@@ -9,29 +9,29 @@ import { only as TeamPB} from "../protocol/Teams";
 import { only as TeamContactPB} from "../protocol/TeamContact";
 import Teams = TeamPB.Teams;
 import TeamContact = TeamContactPB.TeamContact;
-import {IMIOBaseManager} from "./BaseManager";
+import {IOIBaseManager} from "./BaseManager";
 
 
-export class IMIOTeamManager extends IMIOBaseManager{
+export class IOITeamManager extends IOIBaseManager{
 
 
     // ========= 单例模式 =========
-    private static instance: IMIOTeamManager;
+    private static instance: IOITeamManager;
 
-    public client: IMIOClient | null = null;
+    public client: IOIClient | null = null;
 
     private constructor() {
         super();
     }
 
-    public static getInstance(): IMIOTeamManager {
-        if (!IMIOTeamManager.instance) {
-            IMIOTeamManager.instance = new IMIOTeamManager();
+    public static getInstance(): IOITeamManager {
+        if (!IOITeamManager.instance) {
+            IOITeamManager.instance = new IOITeamManager();
         }
-        return IMIOTeamManager.instance;
+        return IOITeamManager.instance;
     }
 
-    public setClient(client : IMIOClient) : IMIOTeamManager{
+    public setClient(client : IOIClient) : IOITeamManager{
         this.client = client
         return this
     }
@@ -39,7 +39,7 @@ export class IMIOTeamManager extends IMIOBaseManager{
 
 
 
-    public memberList(teamId: number): Promise<Array<IMIOMember>> {
+    public memberList(teamId: number): Promise<Array<IOIMember>> {
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -49,7 +49,7 @@ export class IMIOTeamManager extends IMIOBaseManager{
                 meta: this.client!!.meta,
                 fromTeamId: teamId,
             });
-            let res : Array<IMIOMember> = [];
+            let res : Array<IOIMember> = [];
             this.client!!.socket?.requestStream({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('team.members'),
@@ -85,7 +85,7 @@ export class IMIOTeamManager extends IMIOBaseManager{
     /**
      * 加入
      */
-    public create(name: string): Promise<IMIOTeam> {
+    public create(name: string): Promise<IOITeam> {
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -98,7 +98,7 @@ export class IMIOTeamManager extends IMIOBaseManager{
                 deviceKey: (this.client!!.meta!!.deviceKey),
                 deviceTag: (this.client!!.meta!!.deviceTag),
             });
-            let res : IMIOTeam | null  = null;
+            let res : IOITeam | null  = null;
             this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('team.create'),
@@ -136,7 +136,7 @@ export class IMIOTeamManager extends IMIOBaseManager{
     /**
      * 加入
      */
-    public getTeam(teamId: number): Promise<IMIOTeam> {
+    public getTeam(teamId: number): Promise<IOITeam> {
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -146,7 +146,7 @@ export class IMIOTeamManager extends IMIOBaseManager{
                 meta: this.client!!.meta,
                 id: teamId,
             });
-            let res : IMIOTeam | null  = null;
+            let res : IOITeam | null  = null;
             this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('team.byId'),
@@ -187,7 +187,7 @@ export class IMIOTeamManager extends IMIOBaseManager{
      * @param teamId
      * @param remark
      */
-    public join(teamId: number): Promise<IMIOTeam> {
+    public join(teamId: number): Promise<IOITeam> {
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -200,7 +200,7 @@ export class IMIOTeamManager extends IMIOBaseManager{
                 deviceKey: (this.client!!.meta!!.deviceKey),
                 deviceTag: (this.client!!.meta!!.deviceTag),
             });
-            let res : IMIOTeam | null  = null;
+            let res : IOITeam | null  = null;
             this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('team.join'),
@@ -241,7 +241,7 @@ export class IMIOTeamManager extends IMIOBaseManager{
      * @param userId
      * @param deviceKey
      */
-    public joinInvite(teamId: number,userId: string = '',deviceKey:string =""): Promise<IMIOTeam> {
+    public joinInvite(teamId: number,userId: string = '',deviceKey:string =""): Promise<IOITeam> {
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -258,7 +258,7 @@ export class IMIOTeamManager extends IMIOBaseManager{
                 deviceKey: deviceKey,
                 deviceTag: "h5",
             });
-            let res : IMIOTeam | null  = null;
+            let res : IOITeam | null  = null;
             this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('team.join'),
@@ -299,7 +299,7 @@ export class IMIOTeamManager extends IMIOBaseManager{
      * 解散
      * @param teamId
      */
-    public disband(teamId: number): Promise<IMIOTeam> {
+    public disband(teamId: number): Promise<IOITeam> {
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -309,7 +309,7 @@ export class IMIOTeamManager extends IMIOBaseManager{
                 meta: this.client!!.meta,
                 fromTeamId: teamId,
             });
-            let res : IMIOTeam | null  = null;
+            let res : IOITeam | null  = null;
             this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('team.disband'),
@@ -349,7 +349,7 @@ export class IMIOTeamManager extends IMIOBaseManager{
      * 恢复
      * @param teamId
      */
-    public regain(teamId: number): Promise<IMIOTeam> {
+    public regain(teamId: number): Promise<IOITeam> {
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -359,7 +359,7 @@ export class IMIOTeamManager extends IMIOBaseManager{
                 meta: this.client!!.meta,
                 fromTeamId: teamId,
             });
-            let res : IMIOTeam | null  = null;
+            let res : IOITeam | null  = null;
             this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('team.regain'),
@@ -400,7 +400,7 @@ export class IMIOTeamManager extends IMIOBaseManager{
      * @param teamId
      * @param operate true 禁言，false 恢复
      */
-    public teamMuted(teamId: number, operate: boolean): Promise<IMIOTeam> {
+    public teamMuted(teamId: number, operate: boolean): Promise<IOITeam> {
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -411,7 +411,7 @@ export class IMIOTeamManager extends IMIOBaseManager{
                 fromTeamId: teamId,
                 muted: operate?1:0
             });
-            let res : IMIOTeam | null  = null;
+            let res : IOITeam | null  = null;
             this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('team.muted'),
@@ -454,7 +454,7 @@ export class IMIOTeamManager extends IMIOBaseManager{
      * @param deviceKey
      * @param deviceTag
      */
-    public getMember(teamId: number,userId: string = '',deviceKey:string =""): Promise<IMIOMember> {
+    public getMember(teamId: number,userId: string = '',deviceKey:string =""): Promise<IOIMember> {
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -471,7 +471,7 @@ export class IMIOTeamManager extends IMIOBaseManager{
                 deviceKey: deviceKey,
                 deviceTag: 'h5'
             });
-            let res : IMIOMember | null  = null;
+            let res : IOIMember | null  = null;
             this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('team.member.get'),
@@ -544,7 +544,7 @@ export class IMIOTeamManager extends IMIOBaseManager{
             return ("IO Client 尚未建立连接")
         }
         if (this.client!!.getTokenAppId() == 0 || (this.client!!.getTokenAppId() != this.client!!.meta.appId)) {
-            return ("token中的AppId 与 IMIOClientOption不一致")
+            return ("token中的AppId 与 IOIClientOption不一致")
         }
         return ''
     }

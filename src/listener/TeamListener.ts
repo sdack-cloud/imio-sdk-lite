@@ -1,9 +1,9 @@
-import {IMIOMessage} from "../entity/Message";
+import {IOIMessage} from "../entity/Message";
 
 
-export interface IMIOTeamListener {
+export interface IOITeamListener {
     id : string;
 
-    onMessage(message: IMIOMessage): void
+    onMessage(message: IOIMessage): void
 
 }

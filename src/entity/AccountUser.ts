@@ -1,6 +1,6 @@
 
 
-export class IMIOAccountUser {
+export class IOIAccountUser {
 
     accountId: string = ""; //
 

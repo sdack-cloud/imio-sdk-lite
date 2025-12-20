@@ -1,4 +1,4 @@
-export class IMIOMember {
+export class IOIMember {
     memberId : number = 0;
     joinId : number = 0;
     userId : string = '';

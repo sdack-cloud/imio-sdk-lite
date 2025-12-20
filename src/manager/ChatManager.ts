@@ -1,12 +1,12 @@
-import {IMIOClient} from "../Client";
-import {IMIOBaseManager} from "./BaseManager";
-import {IMIOContactManager} from "./ContactManager";
+import {IOIClient} from "../Client";
+import {IOIBaseManager} from "./BaseManager";
+import {IOIContactManager} from "./ContactManager";
 import {Payload} from "rsocket-core";
-import {IMIOMember} from "../entity/Member";
-import {IMIOContact} from "../entity/Contact";
-import {IMIOMessageSender} from "../entity/MessageSender";
-import {IMIOMessage} from "../entity/Message";
-import {IMIOGroup} from "../entity/Group";
+import {IOIMember} from "../entity/Member";
+import {IOIContact} from "../entity/Contact";
+import {IOIMessageSender} from "../entity/MessageSender";
+import {IOIMessage} from "../entity/Message";
+import {IOIGroup} from "../entity/Group";
 
 //  ======
 import {only as ContactPB} from "../protocol/Contacts";
@@ -23,26 +23,26 @@ import Message = MessagePB.Message;
 import MessageSign = MessageSignPB.MessageSign;
 import MessageRemind = MessageRemindPB.MessageRemind;
 import Contacts = ContactPB.Contacts;
-import {IMIOTeamManager} from "./TeamManager";
+import {IOITeamManager} from "./TeamManager";
 
-export class IMIOChatManager extends IMIOBaseManager {
+export class IOIChatManager extends IOIBaseManager {
     // ========= 单例模式 =========
-    private static instance: IMIOChatManager;
+    private static instance: IOIChatManager;
 
-    public client: IMIOClient | null = null;
+    public client: IOIClient | null = null;
 
     private constructor() {
         super();
     }
 
-    public static getInstance(): IMIOChatManager {
-        if (!IMIOChatManager.instance) {
-            IMIOChatManager.instance = new IMIOChatManager();
+    public static getInstance(): IOIChatManager {
+        if (!IOIChatManager.instance) {
+            IOIChatManager.instance = new IOIChatManager();
         }
-        return IMIOChatManager.instance;
+        return IOIChatManager.instance;
     }
 
-    public setClient(client: IMIOClient): IMIOChatManager {
+    public setClient(client: IOIClient): IOIChatManager {
         this.client = client
         return this
     }
@@ -54,9 +54,9 @@ export class IMIOChatManager extends IMIOBaseManager {
      * @param joinId 来源群聊的ID
      * @param userId 聊天的对象
      * @param sender
-     * @param sender.joinId 新创建joinId。 IMIOGroupManager.createDialogue 返回值
+     * @param sender.joinId 新创建joinId。 IOIGroupManager.createDialogue 返回值
      */
-    public dialogue(joinId: number,userId:string, sender: IMIOMessageSender): Promise<any> {
+    public dialogue(joinId: number,userId:string, sender: IOIMessageSender): Promise<any> {
         return new Promise<any>(async (resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -99,14 +99,14 @@ export class IMIOChatManager extends IMIOBaseManager {
         });
     }
 
-    public oneToOne(sender: IMIOMessageSender): Promise<any> {
+    public oneToOne(sender: IOIMessageSender): Promise<any> {
         return new Promise<any>(async (resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
                 return;
             }
 
-            let contactManager = IMIOContactManager.getInstance().setClient(this.client!!);
+            let contactManager = IOIContactManager.getInstance().setClient(this.client!!);
             let ioContact = await contactManager.getContactByJoinId(sender.joinId);
             if (!ioContact) {
                 reject(new Error("联系人不存在"))
@@ -152,13 +152,13 @@ export class IMIOChatManager extends IMIOBaseManager {
     }
 
 
-    public oneToMany(sender: IMIOMessageSender): Promise<any> {
+    public oneToMany(sender: IOIMessageSender): Promise<any> {
         return new Promise<any>(async (resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
                 return;
             }
-            let contactManager = IMIOContactManager.getInstance().setClient(this.client!!);
+            let contactManager = IOIContactManager.getInstance().setClient(this.client!!);
             let ioContact = await contactManager.getContactByJoinId(sender.joinId);
             if (!ioContact) {
                 reject(new Error("联系人不存在"))
@@ -207,7 +207,7 @@ export class IMIOChatManager extends IMIOBaseManager {
      * 给小队发送信息
      * @param joinId = teamId
      */
-    public sendToTeam(sender: IMIOMessageSender): Promise<any> {
+    public sendToTeam(sender: IOIMessageSender): Promise<any> {
         return new Promise<any>(async (resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -393,13 +393,13 @@ export class IMIOChatManager extends IMIOBaseManager {
      * @param page
      * @param pageSize
      */
-    public getMessageList(joinId: number,page: number = 1,pageSize: number = 40): Promise<Array<IMIOMessage>> {
+    public getMessageList(joinId: number,page: number = 1,pageSize: number = 40): Promise<Array<IOIMessage>> {
         return new Promise<any>(async (resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
                 return;
             }
-            let contactManager = IMIOContactManager.getInstance().setClient(this.client!!);
+            let contactManager = IOIContactManager.getInstance().setClient(this.client!!);
             let ioContact = await contactManager.getContactByJoinId(joinId);
             if (!ioContact) {
                 reject(new Error("联系人不存在"))
@@ -412,7 +412,7 @@ export class IMIOChatManager extends IMIOBaseManager {
                 roomId: ioContact.joinId,
                 created: ioContact.joinTime
             });
-            let res : Array<IMIOMessage>  = [];
+            let res : Array<IOIMessage>  = [];
             this.client!!.socket?.requestStream({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('message.page')
@@ -450,13 +450,13 @@ export class IMIOChatManager extends IMIOBaseManager {
      * @param page
      * @param pageSize
      */
-    public teamMessageList(teamId: number,page: number = 1,pageSize: number = 40): Promise<Array<IMIOMessage>> {
+    public teamMessageList(teamId: number,page: number = 1,pageSize: number = 40): Promise<Array<IOIMessage>> {
         return new Promise<any>(async (resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
                 return;
             }
-            let teamManager = IMIOTeamManager.getInstance().setClient(this.client!!);
+            let teamManager = IOITeamManager.getInstance().setClient(this.client!!);
             let ioMember = await teamManager.getMember(teamId,this.client!!.meta.userId,this.client!!.meta.deviceKey );
             if (!ioMember) { // 获取成员主要是获取加入时间
                 reject(new Error('您不在小队中'))
@@ -469,7 +469,7 @@ export class IMIOChatManager extends IMIOBaseManager {
                 roomId: teamId,
                 created: ioMember.joinTime
             });
-            let res : Array<IMIOMessage>  = [];
+            let res : Array<IOIMessage>  = [];
             this.client!!.socket?.requestStream({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('message.team.page')
@@ -505,7 +505,7 @@ export class IMIOChatManager extends IMIOBaseManager {
      * @param teamId
      * @param messageId
      */
-    public teamMessageById(teamId: number,messageId: string): Promise<IMIOMessage> {
+    public teamMessageById(teamId: number,messageId: string): Promise<IOIMessage> {
         return new Promise<any>(async (resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -516,7 +516,7 @@ export class IMIOChatManager extends IMIOBaseManager {
                 roomId: teamId,
                 messageId: messageId
             });
-            let res : IMIOMessage | null  = null;
+            let res : IOIMessage | null  = null;
             this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('message.team.byId')
@@ -556,7 +556,7 @@ export class IMIOChatManager extends IMIOBaseManager {
      * @param userId 用户
      * @param joinId 加入的群组
      */
-    public createDialogue(userId: string,joinId: number): Promise<IMIOGroup> {
+    public createDialogue(userId: string,joinId: number): Promise<IOIGroup> {
         return new Promise<any>(async (resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -568,7 +568,7 @@ export class IMIOChatManager extends IMIOBaseManager {
                 userId: userId,
                 joinRoomId:joinId
             });
-            let res : IMIOGroup | null = null;
+            let res : IOIGroup | null = null;
             this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('dialogue.create')
@@ -605,8 +605,8 @@ export class IMIOChatManager extends IMIOBaseManager {
     }
 
 
-    private senderBuildMessage(sender: IMIOMessageSender): IMIOMessage {
-        let ioMessage = new IMIOMessage();
+    private senderBuildMessage(sender: IOIMessageSender): IOIMessage {
+        let ioMessage = new IOIMessage();
         ioMessage.messageId = sender.messageId;
         ioMessage.joinId = sender.joinId;
         ioMessage.cite = sender.cite;
@@ -625,7 +625,7 @@ export class IMIOChatManager extends IMIOBaseManager {
         if (sender.hintList && sender.hintList.length) {
             ioMessage.hintList = [];
             for (let item of sender.hintList) {
-                let ioMessage1 = new IMIOMessage();
+                let ioMessage1 = new IOIMessage();
                 ioMessage1.destId = item.targetId
                 ioMessage1.destName = item.targetName
                 ioMessage.hintList.push(ioMessage1)
@@ -634,7 +634,7 @@ export class IMIOChatManager extends IMIOBaseManager {
         if (sender.notifyList && sender.notifyList.length) {
             ioMessage.notifyList = [];
             for (let item of sender.notifyList) {
-                let ioMessage1 = new IMIOMessage();
+                let ioMessage1 = new IOIMessage();
                 ioMessage1.destId = item.targetId
                 ioMessage1.destName = item.targetName
                 ioMessage.notifyList.push(ioMessage1)
@@ -643,7 +643,7 @@ export class IMIOChatManager extends IMIOBaseManager {
         if (sender.quietlyList && sender.quietlyList.length) {
             ioMessage.quietlyList = [];
             for (let item of sender.quietlyList) {
-                let ioMessage1 = new IMIOMessage();
+                let ioMessage1 = new IOIMessage();
                 ioMessage1.destId = item.targetId
                 ioMessage1.destName = item.targetName
                 ioMessage.quietlyList.push(ioMessage1)
@@ -652,7 +652,7 @@ export class IMIOChatManager extends IMIOBaseManager {
         return ioMessage;
     }
 
-    private buildMessageProto(destId:string,sender: IMIOMessageSender): Message {
+    private buildMessageProto(destId:string,sender: IOIMessageSender): Message {
         let cc:Array<MessageRemind> = [];
         let remind:Array<MessageRemind> = [];
         if (sender.notifyList && sender.notifyList.length) {
@@ -760,7 +760,7 @@ export class IMIOChatManager extends IMIOBaseManager {
             return ("IO Client 尚未建立连接")
         }
         if (this.client!!.getTokenAppId() == 0 || (this.client!!.getTokenAppId() != this.client!!.meta.appId)) {
-            return ("token中的AppId 与 IMIOClientOption不一致")
+            return ("token中的AppId 与 IOIClientOption不一致")
         }
         return ''
     }

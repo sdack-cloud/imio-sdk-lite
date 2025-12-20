@@ -1,12 +1,12 @@
-import {IMIOClient} from "../Client";
+import {IOIClient} from "../Client";
 import {Payload} from "rsocket-core";
-import {IMIOBaseManager} from "./BaseManager";
-import {IMIOMember} from "../entity/Member";
-import {IMIOGroup, IMIOGroupType} from "../entity/Group";
-import {IMIOContactManager} from "./ContactManager";
-import {IMIOContact} from "../entity/Contact";
-import {IMIOMessage, IMIOMessageLabel} from "../entity/Message";
-import {IMIODeviceStatus} from "../entity/Status";
+import {IOIBaseManager} from "./BaseManager";
+import {IOIMember} from "../entity/Member";
+import {IOIGroup, IOIGroupType} from "../entity/Group";
+import {IOIContactManager} from "./ContactManager";
+import {IOIContact} from "../entity/Contact";
+import {IOIMessage, IOIMessageLabel} from "../entity/Message";
+import {IOIDeviceStatus} from "../entity/Status";
 
 //  ======
 import {only as ContactPB} from "../protocol/Contacts";
@@ -19,24 +19,24 @@ import Contacts = ContactPB.Contacts;
 import {only as UserStatusPB} from "../protocol/UserStatus";
 import UserStatus = UserStatusPB.UserStatus;
 
-export class IMIOUserInfoManager extends IMIOBaseManager{
+export class IOIUserInfoManager extends IOIBaseManager{
 // ========= 单例模式 =========
-    private static instance: IMIOUserInfoManager;
+    private static instance: IOIUserInfoManager;
 
-    public client: IMIOClient | null = null;
+    public client: IOIClient | null = null;
 
     private constructor() {
         super();
     }
 
-    public static getInstance(): IMIOUserInfoManager {
-        if (!IMIOUserInfoManager.instance) {
-            IMIOUserInfoManager.instance = new IMIOUserInfoManager();
+    public static getInstance(): IOIUserInfoManager {
+        if (!IOIUserInfoManager.instance) {
+            IOIUserInfoManager.instance = new IOIUserInfoManager();
         }
-        return IMIOUserInfoManager.instance;
+        return IOIUserInfoManager.instance;
     }
 
-    public setClient(client : IMIOClient) : IMIOUserInfoManager{
+    public setClient(client : IOIClient) : IOIUserInfoManager{
         this.client = client
         return this
     }
@@ -46,7 +46,7 @@ export class IMIOUserInfoManager extends IMIOBaseManager{
      * 获取用户设备状态
      * @param userId
      */
-    public getUserDeviceStatus(userId: string): Promise<Array<IMIODeviceStatus>> {
+    public getUserDeviceStatus(userId: string): Promise<Array<IOIDeviceStatus>> {
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -56,7 +56,7 @@ export class IMIOUserInfoManager extends IMIOBaseManager{
                 meta: this.client!!.meta,
                 userId,
             });
-            let res : Array<IMIODeviceStatus> = [];
+            let res : Array<IOIDeviceStatus> = [];
             this.client!!.socket?.requestStream({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('device.status.byUserid')
@@ -91,7 +91,7 @@ export class IMIOUserInfoManager extends IMIOBaseManager{
      * 更新我的设备状态
      * @param status
      */
-    public updateDeviceStatus(status: IMIODeviceStatus): Promise<Array<IMIODeviceStatus>> {
+    public updateDeviceStatus(status: IOIDeviceStatus): Promise<Array<IOIDeviceStatus>> {
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -101,7 +101,7 @@ export class IMIOUserInfoManager extends IMIOBaseManager{
                 meta: this.client!!.meta,
                 status: status.toString()
             });
-            let res : Array<IMIODeviceStatus> = [];
+            let res : Array<IOIDeviceStatus> = [];
             this.client!!.socket?.requestStream({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('device.status.update')
@@ -139,7 +139,7 @@ export class IMIOUserInfoManager extends IMIOBaseManager{
      * @param page
      * @param pageSize
      */
-    public getNoticeMessage(type:IMIOMessageLabel,page: number = 1,pageSize: number = 40): Promise<Array<IMIOMessage>> {
+    public getNoticeMessage(type:IOIMessageLabel,page: number = 1,pageSize: number = 40): Promise<Array<IOIMessage>> {
         return new Promise<any>(async (resolve, reject) => {
             if (this.checkSocket().length) {
                 reject(new Error(this.checkSocket()))
@@ -159,7 +159,7 @@ export class IMIOUserInfoManager extends IMIOBaseManager{
                 roomId: this.client!!.meta.roomId,
                 label: label
             });
-            let res : Array<IMIOMessage>  = [];
+            let res : Array<IOIMessage>  = [];
             this.client!!.socket?.requestStream({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('message.notice.page')
@@ -268,7 +268,7 @@ export class IMIOUserInfoManager extends IMIOBaseManager{
             return ("IO Client 尚未建立连接")
         }
         if (this.client!!.getTokenAppId() == 0 || (this.client!!.getTokenAppId() != this.client!!.meta.appId)) {
-            return ("token中的AppId 与 IMIOClientOption不一致")
+            return ("token中的AppId 与 IOIClientOption不一致")
         }
         return ''
     }

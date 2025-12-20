@@ -1,13 +1,13 @@
-import {IMIOMember} from "./Member";
+import {IOIMember} from "./Member";
 
-export class IMIOGroup {
+export class IOIGroup {
     groupId: number = 0;
     joinId: number = 0;
     userId: string = ''; // 群创建人
     groupName: string = '';
     groupNumber: string = '';
     avatar: string = '';
-    members ?: Array<IMIOMember> = undefined;
+    members ?: Array<IOIMember> = undefined;
     depict: string = ''; // 群描述
     isGroup: boolean = false; // 是用户还是群组
     isTalk: boolean = false; // 是否允许私聊
@@ -19,11 +19,11 @@ export class IMIOGroup {
     maxMember :number = 200 // 群最大人数
     ask: string = ''; // 入群问题
     remark: string = '';
-    type: IMIOGroupType = IMIOGroupType.protected; // 房间类型
+    type: IOIGroupType = IOIGroupType.protected; // 房间类型
     isLive: boolean = false;
 }
 
-export enum IMIOGroupType {
+export enum IOIGroupType {
     public = 1,
     protected = 2,
     private = 3
