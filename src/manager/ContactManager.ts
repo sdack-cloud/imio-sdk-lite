@@ -158,18 +158,20 @@ export class IMIOContactManager extends IMIOBaseManager {
                 userId: userId,
             });
             let res : Array<IMIOContact>  = [];
-            this.client!!.socket?.requestStream({
+            this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
                 metadata: this.buildRoute('contact.byUserId'),
-            }, 3000,{
+            },{
                 onComplete: () => {
-                    resolve(res)
                 }, onNext: (payload: Payload, isComplete: boolean) => {
                     try {
                         if (payload.data) {
                             let proto = Contacts.deserialize(payload.data);
                             let data = this.buildContact(proto);
                             res.push(data);
+                            if (isComplete) {
+                                resolve(data)
+                            }
                         }
                     }catch (e) {
                         reject(new Error("IO Client Error"))
