@@ -502,6 +502,13 @@ export class IMIOContactManager extends IMIOBaseManager {
                            let proto = Contacts.deserialize(payload.data);
                            let data = this.buildContact(proto);
                            res = data;
+                           try {
+                               let index = this.client!!.contactList.findIndex(it => it.joinId == joinId);
+                               if (index > -1) {
+                                   this.client!!.contactList.splice(index, 1);
+                               }
+                           }catch (e) {
+                           }
                            if (isComplete) {
                                resolve(res)
                            }
@@ -557,6 +564,13 @@ export class IMIOContactManager extends IMIOBaseManager {
                 }, onNext: (payload: Payload, isComplete: boolean) => {
                     try {
                        if (payload.data) {
+                           try {
+                               let index = this.client!!.contactList.findIndex(it => it.joinId == joinId);
+                               if (index > -1) {
+                                   this.client!!.contactList.splice(index, 1);
+                               }
+                           }catch (e) {
+                           }
                            if (isComplete) {
                                resolve("")
                            }

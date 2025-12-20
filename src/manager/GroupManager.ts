@@ -390,6 +390,13 @@ export class IMIOGroupManager extends IMIOBaseManager{
                 metadata: this.buildRoute('group.exit')
             }, 30,{
                 onComplete: () => {
+                    try {
+                        let index = this.client!!.contactList.findIndex(it => it.joinId == joinId);
+                        if (index > -1) {
+                            this.client!!.contactList.splice(index, 1);
+                        }
+                    }catch (e) {
+                    }
                     resolve('')
                 }, onNext: (payload: Payload, isComplete: boolean) => {
                     try {
