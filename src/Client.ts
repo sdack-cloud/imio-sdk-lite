@@ -253,6 +253,7 @@ export class IOIClient extends IOIBase {
         this.account = null;
         clearInterval(this.retryTimer);
         this.unexpectedly = 0;
+        this.contactList.length = 0;
         this.connectStatus = IOIClientConnectStatus.DONE;
         if (this.socket) {
             this.socket.close(new Error("主动关闭"))
