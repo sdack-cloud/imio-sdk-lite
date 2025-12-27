@@ -18,6 +18,8 @@ import Message = MessagePB.Message;
 import Contacts = ContactPB.Contacts;
 import {only as UserStatusPB} from "../protocol/UserStatus";
 import UserStatus = UserStatusPB.UserStatus;
+import {only} from "../protocol/Connect";
+import Connect = only.Connect;
 
 export class IOIUserInfoManager extends IOIBaseManager{
 // ========= 单例模式 =========
@@ -244,6 +246,179 @@ export class IOIUserInfoManager extends IOIBaseManager{
     }
 
 
+
+    /**
+     * 设置我的描述
+     * @param remark
+     */
+    public setMyDepict(remark: string): Promise<string> {
+        if (remark.length > 200) {
+            new Error("太长");
+            return ;
+        }
+        return new Promise<any>((resolve, reject) => {
+            if (this.checkSocket().length) {
+                reject(new Error(this.checkSocket()))
+                return;
+            }
+            const param = new Contacts({
+                meta: this.client!!.meta,
+                remark: remark,
+            });
+            let res : Object | null = null;
+            this.client!!.socket?.requestResponse({
+                data: Buffer.from(param.serializeBinary().buffer),
+                metadata: this.buildRoute('user.update.depict')
+            }, {
+                onComplete: () => {
+                    resolve('')
+                }, onNext: (payload: Payload, isComplete: boolean) => {
+                    try {
+                        // if (payload.data) {
+                        //     let proto = Contacts.deserialize(payload.data);
+                        //     let data = this.buildContact(proto);
+                        //     res = data;
+                        // }
+                        if (isComplete) {
+                            resolve('')
+                        }
+                    }catch (e) {
+                        reject(new Error("IO Client Error"))
+                    }
+                }, onError: (error: Error) => {
+                    let message = error?.message + "";
+                    let errorMsg = this.onError(message);
+                    if (errorMsg.length > 0) {
+                        reject(new Error(errorMsg))
+                    }else {
+                        reject(new Error(message))
+                    }
+                }, onExtension(extendedType: number, content: Buffer | null | undefined, canBeIgnored: boolean): void {
+                }
+            })
+        });
+    }
+
+    /**
+     * 设置我的添加提示
+     * @param remark
+     */
+    public setMyJoinTip(remark: string ): Promise<string> {
+        if (remark.length > 200) {
+            new Error("太长");
+            return ;
+        }
+        return new Promise<any>((resolve, reject) => {
+            if (this.checkSocket().length) {
+                reject(new Error(this.checkSocket()))
+                return;
+            }
+            const param = new Contacts({
+                meta: this.client!!.meta,
+                remark: remark,
+            });
+            let res : Object | null = null;
+            this.client!!.socket?.requestResponse({
+                data: Buffer.from(param.serializeBinary().buffer),
+                metadata: this.buildRoute('user.update.room.remark')
+            }, {
+                onComplete: () => {
+                    resolve('')
+                }, onNext: (payload: Payload, isComplete: boolean) => {
+                    try {
+                        // if (payload.data) {
+                        //     let proto = Contacts.deserialize(payload.data);
+                        //     let data = this.buildContact(proto);
+                        //     res = data;
+                        // }
+                        if (isComplete) {
+                            resolve('')
+                        }
+                    }catch (e) {
+                        reject(new Error("IO Client Error"))
+                    }
+                }, onError: (error: Error) => {
+                    let message = error?.message + "";
+                    let errorMsg = this.onError(message);
+                    if (errorMsg.length > 0) {
+                        reject(new Error(errorMsg))
+                    }else {
+                        reject(new Error(message))
+                    }
+                }, onExtension(extendedType: number, content: Buffer | null | undefined, canBeIgnored: boolean): void {
+                }
+            })
+        });
+    }
+
+
+    /**
+     * 设置添加我的答案
+     * @param ask
+     * @param answer
+     */
+    public setMyJoinQuestion(ask: string, answer: string ): Promise<string> {
+        if (ask.length > 200) {
+            new Error("问题太长");
+            return ;
+        }
+        if (answer.length > 200) {
+            new Error("答案太长");
+            return ;
+        }
+        return new Promise<any>((resolve, reject) => {
+            if (this.checkSocket().length) {
+                reject(new Error(this.checkSocket()))
+                return;
+            }
+            const param = new Contacts({
+                meta: this.client!!.meta,
+                username: ask,
+                remark: answer,
+            });
+            let res : Object | null = null;
+            this.client!!.socket?.requestResponse({
+                data: Buffer.from(param.serializeBinary().buffer),
+                metadata: this.buildRoute('user.update.room.remark')
+            }, {
+                onComplete: () => {
+                    resolve('')
+                }, onNext: (payload: Payload, isComplete: boolean) => {
+                    try {
+                        // if (payload.data) {
+                        //     let proto = Contacts.deserialize(payload.data);
+                        //     let data = this.buildContact(proto);
+                        //     res = data;
+                        // }
+                        if (isComplete) {
+                            resolve('')
+                        }
+                    }catch (e) {
+                        reject(new Error("IO Client Error"))
+                    }
+                }, onError: (error: Error) => {
+                    let message = error?.message + "";
+                    let errorMsg = this.onError(message);
+                    if (errorMsg.length > 0) {
+                        reject(new Error(errorMsg))
+                    }else {
+                        reject(new Error(message))
+                    }
+                }, onExtension(extendedType: number, content: Buffer | null | undefined, canBeIgnored: boolean): void {
+                }
+            })
+        });
+    }
+
+    /**
+     * 清除添加我的答案
+     * @param ask
+     * @param answer
+     */
+    public setMyJoinQuestionClear(): Promise<string> {
+        return this.setMyJoinQuestion("","");
+    }
+
     private onError(message: string): string {
         if (message.indexOf("Jwt") > -1) {
             try {
@@ -260,6 +435,7 @@ export class IOIUserInfoManager extends IOIBaseManager{
         }
         return "";
     }
+
     private checkSocket(): string {
         if (!this.client) {
             return ("IO Client 不存在")

@@ -225,6 +225,7 @@ export class IOIBase {
         data.isMute = proto.muted == 1;
         data.isRevoke = proto.revoke == 1;
         data.ask = proto.ask;
+        data.remark = proto.remark;
         switch (proto.type) {
             case 'protected':
                 data.type = IOIGroupType.protected;
