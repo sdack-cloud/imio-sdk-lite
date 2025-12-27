@@ -270,6 +270,7 @@ export class IOIBase {
     protected buildMessage(proto: MessagePB.Message) : IOIMessage {
         let ioMessage = new IOIMessage();
         ioMessage.messageId = proto.messageId;
+        ioMessage.msgId = proto.msgId;
         ioMessage.joinId = proto.roomId;
         ioMessage.tag = proto.tag;
         ioMessage.fromId = proto.fromId;
@@ -292,6 +293,7 @@ export class IOIBase {
         ioMessage.sent = proto.sent;
         ioMessage.deviceKey = proto.deviceKey;
         ioMessage.deviceTag = proto.deviceTag;
+        ioMessage.avatar = proto.avatar;
         ioMessage.sentDate = new Date(proto.sent);
         ioMessage.revoke = proto.revoke.length != 0;
 

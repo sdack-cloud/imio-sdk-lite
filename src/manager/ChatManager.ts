@@ -607,7 +607,7 @@ export class IOIChatManager extends IOIBaseManager {
 
     private senderBuildMessage(sender: IOIMessageSender): IOIMessage {
         let ioMessage = new IOIMessage();
-        ioMessage.messageId = sender.messageId;
+        ioMessage.msgId = sender.msgId;
         ioMessage.joinId = sender.joinId;
         ioMessage.cite = sender.cite;
         ioMessage.type = sender.type;
@@ -688,7 +688,7 @@ export class IOIChatManager extends IOIBaseManager {
 
         let message = new Message({
             meta:this.client?.meta,
-            messageId: sender.messageId,
+            msgId: sender.msgId,
             roomId: sender.joinId,
             fromId: this.client?.meta?.userId,
             fromName: this.client?.meta?.nickname,
@@ -707,6 +707,7 @@ export class IOIChatManager extends IOIBaseManager {
             length: sender.length,
             cc: cc,
             remind:remind,
+            avatar:sender.avatar,
             cite: sender.cite
         });
 

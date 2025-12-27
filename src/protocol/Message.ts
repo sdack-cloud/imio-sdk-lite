@@ -53,6 +53,8 @@ export namespace only {
             destAccount?: string;
             revoke?: string;
             deviceTag?: string;
+            msgId?: string;
+            avatar?: string;
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [7, 8, 33, 39], this.#one_of_decls);
@@ -185,6 +187,12 @@ export namespace only {
                 }
                 if ("deviceTag" in data && data.deviceTag != undefined) {
                     this.deviceTag = data.deviceTag;
+                }
+                if ("msgId" in data && data.msgId != undefined) {
+                    this.msgId = data.msgId;
+                }
+                if ("avatar" in data && data.avatar != undefined) {
+                    this.avatar = data.avatar;
                 }
             }
         }
@@ -452,6 +460,18 @@ export namespace only {
         set deviceTag(value: string) {
             pb_1.Message.setField(this, 43, value);
         }
+        get msgId() {
+            return pb_1.Message.getFieldWithDefault(this, 44, "") as string;
+        }
+        set msgId(value: string) {
+            pb_1.Message.setField(this, 44, value);
+        }
+        get avatar() {
+            return pb_1.Message.getFieldWithDefault(this, 45, "") as string;
+        }
+        set avatar(value: string) {
+            pb_1.Message.setField(this, 45, value);
+        }
         static fromObject(data: {
             messageId?: string;
             appId?: number;
@@ -496,6 +516,8 @@ export namespace only {
             destAccount?: string;
             revoke?: string;
             deviceTag?: string;
+            msgId?: string;
+            avatar?: string;
         }): Message {
             const message = new Message({});
             if (data.messageId != null) {
@@ -627,6 +649,12 @@ export namespace only {
             if (data.deviceTag != null) {
                 message.deviceTag = data.deviceTag;
             }
+            if (data.msgId != null) {
+                message.msgId = data.msgId;
+            }
+            if (data.avatar != null) {
+                message.avatar = data.avatar;
+            }
             return message;
         }
         toObject() {
@@ -674,6 +702,8 @@ export namespace only {
                 destAccount?: string;
                 revoke?: string;
                 deviceTag?: string;
+                msgId?: string;
+                avatar?: string;
             } = {};
             if (this.messageId != null) {
                 data.messageId = this.messageId;
@@ -804,6 +834,12 @@ export namespace only {
             if (this.deviceTag != null) {
                 data.deviceTag = this.deviceTag;
             }
+            if (this.msgId != null) {
+                data.msgId = this.msgId;
+            }
+            if (this.avatar != null) {
+                data.avatar = this.avatar;
+            }
             return data;
         }
         serialize(): Uint8Array;
@@ -896,6 +932,10 @@ export namespace only {
                 writer.writeString(42, this.revoke);
             if (this.deviceTag.length)
                 writer.writeString(43, this.deviceTag);
+            if (this.msgId.length)
+                writer.writeString(44, this.msgId);
+            if (this.avatar.length)
+                writer.writeString(45, this.avatar);
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -1033,6 +1073,12 @@ export namespace only {
                         break;
                     case 43:
                         message.deviceTag = reader.readString();
+                        break;
+                    case 44:
+                        message.msgId = reader.readString();
+                        break;
+                    case 45:
+                        message.avatar = reader.readString();
                         break;
                     default: reader.skipField();
                 }

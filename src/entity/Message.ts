@@ -24,6 +24,8 @@ export class IOIMessage {
     sent: string = '';
     deviceKey: string = '';
     deviceTag: string = '';
+    msgId: string = '';
+    avatar: string = '';
     revoke: boolean = false;
     talk:IOIMessageTalk = IOIMessageTalk.default;
     citeData: IOIMessage | null = null;

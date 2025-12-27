@@ -1,7 +1,7 @@
 
 export class IOIMessageSender {
 
-    messageId:string = '';
+    msgId:string = '';
     joinId : number = 0;
     // targetId: string = '';
     // targetName: string = '';
@@ -16,6 +16,7 @@ export class IOIMessageSender {
     url: string = '';
     lng: string = '';
     lat: string = '';
+    avatar: string = '';
     size:number = 0;
     length :number = 0;
     hintList:Array<IOIMessageSenderHint> | null = null;// 提及人列表
@@ -128,6 +129,22 @@ export class IOIMessageSender {
             throw Error("title 太长")
         }
         this.title = title;
+        return this
+    }
+
+    public withMsgId(msgId: string): IOIMessageSender {
+        if (msgId.length > 100) {
+            throw Error("msgId 太长")
+        }
+        this.msgId = msgId;
+        return this
+    }
+
+    public withAvatar(avatar: string): IOIMessageSender {
+        if (avatar.length > 250) {
+            throw Error("avatar 太长")
+        }
+        this.avatar = avatar;
         return this
     }
 
