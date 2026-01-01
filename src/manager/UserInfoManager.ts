@@ -254,7 +254,6 @@ export class IOIUserInfoManager extends IOIBaseManager{
     public setMyDepict(remark: string): Promise<string> {
         if (remark.length > 200) {
             new Error("太长");
-            return ;
         }
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
@@ -306,7 +305,6 @@ export class IOIUserInfoManager extends IOIBaseManager{
     public setMyJoinTip(remark: string ): Promise<string> {
         if (remark.length > 200) {
             new Error("太长");
-            return ;
         }
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
@@ -360,11 +358,9 @@ export class IOIUserInfoManager extends IOIBaseManager{
     public setMyJoinQuestion(ask: string, answer: string ): Promise<string> {
         if (ask.length > 200) {
             new Error("问题太长");
-            return ;
         }
         if (answer.length > 200) {
             new Error("答案太长");
-            return ;
         }
         return new Promise<any>((resolve, reject) => {
             if (this.checkSocket().length) {
@@ -379,7 +375,7 @@ export class IOIUserInfoManager extends IOIBaseManager{
             let res : Object | null = null;
             this.client!!.socket?.requestResponse({
                 data: Buffer.from(param.serializeBinary().buffer),
-                metadata: this.buildRoute('user.update.room.remark')
+                metadata: this.buildRoute('user.update.room.ask')
             }, {
                 onComplete: () => {
                     resolve('')

@@ -1254,6 +1254,54 @@ export class IOIGroupManager extends IOIBaseManager{
     }
 
 
+    /**
+     * 清除群聊消息记录
+     * @param joinId
+     */
+    public cleanMessage(joinId : number): Promise<string> {
+        return new Promise<any>((resolve, reject) => {
+            if (this.checkSocket().length) {
+                reject(new Error(this.checkSocket()))
+                return;
+            }
+            const param = new Contacts({
+                meta: this.client!!.meta,
+                joinRoomId: joinId,
+            });
+            let res : Object | null = null;
+            this.client!!.socket?.requestResponse({
+                data: Buffer.from(param.serializeBinary().buffer),
+                metadata: this.buildRoute('group.message.clean')
+            }, {
+                onComplete: () => {
+                    resolve('')
+                }, onNext: (payload: Payload, isComplete: boolean) => {
+                    try {
+                        // if (payload.data) {
+                        //     let proto = Rooms.deserialize(payload.data);
+                        //     let data = this.buildGroup(proto);
+                        //     res = data;
+                        // }
+                        if (isComplete) {
+                            resolve('')
+                        }
+                    }catch (e) {
+                        reject(new Error("IO Client Error"))
+                    }
+                }, onError: (error: Error) => {
+                    let message = error?.message + "";
+                    let errorMsg = this.onError(message);
+                    if (errorMsg.length > 0) {
+                        reject(new Error(errorMsg))
+                    } else {
+                        reject(new Error(message))
+                    }
+                }, onExtension(extendedType: number, content: Buffer | null | undefined, canBeIgnored: boolean): void {
+                }
+            })
+        });
+    }
+
 
     /**
      * 群信息是否可以撤回
