@@ -703,6 +703,56 @@ export class IOIContactManager extends IOIBaseManager {
         });
     }
 
+    /**
+     * 联系人聊天记录清除
+     * @param userId
+     */
+    public cleanMessage(userId: string): Promise<any> {
+        return new Promise<any>(async (resolve, reject) => {
+            if (this.checkSocket().length) {
+                reject(new Error(this.checkSocket()))
+                return;
+            }
+            let contact = await this.getContactByUserId(userId)
+            if (!contact) {
+                reject(new Error('联系人获取失败'))
+                return;
+            }
+            const param = new Contacts({
+                meta: this.client!!.meta,
+                userId:userId,
+            });
+            let res : Object | null = null;
+            this.client!!.socket?.requestResponse({
+                data: Buffer.from(param.serializeBinary().buffer),
+                metadata: this.buildRoute('contact.message.clean')
+            }, {
+                onComplete: () => {
+                    resolve('')
+                }, onNext: (payload: Payload, isComplete: boolean) => {
+                    try {
+                       if (payload.data) {
+                           if (isComplete) {
+                               resolve('')
+                           }
+                       }
+                    }catch (e) {
+                        reject(new Error("IO Client Error"))
+                    }
+                }, onError: (error: Error) => {
+                    let message = error?.message + "";
+                    let errorMsg = this.onError(message);
+                    if (errorMsg.length > 0) {
+                        reject(new Error(errorMsg))
+                    }else {
+                        reject(new Error(message))
+                    }
+                }, onExtension(extendedType: number, content: Buffer | null | undefined, canBeIgnored: boolean): void {
+                }
+            })
+        });
+    }
+
 
    /**
      * 消息未签收的
