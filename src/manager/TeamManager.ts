@@ -294,6 +294,65 @@ export class IOITeamManager extends IOIBaseManager{
     }
 
 
+    /**
+     * 移除成员
+     * @param teamId
+     * @param userId
+     * @param deviceKey
+     */
+    public remove(teamId: number,userId: string = '',deviceKey:string =""): Promise<IOITeam> {
+        return new Promise<any>((resolve, reject) => {
+            if (this.checkSocket().length) {
+                reject(new Error(this.checkSocket()))
+                return;
+            }
+            if (userId.length <= 0 && deviceKey.length <= 0) {
+                reject(new Error("用户的ID 和 设备Key 必选一组"))
+                return;
+            }
+            const param = new TeamContact({
+                meta: this.client!!.meta,
+                fromTeamId: teamId,
+                userId: userId,
+                deviceKey: deviceKey,
+                deviceTag: "h5",
+            });
+            let res : IOITeam | null  = null;
+            this.client!!.socket?.requestResponse({
+                data: Buffer.from(param.serializeBinary().buffer),
+                metadata: this.buildRoute('team.remove'),
+            }, {
+                onComplete: () => {
+                    resolve(res)
+                }, onNext: (payload: Payload, isComplete: boolean) => {
+                    try {
+                        if (payload.data) {
+                            let proto = Teams.deserialize(payload.data);
+                            let data = this.buildTeam(proto);
+                            res = (data);
+                            if (isComplete) {
+                                resolve(res)
+                            }
+                        }
+                    }catch (e) {
+                        reject(new Error("IO Client Error"))
+                    }
+                },
+                onError: (error: Error) => {
+                    let message = error?.message + "";
+                    let errorMsg = this.onError(message);
+                    if (errorMsg.length > 0) {
+                        reject(new Error(errorMsg))
+                    }else {
+                        reject(new Error(message))
+                    }
+                }, onExtension(extendedType: number, content: Buffer | null | undefined, canBeIgnored: boolean): void {
+                }
+            })
+        });
+    }
+
+
 
     /**
      * 解散
